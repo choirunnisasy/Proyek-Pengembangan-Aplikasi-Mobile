@@ -8,7 +8,6 @@ import com.example.rewind.data.local.datastore.UserPreferences
 import com.example.rewind.data.local.datastore.create
 import com.example.rewind.data.remote.api.GeminiService
 import com.example.rewind.data.repository.AIRepositoryImpl
-import com.example.rewind.data.repository.NoteRepositoryImpl
 import com.example.rewind.domain.repository.AIRepository
 import com.example.rewind.domain.repository.NoteRepository
 import com.example.rewind.domain.usecase.DeleteNoteUseCase
