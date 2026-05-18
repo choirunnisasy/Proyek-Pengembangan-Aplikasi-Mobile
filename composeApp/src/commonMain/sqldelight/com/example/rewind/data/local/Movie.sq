@@ -15,12 +15,33 @@ CREATE TABLE MovieEntity (
 selectAllMovies:
 SELECT * FROM MovieEntity ORDER BY updatedAt DESC;
 
--- Gunakan ini untuk TAMBAH BARU (Tanpa Parameter ID)
+-- Perhatikan ID huruf besar menyesuaikan buatan Refi
+getMovieByID:
+SELECT * FROM MovieEntity WHERE id = ?;
+
+getMoviesByStatus:
+SELECT * FROM MovieEntity WHERE status = ? ORDER BY updatedAt DESC;
+
+getMoviesByType:
+SELECT * FROM MovieEntity WHERE type = ? ORDER BY updatedAt DESC;
+
+getMoviesByGenre:
+SELECT * FROM MovieEntity WHERE genre = ? ORDER BY updatedAt DESC;
+
+searchMovies:
+SELECT * FROM MovieEntity WHERE title LIKE '%' || ? || '%' ORDER BY updatedAt DESC;
+
+getFavoriteMovies:
+SELECT * FROM MovieEntity WHERE rating >= 8.0 ORDER BY updatedAt DESC;
+
 insertMovie:
 INSERT INTO MovieEntity(title, genre, type, status, rating, review, totalEpisodes, watchedEpisodes, createdAt, updatedAt)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
--- Gunakan ini untuk UPDATE (Wajib Ada ID)
+-- Trik untuk mendapatkan ID yang baru saja dibuat
+lastInsertRowId:
+SELECT last_insert_rowid();
+
 updateMovie:
 UPDATE MovieEntity
 SET title = ?, genre = ?, type = ?, status = ?, rating = ?, review = ?, totalEpisodes = ?, watchedEpisodes = ?, updatedAt = ?
