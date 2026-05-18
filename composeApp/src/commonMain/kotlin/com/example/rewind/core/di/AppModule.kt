@@ -9,22 +9,29 @@ import com.example.rewind.data.local.datastore.create
 import com.example.rewind.data.remote.api.GeminiService
 import com.example.rewind.data.repository.AIRepositoryImpl
 import com.example.rewind.domain.repository.AIRepository
-import com.example.rewind.domain.repository.NoteRepository
-import com.example.rewind.domain.usecase.DeleteNoteUseCase
-import com.example.rewind.domain.usecase.GenerateIdeasUseCase
-import com.example.rewind.domain.usecase.GetAllNotesUseCase
-import com.example.rewind.domain.usecase.ImproveWritingUseCase
-import com.example.rewind.domain.usecase.SaveNoteUseCase
-import com.example.rewind.domain.usecase.SearchNotesUseCase
-import com.example.rewind.domain.usecase.SummarizeNoteUseCase
-import com.example.rewind.presentation.screens.addnote.AddNoteViewModel
-import com.example.rewind.presentation.screens.ai.AIAssistantViewModel
-import com.example.rewind.presentation.screens.detail.NoteDetailViewModel
-import com.example.rewind.presentation.screens.home.HomeViewModel
+
+// --- IMPORT REPOSITORY BARU (TUGASMU) ---
+import com.example.rewind.domain.repository.MovieRepository
+import com.example.rewind.data.repository.MovieRepositoryImpl
+
+// --- BUNGKAM SEMENTARA IMPORT LAMA (AGAR TIDAK ERROR) ---
+// import com.example.rewind.domain.repository.NoteRepository
+// import com.example.rewind.domain.usecase.DeleteNoteUseCase
+// import com.example.rewind.domain.usecase.GenerateIdeasUseCase
+// import com.example.rewind.domain.usecase.GetAllNotesUseCase
+// import com.example.rewind.domain.usecase.ImproveWritingUseCase
+// import com.example.rewind.domain.usecase.SaveNoteUseCase
+// import com.example.rewind.domain.usecase.SearchNotesUseCase
+// import com.example.rewind.domain.usecase.SummarizeNoteUseCase
+// import com.example.rewind.presentation.screens.addnote.AddNoteViewModel
+// import com.example.rewind.presentation.screens.ai.AIAssistantViewModel
+// import com.example.rewind.presentation.screens.detail.NoteDetailViewModel
+// import com.example.rewind.presentation.screens.home.HomeViewModel
+
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
-import org.koin.core.module.dsl.viewModelOf
+// import org.koin.core.module.dsl.viewModelOf // Dibungkam sementara jika tidak ada viewmodel aktif
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -55,29 +62,33 @@ val preferencesModule = module {
 // ==================== REPOSITORY MODULE ====================
 
 val repositoryModule = module {
-    //singleOf(::NoteRepositoryImpl) bind NoteRepository::class
+    // Daftarkan MovieRepositoryImpl buatanmu di sini!
+    singleOf(::MovieRepositoryImpl) bind MovieRepository::class
+
     singleOf(::AIRepositoryImpl) bind AIRepository::class
 }
 
 // ==================== USE CASE MODULE ====================
 
 val useCaseModule = module {
-    singleOf(::GetAllNotesUseCase)
-    singleOf(::SearchNotesUseCase)
-    singleOf(::SaveNoteUseCase)
-    singleOf(::DeleteNoteUseCase)
-    singleOf(::SummarizeNoteUseCase)
-    singleOf(::ImproveWritingUseCase)
-    singleOf(::GenerateIdeasUseCase)
+    // --- BUNGKAM SEMENTARA AGAR TIDAK MERAH ---
+    // singleOf(::GetAllNotesUseCase)
+    // singleOf(::SearchNotesUseCase)
+    // singleOf(::SaveNoteUseCase)
+    // singleOf(::DeleteNoteUseCase)
+    // singleOf(::SummarizeNoteUseCase)
+    // singleOf(::ImproveWritingUseCase)
+    // singleOf(::GenerateIdeasUseCase)
 }
 
 // ==================== VIEWMODEL MODULE ====================
 
 val viewModelModule = module {
-    viewModelOf(::HomeViewModel)
-    viewModelOf(::AddNoteViewModel)
-    viewModelOf(::NoteDetailViewModel)
-    viewModelOf(::AIAssistantViewModel)
+    // --- BUNGKAM SEMENTARA AGAR TIDAK MERAH ---
+    // viewModelOf(::HomeViewModel)
+    // viewModelOf(::AddNoteViewModel)
+    // viewModelOf(::NoteDetailViewModel)
+    // viewModelOf(::AIAssistantViewModel)
 }
 
 // ==================== SHARED MODULES ====================
