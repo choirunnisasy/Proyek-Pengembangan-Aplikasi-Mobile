@@ -55,7 +55,7 @@ val preferencesModule = module {
 // ==================== REPOSITORY MODULE ====================
 
 val repositoryModule = module {
-    singleOf(::NoteRepositoryImpl) bind NoteRepository::class
+    //singleOf(::NoteRepositoryImpl) bind NoteRepository::class
     singleOf(::AIRepositoryImpl) bind AIRepository::class
 }
 
