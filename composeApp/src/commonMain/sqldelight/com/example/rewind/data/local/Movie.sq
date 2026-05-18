@@ -15,12 +15,16 @@ CREATE TABLE MovieEntity (
 selectAllMovies:
 SELECT * FROM MovieEntity ORDER BY updatedAt DESC;
 
-getMovieById:
-SELECT * FROM MovieEntity WHERE id = ?;
-
+-- Gunakan ini untuk TAMBAH BARU (Tanpa Parameter ID)
 insertMovie:
-INSERT OR REPLACE INTO MovieEntity(id, title, genre, type, status, rating, review, totalEpisodes, watchedEpisodes, createdAt, updatedAt)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO MovieEntity(title, genre, type, status, rating, review, totalEpisodes, watchedEpisodes, createdAt, updatedAt)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- Gunakan ini untuk UPDATE (Wajib Ada ID)
+updateMovie:
+UPDATE MovieEntity
+SET title = ?, genre = ?, type = ?, status = ?, rating = ?, review = ?, totalEpisodes = ?, watchedEpisodes = ?, updatedAt = ?
+WHERE id = ?;
 
 deleteMovieById:
 DELETE FROM MovieEntity WHERE id = ?;
