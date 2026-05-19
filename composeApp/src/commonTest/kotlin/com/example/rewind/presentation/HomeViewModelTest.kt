@@ -9,7 +9,6 @@ import com.example.rewind.domain.usecase.DeleteNoteUseCase
 import com.example.rewind.domain.usecase.GetAllNotesUseCase
 import com.example.rewind.domain.usecase.SearchNotesUseCase
 import com.example.rewind.presentation.screens.home.HomeUiState
-import com.example.rewind.presentation.screens.home.HomeViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -42,7 +41,7 @@ class HomeViewModelTest {
     private lateinit var getAllNotesUseCase: GetAllNotesUseCase
     private lateinit var searchNotesUseCase: SearchNotesUseCase
     private lateinit var deleteNoteUseCase: DeleteNoteUseCase
-    private lateinit var viewModel: HomeViewModel
+    private lateinit var viewModel: `HomeViewModel.kt`
     
     @BeforeTest
     fun setup() {
@@ -53,7 +52,7 @@ class HomeViewModelTest {
         searchNotesUseCase = SearchNotesUseCase(repository)
         deleteNoteUseCase = DeleteNoteUseCase(repository)
         
-        viewModel = HomeViewModel(
+        viewModel = `HomeViewModel.kt`(
             getAllNotesUseCase = getAllNotesUseCase,
             searchNotesUseCase = searchNotesUseCase,
             deleteNoteUseCase = deleteNoteUseCase,
@@ -91,7 +90,7 @@ class HomeViewModelTest {
         repository.insertNote(createTestNote("Note 2"))
         
         // Create new viewmodel after inserting notes
-        val vm = HomeViewModel(
+        val vm = `HomeViewModel.kt`(
             getAllNotesUseCase = getAllNotesUseCase,
             searchNotesUseCase = searchNotesUseCase,
             deleteNoteUseCase = deleteNoteUseCase,
@@ -119,7 +118,7 @@ class HomeViewModelTest {
         repository.insertNote(createTestNote("Kotlin Guide"))
         repository.insertNote(createTestNote("Java Tutorial"))
         
-        val vm = HomeViewModel(
+        val vm = `HomeViewModel.kt`(
             getAllNotesUseCase = getAllNotesUseCase,
             searchNotesUseCase = searchNotesUseCase,
             deleteNoteUseCase = deleteNoteUseCase,
@@ -174,7 +173,7 @@ class HomeViewModelTest {
         repository.insertNote(createTestNote("Work Note", category = NoteCategory.WORK))
         repository.insertNote(createTestNote("Personal Note", category = NoteCategory.PERSONAL))
         
-        val vm = HomeViewModel(
+        val vm = `HomeViewModel.kt`(
             getAllNotesUseCase = getAllNotesUseCase,
             searchNotesUseCase = searchNotesUseCase,
             deleteNoteUseCase = deleteNoteUseCase,
