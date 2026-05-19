@@ -14,7 +14,6 @@ interface MovieRepository {
     fun getMoviesByGenre(genre: MovieGenre): Flow<List<Movie>>
     fun searchMovies(query: String): Flow<List<Movie>>
     fun getFavoriteMovies(): Flow<List<Movie>>
-
     suspend fun insertMovie(movie: Movie): Long
     suspend fun updateMovie(movie: Movie)
     suspend fun deleteMovie(id: Long)

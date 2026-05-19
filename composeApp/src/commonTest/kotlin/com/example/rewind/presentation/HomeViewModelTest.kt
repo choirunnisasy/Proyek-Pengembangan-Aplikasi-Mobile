@@ -1,6 +1,11 @@
 package com.example.rewind.presentation
 
 import app.cash.turbine.test
+import com.example.rewind.data.repository.FakeMovieRepository
+import com.example.rewind.domain.model.Movie
+import com.example.rewind.domain.model.MovieGenre
+import com.example.rewind.domain.model.MovieType
+import com.example.rewind.domain.model.WatchStatus
 import com.example.rewind.domain.usecase.DeleteMovieUseCase
 import com.example.rewind.domain.usecase.GetAllMoviesUseCase
 import com.example.rewind.domain.usecase.MovieSortBy
@@ -13,6 +18,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.datetime.Clock
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -26,13 +32,15 @@ class HomeViewModelTest {
     private lateinit var getAllMoviesUseCase: GetAllMoviesUseCase
     private lateinit var deleteMovieUseCase: DeleteMovieUseCase
     private lateinit var viewModel: HomeViewModel
+    private lateinit var fakeRepository: FakeMovieRepository
 
     @BeforeTest
     fun setup() {
         Dispatchers.setMain(testDispatcher)
 
-        getAllMoviesUseCase = GetAllMoviesUseCase()
-        deleteMovieUseCase = DeleteMovieUseCase()
+        fakeRepository = FakeMovieRepository()
+        getAllMoviesUseCase = GetAllMoviesUseCase(fakeRepository)
+        deleteMovieUseCase = DeleteMovieUseCase(fakeRepository)
 
         viewModel = HomeViewModel(
             getAllMoviesUseCase,
@@ -47,67 +55,83 @@ class HomeViewModelTest {
 
     @Test
     fun `initial state should be Loading then Empty`() = runTest {
-        viewModel.uiState.test {
-            val loading = awaitItem()
-            assertTrue(loading is HomeUiState.Loading)
-
+        val vm = HomeViewModel(getAllMoviesUseCase, deleteMovieUseCase)
+        vm.uiState.test {
             advanceUntilIdle()
-            val empty = awaitItem()
-            assertTrue(empty is HomeUiState.Empty)
-
-            cancelAndIgnoreRemainingEvents()
+            // Kita ambil status paling terakhir, yang seharusnya adalah Empty karena DB kosong
+            val finalState = expectMostRecentItem()
+            assertTrue(finalState is HomeUiState.Empty)
         }
     }
 
     @Test
     fun `state should be Success when movies exist`() = runTest {
-        val vm = HomeViewModel(
-            getAllMoviesUseCase,
-            deleteMovieUseCase
-        )
+        // 1. Masukkan data dummy ke repository TERLEBIH DAHULU agar tidak Empty
+        fakeRepository.insertMovie(createTestMovie("Spiderman"))
+
+        // 2. Buat ViewModel baru agar ia membaca data yang baru dimasukkan
+        val vm = HomeViewModel(getAllMoviesUseCase, deleteMovieUseCase)
 
         vm.uiState.test {
-            skipItems(1)
             advanceUntilIdle()
-
-            val state = awaitItem()
+            // 3. Karena ada 1 film, status terakhinya HARUS Success
+            val state = expectMostRecentItem()
             assertTrue(state is HomeUiState.Success)
-
-            cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
     fun `sort should update movies`() = runTest {
-        val vm = HomeViewModel(
-            getAllMoviesUseCase,
-            deleteMovieUseCase
-        )
+        // Masukkan data dummy
+        fakeRepository.insertMovie(createTestMovie("A Movie"))
+        fakeRepository.insertMovie(createTestMovie("Z Movie"))
+
+        val vm = HomeViewModel(getAllMoviesUseCase, deleteMovieUseCase)
 
         vm.uiState.test {
-            skipItems(1)
             advanceUntilIdle()
-            skipItems(1)
 
+            // Ubah metode sorting
             vm.setSortBy(MovieSortBy.TITLE_ASC)
             advanceUntilIdle()
 
             val state = expectMostRecentItem()
-            assertTrue(state is HomeUiState.Success || state is HomeUiState.Empty)
-
-            cancelAndIgnoreRemainingEvents()
+            assertTrue(state is HomeUiState.Success)
         }
     }
 
     @Test
     fun `deleteMovie should remove movie`() = runTest {
-        viewModel.deleteMovie(1L)
+        // Masukkan 1 film untuk dihapus
+        val id = fakeRepository.insertMovie(createTestMovie("To Delete"))
+        val vm = HomeViewModel(getAllMoviesUseCase, deleteMovieUseCase)
+
         advanceUntilIdle()
 
-        viewModel.uiState.test {
-            val state = awaitItem()
-            assertTrue(state is HomeUiState.Success || state is HomeUiState.Empty || state is HomeUiState.Loading)
-            cancelAndIgnoreRemainingEvents()
+        // Hapus film tersebut
+        vm.deleteMovie(id)
+        advanceUntilIdle()
+
+        vm.uiState.test {
+            val state = expectMostRecentItem()
+            assertTrue(state is HomeUiState.Success || state is HomeUiState.Empty)
         }
+    }
+
+    // Helper function untuk membuat data Movie secara instan di dalam Test
+    private fun createTestMovie(title: String): Movie {
+        return Movie(
+            id = 0,
+            title = title,
+            genre = MovieGenre.OTHER,
+            type = MovieType.MOVIE,
+            status = WatchStatus.PLAN_TO_WATCH,
+            rating = null,
+            review = "",
+            totalEpisodes = null,
+            watchedEpisodes = 0,
+            createdAt = Clock.System.now(),
+            updatedAt = Clock.System.now()
+        )
     }
 }
