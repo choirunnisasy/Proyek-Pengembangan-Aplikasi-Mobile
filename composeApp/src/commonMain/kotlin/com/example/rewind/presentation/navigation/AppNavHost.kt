@@ -8,6 +8,7 @@ import androidx.navigation.toRoute
 import com.example.rewind.presentation.screens.addmovie.AddMovieScreen
 import com.example.rewind.presentation.screens.detail.DetailScreen
 import com.example.rewind.presentation.screens.home.HomeScreen
+import com.example.rewind.presentation.screens.splash.SplashScreen
 
 @Composable
 fun AppNavHost() {
@@ -15,8 +16,17 @@ fun AppNavHost() {
 
     NavHost(
         navController = navController,
-        startDestination = Route.Home
+        startDestination = Route.Splash
     ) {
+        composable<Route.Splash> {
+            SplashScreen(
+                onFinished = {
+                    navController.navigate(Route.Home) {
+                        popUpTo(Route.Splash) { inclusive = true }
+                    }
+                }
+            )
+        }
         composable<Route.Home> {
             HomeScreen(
                 onAddClick = { navController.navigate(Route.AddMovie()) },
