@@ -85,7 +85,7 @@ graph TD
 ```
 ## 🎬 Demo Video
 
-https://github.com/choirunnisasy/Proyek-Pengembangan-Aplikasi-Mobile/assets/demo.mp4
+https://github.com/choirunnisasy/Proyek-Pengembangan-Aplikasi-Mobile/raw/refs/heads/project/123140126-123140136-123140142-Rewind/assets/demo.mp4
 
 ## 🚀 Setup & Installation
 1. **Clone Repository:**
