@@ -82,6 +82,7 @@ fun AddMovieScreen(
     var rating by remember { mutableStateOf(0f) }
     var review by remember { mutableStateOf("") }
     var totalEpisodesText by remember { mutableStateOf("") }
+    var watchedEpisodesText by remember { mutableStateOf("") }
     val isEditMode = movieId != null
 
     LaunchedEffect(movieId) {
@@ -353,7 +354,7 @@ fun AddMovieScreen(
                                     status = selectedStatus,
                                     rating = if (rating > 0f) rating else null,
                                     review = review,
-                                    totalEpisodes = totalEpisodesText.toIntOrNull()
+                                    totalEpisodes = totalEpisodesText.toIntOrNull(),
                                     watchedEpisodes = watchedEpisodesText.toIntOrNull() ?: 0
                                 )
                             },
