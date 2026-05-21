@@ -37,15 +37,20 @@ fun AppNavHost() {
             )
         }
 
-        composable<Route.AddMovie> {
-            AddMovieScreen(onNavigateBack = { navController.popBackStack() })
+        composable<Route.AddMovie> { backStackEntry ->
+            val route = backStackEntry.toRoute<Route.AddMovie>()
+            AddMovieScreen(
+                movieId = route.movieId,
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
 
         composable<Route.MovieDetail> { backStackEntry ->
             val route = backStackEntry.toRoute<Route.MovieDetail>()
             DetailScreen(
                 movieId = route.movieId,
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToEdit = { id -> navController.navigate(Route.AddMovie(movieId = id)) }
             )
         }
 

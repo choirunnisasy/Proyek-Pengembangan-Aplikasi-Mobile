@@ -69,6 +69,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun AddMovieScreen(
+    movieId: Long? = null,
     onNavigateBack: () -> Unit,
     viewModel: AddMovieViewModel = koinViewModel()
 ) {
@@ -81,9 +82,29 @@ fun AddMovieScreen(
     var rating by remember { mutableStateOf(0f) }
     var review by remember { mutableStateOf("") }
     var totalEpisodesText by remember { mutableStateOf("") }
+    val isEditMode = movieId != null
 
+    LaunchedEffect(movieId) {
+        viewModel.loadMovieForEdit(movieId)
+    }
+
+    // Pre-fill form ketika data movie berhasil dimuat
     LaunchedEffect(uiState) {
-        if (uiState is AddMovieUiState.Success) onNavigateBack()
+        when (val state = uiState) {
+            is AddMovieUiState.EditMode -> {
+                val movie = state.movie
+                title = movie.title
+                selectedGenre = movie.genre
+                selectedType = movie.type
+                selectedStatus = movie.status
+                rating = movie.rating ?: 0f
+                review = movie.review
+                totalEpisodesText = movie.totalEpisodes?.toString() ?: ""
+                watchedEpisodesText = movie.watchedEpisodes.toString()
+            }
+            is AddMovieUiState.Success -> onNavigateBack()
+            else -> {}
+        }
     }
 
     Box(
@@ -106,7 +127,10 @@ fun AddMovieScreen(
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
-            AddMovieHeader(onNavigateBack = onNavigateBack)
+            AddMovieHeader(
+                onNavigateBack = onNavigateBack,
+                isEditMode = isEditMode
+            )
 
             Column(
                 modifier = Modifier
@@ -330,6 +354,7 @@ fun AddMovieScreen(
                                     rating = if (rating > 0f) rating else null,
                                     review = review,
                                     totalEpisodes = totalEpisodesText.toIntOrNull()
+                                    watchedEpisodes = watchedEpisodesText.toIntOrNull() ?: 0
                                 )
                             },
                         contentAlignment = Alignment.Center
@@ -342,7 +367,7 @@ fun AddMovieScreen(
                             )
                         } else {
                             Text(
-                                text = "Save to Collection",
+                                text = if (isEditMode) "Update Collection" else "Save to Collection",
                                 color = BackgroundDark,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 15.sp,
@@ -359,7 +384,7 @@ fun AddMovieScreen(
 }
 
 @Composable
-private fun AddMovieHeader(onNavigateBack: () -> Unit) {
+private fun AddMovieHeader(onNavigateBack: () -> Unit, isEditMode: Boolean = false) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -406,14 +431,14 @@ private fun AddMovieHeader(onNavigateBack: () -> Unit) {
             Spacer(modifier = Modifier.width(16.dp))
             Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
                 Text(
-                    text = "ADD TITLE",
+                    text = if (isEditMode) "EDIT TITLE" else "ADD TITLE",
                     color = GoldAmber,
                     fontSize = 9.sp,
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 4.sp
                 )
                 Text(
-                    text = "New Entry",
+                    text = if (isEditMode) "Edit Entry" else "New Entry",
                     color = TextWarm,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,

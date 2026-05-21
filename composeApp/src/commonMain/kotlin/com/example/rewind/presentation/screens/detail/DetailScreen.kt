@@ -68,6 +68,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun DetailScreen(
     movieId: Long,
     onNavigateBack: () -> Unit,
+    onNavigateToEdit: (Long) -> Unit,
     viewModel: DetailViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -154,7 +155,8 @@ fun DetailScreen(
                 MovieDetail(
                     movie = state.movie,
                     onBack = onNavigateBack,
-                    onDelete = { showDeleteDialog = true }
+                    onDelete = { showDeleteDialog = true },
+                    onEdit = { onNavigateToEdit(movieId) }
                 )
             }
         }
@@ -162,7 +164,7 @@ fun DetailScreen(
 }
 
 @Composable
-private fun MovieDetail(movie: Movie, onBack: () -> Unit, onDelete: () -> Unit) {
+private fun MovieDetail(movie: Movie, onBack: () -> Unit, onDelete: () -> Unit, onEdit: () -> Unit) {
     val (statusColor, statusLabel) = when (movie.status) {
         WatchStatus.COMPLETED -> StatusFinished to "Completed"
         WatchStatus.WATCHING -> StatusWatching to "Watching"
@@ -268,24 +270,42 @@ private fun MovieDetail(movie: Movie, onBack: () -> Unit, onDelete: () -> Unit) 
                     Text("←", color = TextWarm, fontSize = 17.sp)
                 }
 
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(TheaterRed.copy(alpha = 0.18f))
-                        .border(
-                            BorderStroke(1.dp, TheaterRed.copy(alpha = 0.35f)),
-                            RoundedCornerShape(10.dp)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // Tombol Edit — BARU
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(GoldAmber.copy(alpha = 0.15f))
+                            .border(BorderStroke(1.dp, GoldAmber.copy(alpha = 0.35f)), RoundedCornerShape(10.dp))
+                            .clickable(onClick = onEdit)
+                            .padding(horizontal = 14.dp, vertical = 9.dp)
+                    ) {
+                        Text(
+                            "Edit",
+                            color = GoldAmber,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 0.3.sp
                         )
-                        .clickable(onClick = onDelete)
-                        .padding(horizontal = 14.dp, vertical = 9.dp)
-                ) {
-                    Text(
-                        "Remove",
-                        color = TheaterRed,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        letterSpacing = 0.3.sp
-                    )
+                    }
+
+                    // Tombol Remove — sama seperti sebelumnya
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(TheaterRed.copy(alpha = 0.18f))
+                            .border(BorderStroke(1.dp, TheaterRed.copy(alpha = 0.35f)), RoundedCornerShape(10.dp))
+                            .clickable(onClick = onDelete)
+                            .padding(horizontal = 14.dp, vertical = 9.dp)
+                    ) {
+                        Text(
+                            "Remove",
+                            color = TheaterRed,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 0.3.sp
+                        )
+                    }
                 }
             }
 
