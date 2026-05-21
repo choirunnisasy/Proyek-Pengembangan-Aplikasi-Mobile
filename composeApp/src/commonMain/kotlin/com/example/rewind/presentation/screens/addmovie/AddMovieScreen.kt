@@ -1,23 +1,70 @@
 package com.example.rewind.presentation.screens.addmovie
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.rewind.domain.model.MovieGenre
 import com.example.rewind.domain.model.MovieType
 import com.example.rewind.domain.model.WatchStatus
-import com.example.rewind.presentation.theme.*
+import com.example.rewind.presentation.theme.BackgroundDark
+import com.example.rewind.presentation.theme.BorderGold
+import com.example.rewind.presentation.theme.BorderSubtle
+import com.example.rewind.presentation.theme.GoldAmber
+import com.example.rewind.presentation.theme.GoldAmberDim
+import com.example.rewind.presentation.theme.StatusDropped
+import com.example.rewind.presentation.theme.StatusFinished
+import com.example.rewind.presentation.theme.StatusOnHold
+import com.example.rewind.presentation.theme.StatusWantToWatch
+import com.example.rewind.presentation.theme.StatusWatching
+import com.example.rewind.presentation.theme.SurfaceDark
+import com.example.rewind.presentation.theme.SurfaceElevated
+import com.example.rewind.presentation.theme.TextMuted
+import com.example.rewind.presentation.theme.TextSecondary
+import com.example.rewind.presentation.theme.TextWarm
+import com.example.rewind.presentation.theme.TheaterRed
+import com.example.rewind.presentation.theme.VelvetRed
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -39,272 +86,437 @@ fun AddMovieScreen(
         if (uiState is AddMovieUiState.Success) onNavigateBack()
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(BackgroundDark)
     ) {
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .background(Brush.verticalGradient(listOf(SurfaceDark, BackgroundDark)))
-                .padding(horizontal = 20.dp, vertical = 16.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .background(SurfaceDark, RoundedCornerShape(10.dp))
-                        .clickable(onClick = onNavigateBack),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("←", color = GoldAmber, fontSize = 18.sp)
-                }
-                Spacer(modifier = Modifier.width(14.dp))
-                Column {
-                    Text(
-                        text = "TAMBAH",
-                        color = GoldAmber,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 3.sp
-                    )
-                    Text(
-                        text = "Film Baru",
-                        color = TextWarm,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
-        ) {
-            Spacer(modifier = Modifier.height(4.dp))
-
-            FieldLabel("JUDUL")
-            OutlinedTextField(
-                value = title,
-                onValueChange = { title = it },
-                placeholder = { Text("Judul film atau series...", color = TextSecondary, fontSize = 14.sp) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                colors = rewindTextFieldColors(),
-                shape = RoundedCornerShape(12.dp),
-                textStyle = LocalTextStyle.current.copy(color = TextWarm, fontSize = 14.sp)
-            )
-
-            FieldLabel("JENIS")
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                MovieType.entries.forEach { type ->
-                    val isSelected = selectedType == type
-                    Surface(
-                        modifier = Modifier.clickable { selectedType = type },
-                        color = if (isSelected) GoldAmber else SurfaceDark,
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Text(
-                            text = type.displayName,
-                            color = if (isSelected) BackgroundDark else TextSecondary,
-                            fontSize = 12.sp,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
-                        )
-                    }
-                }
-            }
-
-            FieldLabel("GENRE")
-            GenreDropdown(
-                selected = selectedGenre,
-                onSelect = { selectedGenre = it }
-            )
-
-            FieldLabel("STATUS")
-            Row(horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-                val statusList = listOf(
-                    WatchStatus.PLAN_TO_WATCH to "Plan",
-                    WatchStatus.WATCHING to "Watch",
-                    WatchStatus.COMPLETED to "Done",
-                    WatchStatus.ON_HOLD to "Hold",
-                    WatchStatus.DROPPED to "Drop"
+                .size(250.dp)
+                .align(Alignment.TopEnd)
+                .offset(x = 60.dp, y = (-30).dp)
+                .blur(80.dp)
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(GoldAmber.copy(alpha = 0.1f), Color.Transparent)
+                    ),
+                    shape = CircleShape
                 )
-                val colors = mapOf(
-                    WatchStatus.PLAN_TO_WATCH to StatusWantToWatch,
-                    WatchStatus.WATCHING to StatusWatching,
-                    WatchStatus.COMPLETED to StatusFinished,
-                    WatchStatus.ON_HOLD to StatusOnHold,
-                    WatchStatus.DROPPED to StatusDropped
-                )
-                statusList.forEach { (status, label) ->
-                    val isSelected = selectedStatus == status
-                    val color = colors[status] ?: GoldAmber
-                    Surface(
-                        modifier = Modifier.clickable { selectedStatus = status },
-                        color = if (isSelected) color.copy(alpha = 0.2f) else SurfaceDark,
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text(
-                            text = label,
-                            color = if (isSelected) color else TextSecondary,
-                            fontSize = 12.sp,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
-                        )
-                    }
-                }
-            }
+        )
 
-            if (selectedType != MovieType.MOVIE) {
-                FieldLabel("TOTAL EPISODE")
+        Column(modifier = Modifier.fillMaxSize()) {
+            AddMovieHeader(onNavigateBack = onNavigateBack)
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                Spacer(modifier = Modifier.height(4.dp))
+
+                SectionLabel("TITLE")
                 OutlinedTextField(
-                    value = totalEpisodesText,
-                    onValueChange = { if (it.all { c -> c.isDigit() }) totalEpisodesText = it },
-                    placeholder = { Text("Jumlah episode...", color = TextSecondary, fontSize = 14.sp) },
+                    value = title,
+                    onValueChange = { title = it },
+                    placeholder = {
+                        Text(
+                            "Movie or series title...",
+                            color = TextMuted,
+                            fontSize = 14.sp
+                        )
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    colors = rewindTextFieldColors(),
+                    colors = fieldColors(),
                     shape = RoundedCornerShape(12.dp),
                     textStyle = LocalTextStyle.current.copy(color = TextWarm, fontSize = 14.sp)
                 )
-            }
 
-            FieldLabel("RATING  ${"★".repeat(rating.toInt())}${"☆".repeat(5 - rating.toInt())}  (${rating.toInt()}/5)")
-            Slider(
-                value = rating,
-                onValueChange = { rating = it },
-                valueRange = 0f..5f,
-                steps = 4,
-                modifier = Modifier.fillMaxWidth(),
-                colors = SliderDefaults.colors(
-                    thumbColor = GoldAmber,
-                    activeTrackColor = GoldAmber,
-                    inactiveTrackColor = VelvetRed.copy(alpha = 0.3f)
-                )
-            )
+                SectionLabel("TYPE")
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    MovieType.entries.forEach { type ->
+                        val isSelected = selectedType == type
+                        if (isSelected) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(
+                                        Brush.horizontalGradient(listOf(GoldAmberDim, GoldAmber))
+                                    )
+                                    .clickable { selectedType = type }
+                                    .padding(horizontal = 14.dp, vertical = 9.dp)
+                            ) {
+                                Text(
+                                    text = type.displayName,
+                                    color = BackgroundDark,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(SurfaceDark)
+                                    .border(BorderStroke(1.dp, BorderSubtle), RoundedCornerShape(10.dp))
+                                    .clickable { selectedType = type }
+                                    .padding(horizontal = 14.dp, vertical = 9.dp)
+                            ) {
+                                Text(
+                                    text = type.displayName,
+                                    color = TextMuted,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                    }
+                }
 
-            FieldLabel("REVIEW / CATATAN")
-            OutlinedTextField(
-                value = review,
-                onValueChange = { review = it },
-                placeholder = { Text("Tulis kesanmu tentang film ini...", color = TextSecondary, fontSize = 14.sp) },
-                modifier = Modifier.fillMaxWidth().height(110.dp),
-                maxLines = 5,
-                colors = rewindTextFieldColors(),
-                shape = RoundedCornerShape(12.dp),
-                textStyle = LocalTextStyle.current.copy(color = TextWarm, fontSize = 14.sp)
-            )
+                SectionLabel("GENRE")
+                GenreDropdown(selected = selectedGenre, onSelect = { selectedGenre = it })
 
-            if (uiState is AddMovieUiState.Error) {
-                Text(
-                    text = (uiState as AddMovieUiState.Error).message,
-                    color = TheaterRed,
-                    fontSize = 13.sp
-                )
-            }
+                SectionLabel("STATUS")
+                StatusSelector(selected = selectedStatus, onSelect = { selectedStatus = it })
 
-            Button(
-                onClick = {
-                    val formattedRating: Float? = if (rating > 0f) rating else null
-                    val formattedEpisodes: Int? = totalEpisodesText.toIntOrNull()
-
-                    viewModel.saveMovie(
-                        title = title,
-                        genre = selectedGenre,
-                        type = selectedType,
-                        status = selectedStatus,
-                        rating = formattedRating,
-                        review = review,
-                        totalEpisodes = formattedEpisodes
-                    )
-                },
-                modifier = Modifier.fillMaxWidth().height(52.dp),
-                enabled = uiState !is AddMovieUiState.Loading,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = GoldAmber,
-                    contentColor = BackgroundDark,
-                    disabledContainerColor = GoldAmber.copy(alpha = 0.4f)
-                ),
-                shape = RoundedCornerShape(14.dp),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
-            ) {
-                if (uiState is AddMovieUiState.Loading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = BackgroundDark,
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Text(
-                        text = "Simpan ke Koleksi",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp,
-                        letterSpacing = 0.5.sp
+                if (selectedType != MovieType.MOVIE) {
+                    SectionLabel("TOTAL EPISODES")
+                    OutlinedTextField(
+                        value = totalEpisodesText,
+                        onValueChange = { if (it.all { c -> c.isDigit() }) totalEpisodesText = it },
+                        placeholder = {
+                            Text("Number of episodes...", color = TextMuted, fontSize = 14.sp)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        colors = fieldColors(),
+                        shape = RoundedCornerShape(12.dp),
+                        textStyle = LocalTextStyle.current.copy(color = TextWarm, fontSize = 14.sp)
                     )
                 }
-            }
 
-            Spacer(modifier = Modifier.height(24.dp))
+                SectionLabel("RATING")
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(SurfaceElevated)
+                        .border(BorderStroke(1.dp, BorderSubtle), RoundedCornerShape(14.dp))
+                        .padding(horizontal = 18.dp, vertical = 14.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "★".repeat(rating.toInt()) + "☆".repeat(5 - rating.toInt()),
+                                color = GoldAmber,
+                                fontSize = 18.sp,
+                                letterSpacing = 2.sp
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        GoldAmber.copy(alpha = 0.12f),
+                                        RoundedCornerShape(6.dp)
+                                    )
+                                    .border(BorderStroke(0.5.dp, BorderGold.copy(alpha = 0.5f)), RoundedCornerShape(6.dp))
+                                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = "${rating.toInt()} / 5",
+                                    color = GoldAmber,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                        Slider(
+                            value = rating,
+                            onValueChange = { rating = it },
+                            valueRange = 0f..5f,
+                            steps = 4,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = SliderDefaults.colors(
+                                thumbColor = GoldAmber,
+                                activeTrackColor = GoldAmber,
+                                inactiveTrackColor = VelvetRed.copy(alpha = 0.25f),
+                                activeTickColor = Color.Transparent,
+                                inactiveTickColor = Color.Transparent
+                            )
+                        )
+                    }
+                }
+
+                SectionLabel("NOTES / REVIEW")
+                OutlinedTextField(
+                    value = review,
+                    onValueChange = { review = it },
+                    placeholder = {
+                        Text(
+                            "Write your thoughts about this title...",
+                            color = TextMuted,
+                            fontSize = 14.sp
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp),
+                    maxLines = 5,
+                    colors = fieldColors(),
+                    shape = RoundedCornerShape(12.dp),
+                    textStyle = LocalTextStyle.current.copy(
+                        color = TextWarm,
+                        fontSize = 14.sp,
+                        lineHeight = 22.sp
+                    )
+                )
+
+                if (uiState is AddMovieUiState.Error) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(TheaterRed.copy(alpha = 0.08f), RoundedCornerShape(8.dp))
+                            .border(BorderStroke(1.dp, TheaterRed.copy(alpha = 0.3f)), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 14.dp, vertical = 10.dp)
+                    ) {
+                        Text(
+                            text = (uiState as AddMovieUiState.Error).message,
+                            color = TheaterRed,
+                            fontSize = 13.sp
+                        )
+                    }
+                }
+
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(200.dp)
+                            .blur(40.dp)
+                            .background(
+                                Brush.radialGradient(
+                                    colors = listOf(GoldAmber.copy(alpha = 0.15f), Color.Transparent)
+                                ),
+                                shape = CircleShape
+                            )
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(
+                                if (uiState !is AddMovieUiState.Loading)
+                                    Brush.horizontalGradient(listOf(GoldAmberDim, GoldAmber))
+                                else
+                                    Brush.horizontalGradient(
+                                        listOf(GoldAmberDim.copy(alpha = 0.4f), GoldAmber.copy(alpha = 0.4f))
+                                    )
+                            )
+                            .clickable(enabled = uiState !is AddMovieUiState.Loading) {
+                                viewModel.saveMovie(
+                                    title = title,
+                                    genre = selectedGenre,
+                                    type = selectedType,
+                                    status = selectedStatus,
+                                    rating = if (rating > 0f) rating else null,
+                                    review = review,
+                                    totalEpisodes = totalEpisodesText.toIntOrNull()
+                                )
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (uiState is AddMovieUiState.Loading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                color = BackgroundDark,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text(
+                                text = "Save to Collection",
+                                color = BackgroundDark,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp,
+                                letterSpacing = 0.5.sp
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(28.dp))
+            }
         }
     }
 }
 
 @Composable
-private fun FieldLabel(text: String) {
+private fun AddMovieHeader(onNavigateBack: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                Brush.verticalGradient(
+                    colorStops = arrayOf(
+                        0f to SurfaceDark,
+                        0.7f to SurfaceDark.copy(alpha = 0.8f),
+                        1f to BackgroundDark
+                    )
+                )
+            )
+            .padding(horizontal = 20.dp, vertical = 18.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .align(Alignment.BottomCenter)
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(
+                            Color.Transparent,
+                            BorderGold.copy(alpha = 0.4f),
+                            GoldAmber.copy(alpha = 0.25f),
+                            BorderGold.copy(alpha = 0.4f),
+                            Color.Transparent
+                        )
+                    )
+                )
+        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(SurfaceElevated)
+                    .border(BorderStroke(1.dp, BorderSubtle), RoundedCornerShape(10.dp))
+                    .clickable(onClick = onNavigateBack),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("←", color = GoldAmber, fontSize = 17.sp)
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
+                Text(
+                    text = "ADD TITLE",
+                    color = GoldAmber,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 4.sp
+                )
+                Text(
+                    text = "New Entry",
+                    color = TextWarm,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = (-0.3).sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SectionLabel(text: String) {
     Text(
         text = text,
-        color = GoldAmber,
-        fontSize = 10.sp,
-        fontWeight = FontWeight.Bold,
-        letterSpacing = 2.sp
+        color = TextMuted,
+        fontSize = 9.sp,
+        fontWeight = FontWeight.ExtraBold,
+        letterSpacing = 2.5.sp
     )
+}
+
+@Composable
+private fun StatusSelector(selected: WatchStatus, onSelect: (WatchStatus) -> Unit) {
+    val statusList = listOf(
+        WatchStatus.PLAN_TO_WATCH to "Plan",
+        WatchStatus.WATCHING to "Watch",
+        WatchStatus.COMPLETED to "Done",
+        WatchStatus.ON_HOLD to "Hold",
+        WatchStatus.DROPPED to "Drop"
+    )
+    val statusColors = mapOf(
+        WatchStatus.PLAN_TO_WATCH to StatusWantToWatch,
+        WatchStatus.WATCHING to StatusWatching,
+        WatchStatus.COMPLETED to StatusFinished,
+        WatchStatus.ON_HOLD to StatusOnHold,
+        WatchStatus.DROPPED to StatusDropped
+    )
+    Row(horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+        statusList.forEach { (status, label) ->
+            val isSelected = selected == status
+            val color = statusColors[status] ?: GoldAmber
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(if (isSelected) color.copy(alpha = 0.15f) else SurfaceDark)
+                    .border(
+                        BorderStroke(
+                            if (isSelected) 1.dp else 1.dp,
+                            if (isSelected) color.copy(alpha = 0.45f) else BorderSubtle
+                        ),
+                        RoundedCornerShape(8.dp)
+                    )
+                    .clickable { onSelect(status) }
+                    .padding(horizontal = 11.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    text = label,
+                    color = if (isSelected) color else TextMuted,
+                    fontSize = 12.sp,
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                )
+            }
+        }
+    }
 }
 
 @Composable
 private fun GenreDropdown(selected: MovieGenre, onSelect: (MovieGenre) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     Box {
-        Surface(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { expanded = true },
-            color = SurfaceDark,
-            shape = RoundedCornerShape(12.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(SurfaceElevated)
+                .border(BorderStroke(1.dp, BorderSubtle), RoundedCornerShape(12.dp))
+                .clickable { expanded = true }
+                .padding(horizontal = 16.dp, vertical = 15.dp)
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = selected.displayName,
-                    color = TextWarm,
-                    fontSize = 14.sp
-                )
-                Text("▾", color = GoldAmber, fontSize = 14.sp)
+                Text(text = selected.displayName, color = TextWarm, fontSize = 14.sp)
+                Text("▾", color = GoldAmber, fontSize = 13.sp)
             }
         }
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier.background(SurfaceDark)
+            modifier = Modifier
+                .background(SurfaceElevated)
+                .border(BorderStroke(1.dp, BorderSubtle), RoundedCornerShape(8.dp))
         ) {
             MovieGenre.entries.forEach { genre ->
                 DropdownMenuItem(
                     text = {
                         Text(
                             text = genre.displayName,
-                            color = if (genre == selected) GoldAmber else TextWarm,
-                            fontSize = 14.sp,
-                            fontWeight = if (genre == selected) FontWeight.Bold else FontWeight.Normal
+                            color = if (genre == selected) GoldAmber else TextSecondary,
+                            fontSize = 13.sp,
+                            fontWeight = if (genre == selected) FontWeight.SemiBold else FontWeight.Normal
                         )
                     },
                     onClick = {
@@ -318,13 +530,13 @@ private fun GenreDropdown(selected: MovieGenre, onSelect: (MovieGenre) -> Unit) 
 }
 
 @Composable
-private fun rewindTextFieldColors() = OutlinedTextFieldDefaults.colors(
-    focusedBorderColor = GoldAmber,
-    unfocusedBorderColor = VelvetRed.copy(alpha = 0.4f),
+private fun fieldColors() = OutlinedTextFieldDefaults.colors(
+    focusedBorderColor = GoldAmber.copy(alpha = 0.7f),
+    unfocusedBorderColor = BorderSubtle,
     focusedTextColor = TextWarm,
     unfocusedTextColor = TextWarm,
     cursorColor = GoldAmber,
-    focusedContainerColor = SurfaceDark,
-    unfocusedContainerColor = SurfaceDark,
+    focusedContainerColor = SurfaceElevated,
+    unfocusedContainerColor = SurfaceElevated,
     focusedLabelColor = GoldAmber
 )
