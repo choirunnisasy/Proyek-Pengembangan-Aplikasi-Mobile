@@ -14,11 +14,15 @@ sealed interface Route {
 
     @Serializable
     data class MovieDetail(val movieId: Long) : Route
+
+    @Serializable
+    data object AIAssistant : Route
 }
 
 interface NavigationActions {
     fun navigateToHome()
     fun navigateToAddMovie(movieId: Long? = null)
     fun navigateToMovieDetail(movieId: Long)
+    fun navigateToAIAssistant()
     fun navigateBack()
 }

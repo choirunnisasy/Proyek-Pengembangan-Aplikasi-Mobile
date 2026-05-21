@@ -26,14 +26,13 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -69,6 +68,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun HomeScreen(
     onAddClick: () -> Unit,
     onMovieClick: (Long) -> Unit,
+    onAIClick: () -> Unit,
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -85,12 +85,7 @@ fun HomeScreen(
                 .offset(x = (-60).dp, y = (-40).dp)
                 .blur(100.dp)
                 .background(
-                    Brush.radialGradient(
-                        colors = listOf(
-                            TheaterRed.copy(alpha = 0.18f),
-                            Color.Transparent
-                        )
-                    ),
+                    Brush.radialGradient(colors = listOf(TheaterRed.copy(alpha = 0.18f), Color.Transparent)),
                     shape = CircleShape
                 )
         )
@@ -101,18 +96,13 @@ fun HomeScreen(
                 .offset(x = 40.dp, y = 20.dp)
                 .blur(80.dp)
                 .background(
-                    Brush.radialGradient(
-                        colors = listOf(
-                            GoldAmber.copy(alpha = 0.12f),
-                            Color.Transparent
-                        )
-                    ),
+                    Brush.radialGradient(colors = listOf(GoldAmber.copy(alpha = 0.12f), Color.Transparent)),
                     shape = CircleShape
                 )
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
-            HomeHeader()
+            HomeHeader(onAIClick = onAIClick)
             FilterRow(selected = selectedFilter, onSelect = { selectedFilter = it })
 
             when (val state = uiState) {
@@ -144,9 +134,7 @@ fun HomeScreen(
                     .size(70.dp)
                     .blur(20.dp)
                     .background(
-                        Brush.radialGradient(
-                            colors = listOf(GoldAmber.copy(alpha = 0.5f), Color.Transparent)
-                        ),
+                        Brush.radialGradient(colors = listOf(GoldAmber.copy(alpha = 0.5f), Color.Transparent)),
                         shape = CircleShape
                     )
             )
@@ -164,7 +152,7 @@ fun HomeScreen(
 }
 
 @Composable
-private fun HomeHeader() {
+private fun HomeHeader(onAIClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -176,11 +164,6 @@ private fun HomeHeader() {
                         1f to BackgroundDark
                     )
                 )
-            )
-            .border(
-                width = 0.dp,
-                color = Color.Transparent,
-                shape = RoundedCornerShape(0.dp)
             )
             .padding(horizontal = 24.dp, vertical = 22.dp)
     ) {
@@ -218,7 +201,7 @@ private fun HomeHeader() {
                 Text(
                     text = "My Collection",
                     color = TextWarm,
-                    fontSize = 23.sp,
+                    fontSize = 26.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = (-0.5).sp
                 )
@@ -230,9 +213,7 @@ private fun HomeHeader() {
                         .size(54.dp)
                         .blur(16.dp)
                         .background(
-                            Brush.radialGradient(
-                                colors = listOf(GoldAmber.copy(alpha = 0.4f), Color.Transparent)
-                            ),
+                            Brush.radialGradient(colors = listOf(GoldAmber.copy(alpha = 0.35f), Color.Transparent)),
                             shape = CircleShape
                         )
                 )
@@ -241,15 +222,18 @@ private fun HomeHeader() {
                         .size(42.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .background(
-                            Brush.linearGradient(listOf(SurfaceElevated, VelvetRed))
+                            Brush.linearGradient(
+                                listOf(GoldAmberDim.copy(alpha = 0.2f), GoldAmber.copy(alpha = 0.1f))
+                            )
                         )
                         .border(
-                            BorderStroke(1.dp, Brush.linearGradient(listOf(BorderGold, VelvetRed))),
+                            BorderStroke(1.dp, BorderGold.copy(alpha = 0.5f)),
                             RoundedCornerShape(12.dp)
-                        ),
+                        )
+                        .clickable(onClick = onAIClick),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("🎬", fontSize = 18.sp)
+                    Text("🦉", fontSize = 20.sp)
                 }
             }
         }
@@ -277,9 +261,7 @@ private fun FilterRow(selected: WatchStatus?, onSelect: (WatchStatus?) -> Unit) 
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(20.dp))
-                        .background(
-                            Brush.horizontalGradient(listOf(GoldAmberDim, GoldAmber))
-                        )
+                        .background(Brush.horizontalGradient(listOf(GoldAmberDim, GoldAmber)))
                         .clickable { onSelect(status) }
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
@@ -296,10 +278,7 @@ private fun FilterRow(selected: WatchStatus?, onSelect: (WatchStatus?) -> Unit) 
                     modifier = Modifier
                         .clip(RoundedCornerShape(20.dp))
                         .background(SurfaceDark)
-                        .border(
-                            BorderStroke(1.dp, BorderSubtle),
-                            RoundedCornerShape(20.dp)
-                        )
+                        .border(BorderStroke(1.dp, BorderSubtle), RoundedCornerShape(20.dp))
                         .clickable { onSelect(status) }
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
@@ -345,10 +324,7 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
             .clip(RoundedCornerShape(16.dp))
             .background(
                 Brush.linearGradient(
-                    colorStops = arrayOf(
-                        0f to SurfaceElevated,
-                        1f to SurfaceDark
-                    )
+                    colorStops = arrayOf(0f to SurfaceElevated, 1f to SurfaceDark)
                 )
             )
             .border(
@@ -372,9 +348,7 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
                 .offset(x = (-10).dp, y = (-10).dp)
                 .blur(30.dp)
                 .background(
-                    Brush.radialGradient(
-                        colors = listOf(statusColor.copy(alpha = 0.15f), Color.Transparent)
-                    ),
+                    Brush.radialGradient(colors = listOf(statusColor.copy(alpha = 0.15f), Color.Transparent)),
                     shape = CircleShape
                 )
         )
@@ -389,9 +363,7 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
                         .size(66.dp)
                         .blur(12.dp)
                         .background(
-                            Brush.radialGradient(
-                                colors = listOf(TheaterRed.copy(alpha = 0.4f), Color.Transparent)
-                            ),
+                            Brush.radialGradient(colors = listOf(TheaterRed.copy(alpha = 0.4f), Color.Transparent)),
                             shape = CircleShape
                         )
                 )
@@ -401,18 +373,13 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
                         .clip(RoundedCornerShape(13.dp))
                         .background(
                             Brush.linearGradient(
-                                colorStops = arrayOf(
-                                    0f to VelvetRed,
-                                    1f to TheaterRed
-                                )
+                                colorStops = arrayOf(0f to VelvetRed, 1f to TheaterRed)
                             )
                         )
                         .border(
                             BorderStroke(
                                 1.dp,
-                                Brush.linearGradient(
-                                    listOf(GoldAmber.copy(alpha = 0.3f), Color.Transparent)
-                                )
+                                Brush.linearGradient(listOf(GoldAmber.copy(alpha = 0.3f), Color.Transparent))
                             ),
                             RoundedCornerShape(13.dp)
                         ),
@@ -446,14 +413,8 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
                 ) {
                     Box(
                         modifier = Modifier
-                            .background(
-                                statusColor.copy(alpha = 0.12f),
-                                RoundedCornerShape(5.dp)
-                            )
-                            .border(
-                                BorderStroke(0.5.dp, statusColor.copy(alpha = 0.35f)),
-                                RoundedCornerShape(5.dp)
-                            )
+                            .background(statusColor.copy(alpha = 0.12f), RoundedCornerShape(5.dp))
+                            .border(BorderStroke(0.5.dp, statusColor.copy(alpha = 0.35f)), RoundedCornerShape(5.dp))
                             .padding(horizontal = 7.dp, vertical = 3.dp)
                     ) {
                         Text(
@@ -516,12 +477,7 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
             }
 
             Spacer(modifier = Modifier.width(6.dp))
-            Text(
-                text = "›",
-                color = TextMuted,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Light
-            )
+            Text("›", color = TextMuted, fontSize = 20.sp, fontWeight = FontWeight.Light)
         }
     }
 }
@@ -551,9 +507,7 @@ private fun EmptyState() {
                         .size(100.dp)
                         .blur(30.dp)
                         .background(
-                            Brush.radialGradient(
-                                colors = listOf(GoldAmber.copy(alpha = 0.2f), Color.Transparent)
-                            ),
+                            Brush.radialGradient(colors = listOf(GoldAmber.copy(alpha = 0.2f), Color.Transparent)),
                             shape = CircleShape
                         )
                 )
@@ -596,10 +550,6 @@ private fun EmptyFilterState() {
 @Composable
 private fun ErrorState(message: String) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(
-            text = message,
-            color = TheaterRed,
-            fontSize = 13.sp
-        )
+        Text(text = message, color = TheaterRed, fontSize = 13.sp)
     }
 }

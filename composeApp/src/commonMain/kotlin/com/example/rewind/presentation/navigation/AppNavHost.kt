@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.rewind.presentation.screens.addmovie.AddMovieScreen
+import com.example.rewind.presentation.screens.ai.AIAssistantScreen
 import com.example.rewind.presentation.screens.detail.DetailScreen
 import com.example.rewind.presentation.screens.home.HomeScreen
 import com.example.rewind.presentation.screens.splash.SplashScreen
@@ -27,19 +28,29 @@ fun AppNavHost() {
                 }
             )
         }
+
         composable<Route.Home> {
             HomeScreen(
                 onAddClick = { navController.navigate(Route.AddMovie()) },
-                onMovieClick = { id -> navController.navigate(Route.MovieDetail(movieId = id)) }
+                onMovieClick = { id -> navController.navigate(Route.MovieDetail(movieId = id)) },
+                onAIClick = { navController.navigate(Route.AIAssistant) }
             )
         }
+
         composable<Route.AddMovie> {
             AddMovieScreen(onNavigateBack = { navController.popBackStack() })
         }
+
         composable<Route.MovieDetail> { backStackEntry ->
             val route = backStackEntry.toRoute<Route.MovieDetail>()
             DetailScreen(
                 movieId = route.movieId,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable<Route.AIAssistant> {
+            AIAssistantScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

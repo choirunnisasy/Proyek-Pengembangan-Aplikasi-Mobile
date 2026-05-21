@@ -9,12 +9,8 @@ import com.example.rewind.data.local.datastore.create
 import com.example.rewind.data.remote.api.GeminiService
 import com.example.rewind.data.repository.AIRepositoryImpl
 import com.example.rewind.domain.repository.AIRepository
-
-// --- IMPORT REPOSITORY ---
 import com.example.rewind.domain.repository.MovieRepository
 import com.example.rewind.data.repository.MovieRepositoryImpl
-
-// --- IMPORT USE CASES ---
 import com.example.rewind.domain.usecase.GetAllMoviesUseCase
 import com.example.rewind.domain.usecase.GetMovieByIDUseCase
 import com.example.rewind.domain.usecase.SearchMoviesUseCase
@@ -22,12 +18,13 @@ import com.example.rewind.domain.usecase.GetMoviesByStatusUseCase
 import com.example.rewind.domain.usecase.GetFavoriteMoviesUseCase
 import com.example.rewind.domain.usecase.SaveMovieUseCase
 import com.example.rewind.domain.usecase.DeleteMovieUseCase
-
-// --- IMPORT VIEWMODELS ---
+import com.example.rewind.domain.usecase.SummarizeNoteUseCase
+import com.example.rewind.domain.usecase.ImproveWritingUseCase
+import com.example.rewind.domain.usecase.GenerateIdeasUseCase
 import com.example.rewind.presentation.screens.home.HomeViewModel
 import com.example.rewind.presentation.screens.addmovie.AddMovieViewModel
 import com.example.rewind.presentation.screens.detail.DetailViewModel
-
+import com.example.rewind.presentation.screens.ai.AIAssistantViewModel
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
@@ -58,7 +55,6 @@ val repositoryModule = module {
     singleOf(::AIRepositoryImpl) bind AIRepository::class
 }
 
-// REGISTER SEMUA USE CASES
 val useCaseModule = module {
     singleOf(::GetAllMoviesUseCase)
     singleOf(::GetMovieByIDUseCase)
@@ -67,12 +63,16 @@ val useCaseModule = module {
     singleOf(::GetFavoriteMoviesUseCase)
     singleOf(::SaveMovieUseCase)
     singleOf(::DeleteMovieUseCase)
+    singleOf(::SummarizeNoteUseCase)
+    singleOf(::ImproveWritingUseCase)
+    singleOf(::GenerateIdeasUseCase)
 }
 
 val viewModelModule = module {
     viewModelOf(::HomeViewModel)
     viewModelOf(::AddMovieViewModel)
     viewModelOf(::DetailViewModel)
+    viewModelOf(::AIAssistantViewModel)
 }
 
 val sharedModules = listOf(
