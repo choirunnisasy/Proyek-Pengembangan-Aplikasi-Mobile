@@ -32,6 +32,7 @@ import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.bind
 import org.koin.dsl.module
+import com.example.rewind.domain.usecase.UpdateMovieUseCase
 
 val networkModule = module {
     single { HttpClientFactory.create(enableLogging = true) }
@@ -62,6 +63,7 @@ val useCaseModule = module {
     singleOf(::GetMoviesByStatusUseCase)
     singleOf(::GetFavoriteMoviesUseCase)
     singleOf(::SaveMovieUseCase)
+    singleOf(::UpdateMovieUseCase)
     singleOf(::DeleteMovieUseCase)
     singleOf(::SummarizeNoteUseCase)
     singleOf(::ImproveWritingUseCase)
