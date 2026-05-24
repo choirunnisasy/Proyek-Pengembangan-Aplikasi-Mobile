@@ -12,13 +12,15 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val getAllMovies: GetAllMoviesUseCase,
-    private val deleteMovie: DeleteMovieUseCase
+    private val deleteMovieUseCase: DeleteMovieUseCase
 ) : ViewModel() {
 
     private val _sortBy = MutableStateFlow(MovieSortBy.UPDATED_DESC)
@@ -27,7 +29,8 @@ class HomeViewModel(
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     val uiState: StateFlow<HomeUiState> = combine(
         _sortBy.flatMapLatest { sort -> getAllMovies(sort) },
-        searchQuery.debounce(300)
+        // FIX: Tambahkan onStart agar Unit Test tidak terjebak Loading selama 300ms
+        searchQuery.debounce(300).onStart { emit("") }.distinctUntilChanged()
     ) { movies, query ->
         val filtered = if (query.isBlank()) {
             movies
@@ -60,7 +63,7 @@ class HomeViewModel(
 
     fun deleteMovie(id: Long) {
         viewModelScope.launch {
-            deleteMovie.invoke(id)
+            deleteMovieUseCase(id)
         }
     }
 }
