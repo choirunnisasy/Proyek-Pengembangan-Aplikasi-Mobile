@@ -54,3 +54,51 @@ data class TmdbMovieDto(
     val isTvSeries: Boolean
         get() = mediaType == "tv" || name != null
 }
+
+// ==================== MOVIE DETAIL ====================
+
+@Serializable
+data class TmdbMovieDetailDto(
+    @SerialName("id") val id: Int,
+    @SerialName("title") val title: String? = null,
+    @SerialName("name") val name: String? = null,
+    @SerialName("overview") val overview: String? = null,
+    @SerialName("poster_path") val posterPath: String? = null,
+    @SerialName("backdrop_path") val backdropPath: String? = null,
+    @SerialName("vote_average") val voteAverage: Double = 0.0,
+    @SerialName("release_date") val releaseDate: String? = null,
+    @SerialName("first_air_date") val firstAirDate: String? = null,
+    @SerialName("genres") val genres: List<TmdbGenreDto> = emptyList(),
+    @SerialName("runtime") val runtime: Int? = null,               // menit (movie)
+    @SerialName("number_of_episodes") val numberOfEpisodes: Int? = null, // tv
+    @SerialName("number_of_seasons") val numberOfSeasons: Int? = null,   // tv
+    @SerialName("status") val status: String? = null,
+    @SerialName("tagline") val tagline: String? = null,
+    @SerialName("homepage") val homepage: String? = null,
+    @SerialName("original_language") val originalLanguage: String? = null
+) {
+    val displayTitle: String
+        get() = title ?: name ?: "Unknown"
+
+    fun posterUrl(size: String = "w500"): String? =
+        posterPath?.let { "https://image.tmdb.org/t/p/$size$it" }
+
+    fun backdropUrl(size: String = "w780"): String? =
+        backdropPath?.let { "https://image.tmdb.org/t/p/$size$it" }
+}
+
+// ==================== GENRE ====================
+
+@Serializable
+data class TmdbGenreDto(
+    @SerialName("id") val id: Int,
+    @SerialName("name") val name: String
+)
+
+// ==================== GENRE LIST RESPONSE ====================
+
+@Serializable
+data class TmdbGenreListDto(
+    @SerialName("genres") val genres: List<TmdbGenreDto> = emptyList()
+)
+
