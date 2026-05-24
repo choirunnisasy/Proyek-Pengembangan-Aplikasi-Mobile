@@ -42,6 +42,7 @@ import com.example.rewind.domain.usecase.SearchTmdbUseCase
 import com.example.rewind.domain.usecase.GetTrendingUseCase
 import com.example.rewind.domain.usecase.GetTmdbDetailUseCase
 import com.example.rewind.presentation.screens.search.SearchViewModel
+import com.example.rewind.presentation.screens.settings.SettingsViewModel
 
 val networkModule = module {
     single { HttpClientFactory.create(enableLogging = true) }
@@ -91,6 +92,7 @@ val viewModelModule = module {
     viewModelOf(::AIAssistantViewModel)
     viewModelOf(::ProfileViewModel)
     viewModelOf(::SearchViewModel)
+    viewModelOf(::SettingsViewModel)
 }
 
 val sharedModules = listOf(
