@@ -102,3 +102,22 @@ data class TmdbGenreListDto(
     @SerialName("genres") val genres: List<TmdbGenreDto> = emptyList()
 )
 
+// ==================== GENRE ID MAPPING KE DOMAIN ====================
+
+object TmdbGenreMapper {
+    // Mapping TMDB genre ID -> nama genre Rewind
+    fun fromGenreIds(ids: List<Int>): String {
+        return when {
+            ids.contains(28) || ids.contains(10759) -> "ACTION"
+            ids.contains(35) -> "COMEDY"
+            ids.contains(18) || ids.contains(10766) -> "DRAMA"
+            ids.contains(27) -> "HORROR"
+            ids.contains(10749) -> "ROMANCE"
+            ids.contains(878) || ids.contains(10765) -> "SCIFI"
+            ids.contains(53) -> "THRILLER"
+            ids.contains(16) -> "ANIMATION"
+            ids.contains(14) || ids.contains(10770) -> "FANTASY"
+            else -> "OTHER"
+        }
+    }
+}
