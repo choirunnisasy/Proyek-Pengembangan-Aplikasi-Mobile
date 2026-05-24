@@ -41,6 +41,7 @@ import com.example.rewind.domain.repository.TmdbRepository
 import com.example.rewind.domain.usecase.SearchTmdbUseCase
 import com.example.rewind.domain.usecase.GetTrendingUseCase
 import com.example.rewind.domain.usecase.GetTmdbDetailUseCase
+import com.example.rewind.presentation.screens.search.SearchViewModel
 
 val networkModule = module {
     single { HttpClientFactory.create(enableLogging = true) }
@@ -80,6 +81,7 @@ val useCaseModule = module {
     singleOf(::GenerateIdeasUseCase)
     singleOf(::GetTrendingUseCase)
     singleOf(::GetTmdbDetailUseCase)
+    singleOf(::SearchTmdbUseCase)
 }
 
 val viewModelModule = module {
@@ -88,6 +90,7 @@ val viewModelModule = module {
     viewModelOf(::DetailViewModel)
     viewModelOf(::AIAssistantViewModel)
     viewModelOf(::ProfileViewModel)
+    viewModelOf(::SearchViewModel)
 }
 
 val sharedModules = listOf(
