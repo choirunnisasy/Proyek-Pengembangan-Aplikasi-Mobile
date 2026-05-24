@@ -25,6 +25,7 @@ import com.example.rewind.presentation.screens.home.HomeViewModel
 import com.example.rewind.presentation.screens.addmovie.AddMovieViewModel
 import com.example.rewind.presentation.screens.detail.DetailViewModel
 import com.example.rewind.presentation.screens.ai.AIAssistantViewModel
+import com.example.rewind.presentation.screens.profile.ProfileViewModel
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
@@ -75,6 +76,7 @@ val viewModelModule = module {
     viewModelOf(::AddMovieViewModel)
     viewModelOf(::DetailViewModel)
     viewModelOf(::AIAssistantViewModel)
+    viewModelOf(::ProfileViewModel)
 }
 
 val sharedModules = listOf(
