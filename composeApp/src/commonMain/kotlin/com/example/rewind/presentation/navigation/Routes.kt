@@ -17,6 +17,9 @@ sealed interface Route {
 
     @Serializable
     data object AIAssistant : Route
+
+    @Serializable
+    data object Profile : Route
 }
 
 interface NavigationActions {

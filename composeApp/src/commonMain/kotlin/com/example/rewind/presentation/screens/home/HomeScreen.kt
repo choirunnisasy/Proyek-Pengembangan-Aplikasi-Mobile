@@ -22,11 +22,16 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -43,6 +48,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import com.example.rewind.domain.model.Movie
 import com.example.rewind.domain.model.WatchStatus
 import com.example.rewind.presentation.theme.BackgroundDark
@@ -69,6 +76,7 @@ fun HomeScreen(
     onAddClick: () -> Unit,
     onMovieClick: (Long) -> Unit,
     onAIClick: () -> Unit,
+    onProfileClick: () -> Unit,
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -102,12 +110,19 @@ fun HomeScreen(
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
-            HomeHeader(onAIClick = onAIClick)
+            HomeHeader(onAIClick = onAIClick, onProfileClick = onProfileClick)
+
+            SearchBar(
+                query = searchQuery,
+                onQueryChange = { viewModel.onSearchQueryChange(it) }
+            )
+
             FilterRow(selected = selectedFilter, onSelect = { selectedFilter = it })
 
             when (val state = uiState) {
                 is HomeUiState.Loading -> LoadingState()
                 is HomeUiState.Empty -> EmptyState()
+                is HomeUiState.NoResults -> NoResultsState(query = state.query)
                 is HomeUiState.Success -> {
                     val displayed = if (selectedFilter != null) {
                         state.movies.filter { it.status == selectedFilter }
@@ -152,7 +167,7 @@ fun HomeScreen(
 }
 
 @Composable
-private fun HomeHeader(onAIClick: () -> Unit) {
+private fun HomeHeader(onAIClick: () -> Unit, onProfileClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -207,38 +222,42 @@ private fun HomeHeader(onAIClick: () -> Unit) {
                 )
             }
 
-            Box(contentAlignment = Alignment.Center) {
-                Box(
-                    modifier = Modifier
-                        .size(54.dp)
-                        .blur(16.dp)
-                        .background(
-                            Brush.radialGradient(colors = listOf(GoldAmber.copy(alpha = 0.35f), Color.Transparent)),
-                            shape = CircleShape
-                        )
-                )
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                // Tombol Profile — BARU
                 Box(
                     modifier = Modifier
                         .size(42.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(
-                            Brush.linearGradient(
-                                listOf(GoldAmberDim.copy(alpha = 0.2f), GoldAmber.copy(alpha = 0.1f))
-                            )
-                        )
-                        .border(
-                            BorderStroke(1.dp, BorderGold.copy(alpha = 0.5f)),
-                            RoundedCornerShape(12.dp)
-                        )
-                        .clickable(onClick = onAIClick),
+                        .background(SurfaceElevated)
+                        .border(BorderStroke(1.dp, BorderSubtle), RoundedCornerShape(12.dp))
+                        .clickable(onClick = onProfileClick),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("🦉", fontSize = 20.sp)
+                    Text("👤", fontSize = 18.sp)
+                }
+
+                // Tombol AI — sama seperti sebelumnya
+                Box(contentAlignment = Alignment.Center) {
+                    Box(modifier = Modifier.size(54.dp).blur(16.dp)
+                        .background(Brush.radialGradient(
+                            colors = listOf(GoldAmber.copy(alpha = 0.35f), Color.Transparent)),
+                            shape = CircleShape))
+                    Box(
+                        modifier = Modifier
+                            .size(42.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Brush.linearGradient(
+                                listOf(GoldAmberDim.copy(alpha = 0.2f), GoldAmber.copy(alpha = 0.1f))))
+                            .border(BorderStroke(1.dp, BorderGold.copy(alpha = 0.5f)), RoundedCornerShape(12.dp))
+                            .clickable(onClick = onAIClick),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("🦉", fontSize = 20.sp)
+                    }
                 }
             }
         }
     }
-}
 
 @Composable
 private fun FilterRow(selected: WatchStatus?, onSelect: (WatchStatus?) -> Unit) {
@@ -551,5 +570,73 @@ private fun EmptyFilterState() {
 private fun ErrorState(message: String) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(text = message, color = TheaterRed, fontSize = 13.sp)
+    }
+}
+
+@Composable
+private fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
+    val focusManager = LocalFocusManager.current
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        placeholder = {
+            Text("Search title, genre, type...", color = TextMuted, fontSize = 13.sp)
+        },
+        leadingIcon = {
+            Text("🔍", fontSize = 15.sp, modifier = Modifier.padding(start = 4.dp))
+        },
+        trailingIcon = {
+            if (query.isNotEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .clickable { onQueryChange("") }
+                        .padding(4.dp)
+                ) {
+                    Text("✕", color = TextMuted, fontSize = 13.sp)
+                }
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 4.dp)
+            .heightIn(min = 48.dp),
+        singleLine = true,
+        shape = RoundedCornerShape(14.dp),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+        keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = GoldAmber.copy(alpha = 0.6f),
+            unfocusedBorderColor = BorderSubtle,
+            focusedContainerColor = SurfaceElevated,
+            unfocusedContainerColor = SurfaceElevated,
+            cursorColor = GoldAmber,
+            focusedTextColor = TextWarm,
+            unfocusedTextColor = TextWarm
+        ),
+        textStyle = androidx.compose.ui.text.TextStyle(fontSize = 13.sp)
+    )
+}
+
+@Composable
+private fun NoResultsState(query: String) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text("🎬", fontSize = 40.sp)
+            Text(
+                text = "No results for \"$query\"",
+                color = TextWarm,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = "Try a different title or genre",
+                color = TextMuted,
+                fontSize = 12.sp
+            )
+        }
     }
 }

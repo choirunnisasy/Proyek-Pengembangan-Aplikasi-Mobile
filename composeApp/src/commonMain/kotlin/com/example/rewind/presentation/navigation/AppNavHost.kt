@@ -33,7 +33,8 @@ fun AppNavHost() {
             HomeScreen(
                 onAddClick = { navController.navigate(Route.AddMovie()) },
                 onMovieClick = { id -> navController.navigate(Route.MovieDetail(movieId = id)) },
-                onAIClick = { navController.navigate(Route.AIAssistant) }
+                onAIClick = { navController.navigate(Route.AIAssistant) },
+                onProfileClick = { navController.navigate(Route.Profile) }
             )
         }
 
@@ -58,6 +59,10 @@ fun AppNavHost() {
             AIAssistantScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
+        }
+
+        composable<Route.Profile> {
+            ProfileScreen(onNavigateBack = { navController.popBackStack() })
         }
     }
 }
