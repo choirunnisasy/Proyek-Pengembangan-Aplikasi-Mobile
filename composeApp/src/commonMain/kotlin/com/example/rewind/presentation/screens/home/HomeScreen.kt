@@ -80,6 +80,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
     var selectedFilter by remember { mutableStateOf<WatchStatus?>(null) }
 
     Box(
@@ -223,32 +224,54 @@ private fun HomeHeader(onAIClick: () -> Unit, onProfileClick: () -> Unit) {
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                // Tombol Profile — BARU
-                Box(
-                    modifier = Modifier
-                        .size(42.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(SurfaceElevated)
-                        .border(BorderStroke(1.dp, BorderSubtle), RoundedCornerShape(12.dp))
-                        .clickable(onClick = onProfileClick),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("👤", fontSize = 18.sp)
+                Box(contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier.size(54.dp).blur(16.dp)
+                            .background(Brush.radialGradient(
+                                colors = listOf(TheaterRed.copy(alpha = 0.25f), Color.Transparent)),
+                                shape = CircleShape)
+                    )
+                    Box(
+                        modifier = Modifier.size(42.dp).clip(RoundedCornerShape(12.dp))
+                            .background(Brush.linearGradient(
+                                listOf(TheaterRed.copy(alpha = 0.15f), VelvetRed.copy(alpha = 0.1f))))
+                            .border(BorderStroke(1.dp, TheaterRed.copy(alpha = 0.4f)), RoundedCornerShape(12.dp))
+                            .clickable(onClick = onProfileClick),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("👤", fontSize = 20.sp)
+                    }
                 }
 
-                // Tombol AI — sama seperti sebelumnya
                 Box(contentAlignment = Alignment.Center) {
-                    Box(modifier = Modifier.size(54.dp).blur(16.dp)
-                        .background(Brush.radialGradient(
-                            colors = listOf(GoldAmber.copy(alpha = 0.35f), Color.Transparent)),
-                            shape = CircleShape))
+                    Box(
+                        modifier = Modifier.size(54.dp).blur(16.dp)
+                            .background(
+                                Brush.radialGradient(
+                                    colors = listOf(
+                                        GoldAmber.copy(alpha = 0.35f),
+                                        Color.Transparent
+                                    )
+                                ),
+                                shape = CircleShape
+                            )
+                    )
                     Box(
                         modifier = Modifier
                             .size(42.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Brush.linearGradient(
-                                listOf(GoldAmberDim.copy(alpha = 0.2f), GoldAmber.copy(alpha = 0.1f))))
-                            .border(BorderStroke(1.dp, BorderGold.copy(alpha = 0.5f)), RoundedCornerShape(12.dp))
+                            .background(
+                                Brush.linearGradient(
+                                    listOf(
+                                        GoldAmberDim.copy(alpha = 0.2f),
+                                        GoldAmber.copy(alpha = 0.1f)
+                                    )
+                                )
+                            )
+                            .border(
+                                BorderStroke(1.dp, BorderGold.copy(alpha = 0.5f)),
+                                RoundedCornerShape(12.dp)
+                            )
                             .clickable(onClick = onAIClick),
                         contentAlignment = Alignment.Center
                     ) {
@@ -258,7 +281,7 @@ private fun HomeHeader(onAIClick: () -> Unit, onProfileClick: () -> Unit) {
             }
         }
     }
-
+}
 @Composable
 private fun FilterRow(selected: WatchStatus?, onSelect: (WatchStatus?) -> Unit) {
     val filters = listOf(

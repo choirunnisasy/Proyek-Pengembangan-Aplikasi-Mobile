@@ -8,7 +8,8 @@ sealed interface HomeUiState {
     data object Empty : HomeUiState
     data class Success(
         val movies: List<Movie>,
-        val sortBy: MovieSortBy = MovieSortBy.UPDATED_DESC
+        val sortBy: MovieSortBy = MovieSortBy.UPDATED_DESC,
+        val searchQuery: String = ""
     ) : HomeUiState
     data class NoResults(val query: String) : HomeUiState
     data class Error(val message: String) : HomeUiState

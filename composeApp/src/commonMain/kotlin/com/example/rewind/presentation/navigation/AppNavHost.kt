@@ -10,6 +10,7 @@ import com.example.rewind.presentation.screens.ai.AIAssistantScreen
 import com.example.rewind.presentation.screens.detail.DetailScreen
 import com.example.rewind.presentation.screens.home.HomeScreen
 import com.example.rewind.presentation.screens.splash.SplashScreen
+import com.example.rewind.presentation.screens.profile.ProfileScreen
 
 @Composable
 fun AppNavHost() {
