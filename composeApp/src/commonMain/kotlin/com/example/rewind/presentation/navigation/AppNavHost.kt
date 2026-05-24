@@ -37,7 +37,8 @@ fun AppNavHost() {
                 onAddClick = { navController.navigate(Route.AddMovie()) },
                 onMovieClick = { id -> navController.navigate(Route.MovieDetail(movieId = id)) },
                 onAIClick = { navController.navigate(Route.AIAssistant) },
-                onProfileClick = { navController.navigate(Route.Profile) }
+                onProfileClick = { navController.navigate(Route.Profile) },
+                onSettingClick = { navController.navigate(Route.Settings) }
             )
         }
 
