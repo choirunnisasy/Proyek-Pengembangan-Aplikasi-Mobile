@@ -58,7 +58,6 @@ class HomeViewModelTest {
         val vm = HomeViewModel(getAllMoviesUseCase, deleteMovieUseCase)
         vm.uiState.test {
             advanceUntilIdle()
-            // Kita ambil status paling terakhir, yang seharusnya adalah Empty karena DB kosong
             val finalState = expectMostRecentItem()
             assertTrue(finalState is HomeUiState.Empty)
         }
@@ -66,15 +65,12 @@ class HomeViewModelTest {
 
     @Test
     fun `state should be Success when movies exist`() = runTest {
-        // 1. Masukkan data dummy ke repository TERLEBIH DAHULU agar tidak Empty
         fakeRepository.insertMovie(createTestMovie("Spiderman"))
 
-        // 2. Buat ViewModel baru agar ia membaca data yang baru dimasukkan
         val vm = HomeViewModel(getAllMoviesUseCase, deleteMovieUseCase)
 
         vm.uiState.test {
             advanceUntilIdle()
-            // 3. Karena ada 1 film, status terakhinya HARUS Success
             val state = expectMostRecentItem()
             assertTrue(state is HomeUiState.Success)
         }
@@ -82,7 +78,6 @@ class HomeViewModelTest {
 
     @Test
     fun `sort should update movies`() = runTest {
-        // Masukkan data dummy
         fakeRepository.insertMovie(createTestMovie("A Movie"))
         fakeRepository.insertMovie(createTestMovie("Z Movie"))
 
@@ -91,7 +86,6 @@ class HomeViewModelTest {
         vm.uiState.test {
             advanceUntilIdle()
 
-            // Ubah metode sorting
             vm.setSortBy(MovieSortBy.TITLE_ASC)
             advanceUntilIdle()
 
@@ -102,23 +96,28 @@ class HomeViewModelTest {
 
     @Test
     fun `deleteMovie should remove movie`() = runTest {
-        // Masukkan 1 film untuk dihapus
+        // 1. Insert 1 film ke fake repository
         val id = fakeRepository.insertMovie(createTestMovie("To Delete"))
+
+        // 2. Buat ViewModel baru setelah data ada
         val vm = HomeViewModel(getAllMoviesUseCase, deleteMovieUseCase)
 
-        advanceUntilIdle()
-
-        // Hapus film tersebut
-        vm.deleteMovie(id)
-        advanceUntilIdle()
-
         vm.uiState.test {
-            val state = expectMostRecentItem()
-            assertTrue(state is HomeUiState.Success || state is HomeUiState.Empty)
+            // 3. Tunggu state awal terbentuk — harusnya Success karena ada 1 film
+            advanceUntilIdle()
+            val initialState = expectMostRecentItem()
+            assertTrue(initialState is HomeUiState.Success)
+
+            // 4. Hapus film di dalam blok test agar Turbine bisa menangkap perubahannya
+            vm.deleteMovie(id)
+            advanceUntilIdle()
+
+            // 5. Setelah dihapus, tidak ada film tersisa → harusnya Empty
+            val stateAfterDelete = expectMostRecentItem()
+            assertTrue(stateAfterDelete is HomeUiState.Empty)
         }
     }
 
-    // Helper function untuk membuat data Movie secara instan di dalam Test
     private fun createTestMovie(title: String): Movie {
         return Movie(
             id = 0,
