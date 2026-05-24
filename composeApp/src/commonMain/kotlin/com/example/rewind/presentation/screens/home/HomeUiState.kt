@@ -10,5 +10,6 @@ sealed interface HomeUiState {
         val movies: List<Movie>,
         val sortBy: MovieSortBy = MovieSortBy.UPDATED_DESC
     ) : HomeUiState
+    data class NoResults(val query: String) : HomeUiState
     data class Error(val message: String) : HomeUiState
 }

@@ -5,10 +5,15 @@ import androidx.lifecycle.viewModelScope
 import com.example.rewind.domain.usecase.DeleteMovieUseCase
 import com.example.rewind.domain.usecase.GetAllMoviesUseCase
 import com.example.rewind.domain.usecase.MovieSortBy
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
@@ -16,39 +21,46 @@ class HomeViewModel(
     private val deleteMovie: DeleteMovieUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
-    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+    private val _sortBy = MutableStateFlow(MovieSortBy.UPDATED_DESC)
+    val searchQuery = MutableStateFlow("")
 
-    private var currentSort = MovieSortBy.UPDATED_DESC
+    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
+    val uiState: StateFlow<HomeUiState> = combine(
+        _sortBy.flatMapLatest { sort -> getAllMovies(sort) },
+        searchQuery.debounce(300)
+    ) { movies, query ->
+        val filtered = if (query.isBlank()) {
+            movies
+        } else {
+            movies.filter { movie ->
+                movie.title.contains(query, ignoreCase = true) ||
+                        movie.genre.displayName.contains(query, ignoreCase = true) ||
+                        movie.type.displayName.contains(query, ignoreCase = true)
+            }
+        }
 
-    init {
-        loadMovies()
+        when {
+            filtered.isEmpty() && query.isNotBlank() -> HomeUiState.NoResults(query)
+            filtered.isEmpty() -> HomeUiState.Empty
+            else -> HomeUiState.Success(filtered, _sortBy.value, query)
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = HomeUiState.Loading
+    )
+
+    fun onSearchQueryChange(query: String) {
+        searchQuery.value = query
     }
 
-    private fun loadMovies() {
-        viewModelScope.launch {
-            getAllMovies(currentSort)
-                .catch { e ->
-                    _uiState.value = HomeUiState.Error(e.message ?: "Terjadi kesalahan")
-                }
-                .collect { movies ->
-                    _uiState.value = if (movies.isEmpty()) {
-                        HomeUiState.Empty
-                    } else {
-                        HomeUiState.Success(movies, currentSort)
-                    }
-                }
-        }
+    fun setSortBy(sortBy: MovieSortBy) {
+        _sortBy.value = sortBy
     }
 
     fun deleteMovie(id: Long) {
         viewModelScope.launch {
             deleteMovie.invoke(id)
         }
-    }
-
-    fun setSortBy(sortBy: MovieSortBy) {
-        currentSort = sortBy
-        loadMovies()
     }
 }
