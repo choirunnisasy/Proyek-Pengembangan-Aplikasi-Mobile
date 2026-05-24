@@ -77,7 +77,8 @@ fun HomeScreen(
     onMovieClick: (Long) -> Unit,
     onAIClick: () -> Unit,
     onProfileClick: () -> Unit,
-    viewModel: HomeViewModel = koinViewModel()
+    onSettingClick: () -> Unit,
+     viewModel: HomeViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -111,7 +112,7 @@ fun HomeScreen(
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
-            HomeHeader(onAIClick = onAIClick, onProfileClick = onProfileClick)
+            HomeHeader(onAIClick = onAIClick, onProfileClick = onProfileClick, onSettingClick = onSettingClick)
 
             SearchBar(
                 query = searchQuery,
@@ -168,7 +169,10 @@ fun HomeScreen(
 }
 
 @Composable
-private fun HomeHeader(onAIClick: () -> Unit, onProfileClick: () -> Unit) {
+private fun HomeHeader(
+    onAIClick: () -> Unit,
+    onProfileClick: () -> Unit,
+    onSettingClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -224,6 +228,25 @@ private fun HomeHeader(onAIClick: () -> Unit, onProfileClick: () -> Unit) {
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Box(contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier.size(54.dp).blur(16.dp)
+                            .background(Brush.radialGradient(
+                                colors = listOf(GoldAmber.copy(alpha = 0.2f), Color.Transparent)),
+                                shape = CircleShape
+                            )
+                    )
+                    Box(
+                        modifier = Modifier.size(42.dp).clip(RoundedCornerShape(12.dp))
+                            .background(Brush.linearGradient(
+                                listOf(GoldAmber.copy(alpha = 0.15f), GoldAmber.copy(alpha = 0.08f))))
+                            .border(BorderStroke(1.dp, BorderGold.copy(alpha = 0.4f)), RoundedCornerShape(12.dp))
+                            .clickable(onClick = onSettingClick), contentAlignment = Alignment.Center
+                    ) {
+                        Text("⚙️", fontSize = 20.sp)
+                    }
+                }
+
                 Box(contentAlignment = Alignment.Center) {
                     Box(
                         modifier = Modifier.size(54.dp).blur(16.dp)
