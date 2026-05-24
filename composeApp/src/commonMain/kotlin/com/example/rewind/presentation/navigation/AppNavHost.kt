@@ -11,6 +11,8 @@ import com.example.rewind.presentation.screens.detail.DetailScreen
 import com.example.rewind.presentation.screens.home.HomeScreen
 import com.example.rewind.presentation.screens.splash.SplashScreen
 import com.example.rewind.presentation.screens.profile.ProfileScreen
+import com.example.rewind.presentation.screens.search.SearchScreen
+import com.example.rewind.presentation.screens.settings.SettingsScreen
 
 @Composable
 fun AppNavHost() {
@@ -64,6 +66,16 @@ fun AppNavHost() {
 
         composable<Route.Profile> {
             ProfileScreen(onNavigateBack = { navController.popBackStack() })
+        }
+
+        composable<Route.Search> {
+            SearchScreen(
+                onNavigateBack = { navController.popBackStack() })
+        }
+
+        composable<Route.Settings> {
+            SettingsScreen(
+                onNavigateBack = { navController.popBackStack() })
         }
     }
 }
