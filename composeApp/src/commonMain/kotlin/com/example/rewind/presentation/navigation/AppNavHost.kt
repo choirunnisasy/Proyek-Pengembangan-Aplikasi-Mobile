@@ -171,7 +171,8 @@ private fun RewindBottomBar(
         BottomNavItem(Route.Home, Icons.Rounded.Home, "Home"),
         BottomNavItem(Route.AIAssistant, Icons.Rounded.Psychology, "AI"),
         BottomNavItem(Route.Settings, Icons.Rounded.Settings, "Settings"),
-        BottomNavItem(Route.Profile, Icons.Rounded.Person, "Profile")
+        BottomNavItem(Route.Profile, Icons.Rounded.Person, "Profile"),
+        BottomNavItem(Route.Search, Icons.Rounded.Search, "Search")
     )
 
     Box(
