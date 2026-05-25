@@ -58,12 +58,15 @@ import com.example.rewind.presentation.theme.GoldAmberDim
 import com.example.rewind.presentation.theme.SurfaceDark
 import com.example.rewind.presentation.theme.SurfaceElevated
 import com.example.rewind.presentation.theme.TextMuted
+import com.example.rewind.presentation.screens.search.SearchScreen
+import androidx.compose.material.icons.rounded.Search
 
 private val bottomNavRoutes: List<Route> = listOf(
     Route.Home,
     Route.AIAssistant,
     Route.Settings,
-    Route.Profile
+    Route.Profile,
+    Route.Search
 )
 
 @Composable
@@ -140,6 +143,12 @@ fun AppNavHost() {
 
             composable<Route.Settings> {
                 SettingsScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable<Route.Search> {
+                SearchScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
