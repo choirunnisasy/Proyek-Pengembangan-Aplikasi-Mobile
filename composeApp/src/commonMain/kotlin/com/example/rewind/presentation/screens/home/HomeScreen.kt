@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -22,16 +23,15 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.Text
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,12 +44,13 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.input.ImeAction
 import com.example.rewind.domain.model.Movie
 import com.example.rewind.domain.model.WatchStatus
 import com.example.rewind.presentation.theme.BackgroundDark
@@ -65,7 +66,6 @@ import com.example.rewind.presentation.theme.StatusWatching
 import com.example.rewind.presentation.theme.SurfaceDark
 import com.example.rewind.presentation.theme.SurfaceElevated
 import com.example.rewind.presentation.theme.TextMuted
-import com.example.rewind.presentation.theme.TextSecondary
 import com.example.rewind.presentation.theme.TextWarm
 import com.example.rewind.presentation.theme.TheaterRed
 import com.example.rewind.presentation.theme.VelvetRed
@@ -75,10 +75,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun HomeScreen(
     onAddClick: () -> Unit,
     onMovieClick: (Long) -> Unit,
-    onAIClick: () -> Unit,
-    onProfileClick: () -> Unit,
-    onSettingClick: () -> Unit,
-     viewModel: HomeViewModel = koinViewModel()
+    viewModel: HomeViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -112,13 +109,11 @@ fun HomeScreen(
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
-            HomeHeader(onAIClick = onAIClick, onProfileClick = onProfileClick, onSettingClick = onSettingClick)
-
+            HomeHeader()
             SearchBar(
                 query = searchQuery,
                 onQueryChange = { viewModel.onSearchQueryChange(it) }
             )
-
             FilterRow(selected = selectedFilter, onSelect = { selectedFilter = it })
 
             when (val state = uiState) {
@@ -169,10 +164,7 @@ fun HomeScreen(
 }
 
 @Composable
-private fun HomeHeader(
-    onAIClick: () -> Unit,
-    onProfileClick: () -> Unit,
-    onSettingClick: () -> Unit) {
+private fun HomeHeader() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -204,107 +196,70 @@ private fun HomeHeader(
                     )
                 )
         )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(
-                    text = "REWIND",
-                    color = GoldAmber,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 5.sp
-                )
-                Text(
-                    text = "My Collection",
-                    color = TextWarm,
-                    fontSize = 26.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = (-0.5).sp
-                )
-            }
-
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Box(contentAlignment = Alignment.Center) {
-                    Box(
-                        modifier = Modifier.size(54.dp).blur(16.dp)
-                            .background(Brush.radialGradient(
-                                colors = listOf(GoldAmber.copy(alpha = 0.2f), Color.Transparent)),
-                                shape = CircleShape
-                            )
-                    )
-                    Box(
-                        modifier = Modifier.size(42.dp).clip(RoundedCornerShape(12.dp))
-                            .background(Brush.linearGradient(
-                                listOf(GoldAmber.copy(alpha = 0.15f), GoldAmber.copy(alpha = 0.08f))))
-                            .border(BorderStroke(1.dp, BorderGold.copy(alpha = 0.4f)), RoundedCornerShape(12.dp))
-                            .clickable(onClick = onSettingClick), contentAlignment = Alignment.Center
-                    ) {
-                        Text("⚙️", fontSize = 20.sp)
-                    }
-                }
-
-                Box(contentAlignment = Alignment.Center) {
-                    Box(
-                        modifier = Modifier.size(54.dp).blur(16.dp)
-                            .background(Brush.radialGradient(
-                                colors = listOf(TheaterRed.copy(alpha = 0.25f), Color.Transparent)),
-                                shape = CircleShape)
-                    )
-                    Box(
-                        modifier = Modifier.size(42.dp).clip(RoundedCornerShape(12.dp))
-                            .background(Brush.linearGradient(
-                                listOf(TheaterRed.copy(alpha = 0.15f), VelvetRed.copy(alpha = 0.1f))))
-                            .border(BorderStroke(1.dp, TheaterRed.copy(alpha = 0.4f)), RoundedCornerShape(12.dp))
-                            .clickable(onClick = onProfileClick),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("👤", fontSize = 20.sp)
-                    }
-                }
-
-                Box(contentAlignment = Alignment.Center) {
-                    Box(
-                        modifier = Modifier.size(54.dp).blur(16.dp)
-                            .background(
-                                Brush.radialGradient(
-                                    colors = listOf(
-                                        GoldAmber.copy(alpha = 0.35f),
-                                        Color.Transparent
-                                    )
-                                ),
-                                shape = CircleShape
-                            )
-                    )
-                    Box(
-                        modifier = Modifier
-                            .size(42.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(
-                                Brush.linearGradient(
-                                    listOf(
-                                        GoldAmberDim.copy(alpha = 0.2f),
-                                        GoldAmber.copy(alpha = 0.1f)
-                                    )
-                                )
-                            )
-                            .border(
-                                BorderStroke(1.dp, BorderGold.copy(alpha = 0.5f)),
-                                RoundedCornerShape(12.dp)
-                            )
-                            .clickable(onClick = onAIClick),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("🦉", fontSize = 20.sp)
-                    }
-                }
-            }
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+                text = "REWIND",
+                color = GoldAmber,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 5.sp
+            )
+            Text(
+                text = "My Collection",
+                color = TextWarm,
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = (-0.5).sp
+            )
         }
     }
 }
+
+@Composable
+private fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
+    val focusManager = LocalFocusManager.current
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        placeholder = {
+            Text("Search title, genre, type...", color = TextMuted, fontSize = 13.sp)
+        },
+        leadingIcon = {
+            Text("🔍", fontSize = 15.sp, modifier = Modifier.padding(start = 4.dp))
+        },
+        trailingIcon = {
+            if (query.isNotEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .clickable { onQueryChange("") }
+                        .padding(4.dp)
+                ) {
+                    Text("✕", color = TextMuted, fontSize = 13.sp)
+                }
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 4.dp)
+            .heightIn(min = 48.dp),
+        singleLine = true,
+        shape = RoundedCornerShape(14.dp),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+        keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = GoldAmber.copy(alpha = 0.6f),
+            unfocusedBorderColor = BorderSubtle,
+            focusedContainerColor = SurfaceElevated,
+            unfocusedContainerColor = SurfaceElevated,
+            cursorColor = GoldAmber,
+            focusedTextColor = TextWarm,
+            unfocusedTextColor = TextWarm
+        ),
+        textStyle = TextStyle(fontSize = 13.sp)
+    )
+}
+
 @Composable
 private fun FilterRow(selected: WatchStatus?, onSelect: (WatchStatus?) -> Unit) {
     val filters = listOf(
@@ -387,20 +342,12 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(
-                Brush.linearGradient(
-                    colorStops = arrayOf(0f to SurfaceElevated, 1f to SurfaceDark)
-                )
-            )
+            .background(Brush.linearGradient(colorStops = arrayOf(0f to SurfaceElevated, 1f to SurfaceDark)))
             .border(
                 BorderStroke(
                     1.dp,
                     Brush.linearGradient(
-                        colors = listOf(
-                            BorderSubtle.copy(alpha = 0.8f),
-                            BorderSubtle.copy(alpha = 0.3f),
-                            Color.Transparent
-                        )
+                        colors = listOf(BorderSubtle.copy(alpha = 0.8f), BorderSubtle.copy(alpha = 0.3f), Color.Transparent)
                     )
                 ),
                 RoundedCornerShape(16.dp)
@@ -436,16 +383,9 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
                     modifier = Modifier
                         .size(56.dp)
                         .clip(RoundedCornerShape(13.dp))
-                        .background(
-                            Brush.linearGradient(
-                                colorStops = arrayOf(0f to VelvetRed, 1f to TheaterRed)
-                            )
-                        )
+                        .background(Brush.linearGradient(colorStops = arrayOf(0f to VelvetRed, 1f to TheaterRed)))
                         .border(
-                            BorderStroke(
-                                1.dp,
-                                Brush.linearGradient(listOf(GoldAmber.copy(alpha = 0.3f), Color.Transparent))
-                            ),
+                            BorderStroke(1.dp, Brush.linearGradient(listOf(GoldAmber.copy(alpha = 0.3f), Color.Transparent))),
                             RoundedCornerShape(13.dp)
                         ),
                     contentAlignment = Alignment.Center
@@ -471,7 +411,6 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
                     overflow = TextOverflow.Ellipsis,
                     letterSpacing = 0.1.sp
                 )
-
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(7.dp)
@@ -490,7 +429,6 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
                             letterSpacing = 0.3.sp
                         )
                     }
-
                     if (movie.rating != null && movie.rating > 0f) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -506,7 +444,6 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
                         }
                     }
                 }
-
                 Text(
                     text = "${movie.type.displayName}  ·  ${movie.genre.displayName}",
                     color = TextMuted,
@@ -515,7 +452,6 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
                     overflow = TextOverflow.Ellipsis,
                     letterSpacing = 0.2.sp
                 )
-
                 if (movie.status == WatchStatus.WATCHING && movie.totalEpisodes != null) {
                     Spacer(modifier = Modifier.height(2.dp))
                     Row(
@@ -525,10 +461,7 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
                     ) {
                         LinearProgressIndicator(
                             progress = { movie.progressPercent / 100f },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(3.dp)
-                                .clip(RoundedCornerShape(2.dp)),
+                            modifier = Modifier.weight(1f).height(3.dp).clip(RoundedCornerShape(2.dp)),
                             color = GoldAmber,
                             trackColor = VelvetRed.copy(alpha = 0.25f)
                         )
@@ -550,11 +483,7 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
 @Composable
 private fun LoadingState() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(
-            color = GoldAmber,
-            strokeWidth = 1.5.dp,
-            modifier = Modifier.size(32.dp)
-        )
+        CircularProgressIndicator(color = GoldAmber, strokeWidth = 1.5.dp, modifier = Modifier.size(32.dp))
     }
 }
 
@@ -586,11 +515,7 @@ private fun EmptyState() {
                 fontWeight = FontWeight.SemiBold,
                 letterSpacing = 0.1.sp
             )
-            Text(
-                text = "Tap + to add your first title",
-                color = TextMuted,
-                fontSize = 13.sp
-            )
+            Text(text = "Tap + to add your first title", color = TextMuted, fontSize = 13.sp)
         }
     }
 }
@@ -603,65 +528,9 @@ private fun EmptyFilterState() {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text("🔍", fontSize = 36.sp)
-            Text(
-                text = "No titles in this category",
-                color = TextMuted,
-                fontSize = 14.sp
-            )
+            Text(text = "No titles in this category", color = TextMuted, fontSize = 14.sp)
         }
     }
-}
-
-@Composable
-private fun ErrorState(message: String) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = message, color = TheaterRed, fontSize = 13.sp)
-    }
-}
-
-@Composable
-private fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
-    val focusManager = LocalFocusManager.current
-    OutlinedTextField(
-        value = query,
-        onValueChange = onQueryChange,
-        placeholder = {
-            Text("Search title, genre, type...", color = TextMuted, fontSize = 13.sp)
-        },
-        leadingIcon = {
-            Text("🔍", fontSize = 15.sp, modifier = Modifier.padding(start = 4.dp))
-        },
-        trailingIcon = {
-            if (query.isNotEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(6.dp))
-                        .clickable { onQueryChange("") }
-                        .padding(4.dp)
-                ) {
-                    Text("✕", color = TextMuted, fontSize = 13.sp)
-                }
-            }
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 4.dp)
-            .heightIn(min = 48.dp),
-        singleLine = true,
-        shape = RoundedCornerShape(14.dp),
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = GoldAmber.copy(alpha = 0.6f),
-            unfocusedBorderColor = BorderSubtle,
-            focusedContainerColor = SurfaceElevated,
-            unfocusedContainerColor = SurfaceElevated,
-            cursorColor = GoldAmber,
-            focusedTextColor = TextWarm,
-            unfocusedTextColor = TextWarm
-        ),
-        textStyle = androidx.compose.ui.text.TextStyle(fontSize = 13.sp)
-    )
 }
 
 @Composable
@@ -678,11 +547,14 @@ private fun NoResultsState(query: String) {
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold
             )
-            Text(
-                text = "Try a different title or genre",
-                color = TextMuted,
-                fontSize = 12.sp
-            )
+            Text(text = "Try a different title or genre", color = TextMuted, fontSize = 12.sp)
         }
+    }
+}
+
+@Composable
+private fun ErrorState(message: String) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(text = message, color = TheaterRed, fontSize = 13.sp)
     }
 }
