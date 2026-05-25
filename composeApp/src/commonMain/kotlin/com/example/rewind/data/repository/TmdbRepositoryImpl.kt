@@ -23,10 +23,6 @@ class TmdbRepositoryImpl(
 
     // ==================== SEARCH ====================
 
-    /**
-     * Search tidak di-cache karena query selalu berbeda-beda.
-     * Filtering adult content dilakukan di sini sebagai safety layer tambahan.
-     */
     override suspend fun searchMulti(
         query: String,
         page: Int
@@ -43,10 +39,6 @@ class TmdbRepositoryImpl(
 
     // ==================== MOVIE DETAIL ====================
 
-    /**
-     * Cek cache dulu, kalau ada langsung return.
-     * Kalau tidak ada, fetch dari API lalu simpan ke cache.
-     */
     override suspend fun getMovieDetail(tmdbId: Int): NetworkResult<TmdbMovieDetailDto> {
         movieDetailCache[tmdbId]?.let { cached ->
             return NetworkResult.Success(cached)
@@ -75,11 +67,6 @@ class TmdbRepositoryImpl(
 
     // ==================== TRENDING ====================
 
-    /**
-     * Cache trending selama 30 menit.
-     * Jika cache masih valid, return dari cache.
-     * Jika kadaluarsa atau belum ada, fetch dari API.
-     */
     override suspend fun getTrending(): NetworkResult<List<TmdbMovieDto>> {
         val now = System.currentTimeMillis()
         val isCacheValid = trendingCache != null &&
@@ -101,9 +88,6 @@ class TmdbRepositoryImpl(
 
     // ==================== CACHE MANAGEMENT ====================
 
-    /**
-     * Clear semua cache secara manual (misalnya saat pull-to-refresh)
-     */
     fun clearCache() {
         trendingCache = null
         trendingCacheTime = 0
