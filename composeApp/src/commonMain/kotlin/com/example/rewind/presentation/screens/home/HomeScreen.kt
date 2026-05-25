@@ -29,6 +29,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -53,9 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.rewind.domain.model.Movie
 import com.example.rewind.domain.model.WatchStatus
-import com.example.rewind.presentation.theme.BackgroundDark
 import com.example.rewind.presentation.theme.BorderGold
-import com.example.rewind.presentation.theme.BorderSubtle
 import com.example.rewind.presentation.theme.GoldAmber
 import com.example.rewind.presentation.theme.GoldAmberDim
 import com.example.rewind.presentation.theme.StatusDropped
@@ -63,11 +62,6 @@ import com.example.rewind.presentation.theme.StatusFinished
 import com.example.rewind.presentation.theme.StatusOnHold
 import com.example.rewind.presentation.theme.StatusWantToWatch
 import com.example.rewind.presentation.theme.StatusWatching
-import com.example.rewind.presentation.theme.SurfaceDark
-import com.example.rewind.presentation.theme.SurfaceElevated
-import com.example.rewind.presentation.theme.TextMuted
-import com.example.rewind.presentation.theme.TextWarm
-import com.example.rewind.presentation.theme.TheaterRed
 import com.example.rewind.presentation.theme.VelvetRed
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -84,15 +78,21 @@ fun HomeScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundDark)
+            .background(MaterialTheme.colorScheme.background)  // ← BackgroundDark
     ) {
+        // Dekoratif blur background
         Box(
             modifier = Modifier
                 .size(300.dp)
                 .offset(x = (-60).dp, y = (-40).dp)
                 .blur(100.dp)
                 .background(
-                    Brush.radialGradient(colors = listOf(TheaterRed.copy(alpha = 0.18f), Color.Transparent)),
+                    Brush.radialGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.secondary.copy(alpha = 0.18f),  // ← TheaterRed
+                            Color.Transparent
+                        )
+                    ),
                     shape = CircleShape
                 )
         )
@@ -103,7 +103,12 @@ fun HomeScreen(
                 .offset(x = 40.dp, y = 20.dp)
                 .blur(80.dp)
                 .background(
-                    Brush.radialGradient(colors = listOf(GoldAmber.copy(alpha = 0.12f), Color.Transparent)),
+                    Brush.radialGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),  // ← GoldAmber
+                            Color.Transparent
+                        )
+                    ),
                     shape = CircleShape
                 )
         )
@@ -136,6 +141,7 @@ fun HomeScreen(
             }
         }
 
+        // FAB
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -146,14 +152,19 @@ fun HomeScreen(
                     .size(70.dp)
                     .blur(20.dp)
                     .background(
-                        Brush.radialGradient(colors = listOf(GoldAmber.copy(alpha = 0.5f), Color.Transparent)),
+                        Brush.radialGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),  // ← GoldAmber
+                                Color.Transparent
+                            )
+                        ),
                         shape = CircleShape
                     )
             )
             FloatingActionButton(
                 onClick = onAddClick,
-                containerColor = GoldAmber,
-                contentColor = BackgroundDark,
+                containerColor = MaterialTheme.colorScheme.primary,          // ← GoldAmber
+                contentColor = MaterialTheme.colorScheme.background,         // ← BackgroundDark
                 shape = CircleShape,
                 elevation = FloatingActionButtonDefaults.elevation(12.dp)
             ) {
@@ -171,14 +182,15 @@ private fun HomeHeader() {
             .background(
                 Brush.verticalGradient(
                     colorStops = arrayOf(
-                        0f to SurfaceDark,
-                        0.6f to SurfaceDark.copy(alpha = 0.8f),
-                        1f to BackgroundDark
+                        0f to MaterialTheme.colorScheme.surface,                      // ← SurfaceDark
+                        0.6f to MaterialTheme.colorScheme.surface.copy(alpha = 0.8f), // ← SurfaceDark
+                        1f to MaterialTheme.colorScheme.background                    // ← BackgroundDark
                     )
                 )
             )
             .padding(horizontal = 24.dp, vertical = 22.dp)
     ) {
+        // Garis bawah dekoratif
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -189,7 +201,7 @@ private fun HomeHeader() {
                         colors = listOf(
                             Color.Transparent,
                             BorderGold.copy(alpha = 0.4f),
-                            GoldAmber.copy(alpha = 0.3f),
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),  // ← GoldAmber
                             BorderGold.copy(alpha = 0.4f),
                             Color.Transparent
                         )
@@ -199,14 +211,14 @@ private fun HomeHeader() {
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
                 text = "REWIND",
-                color = GoldAmber,
+                color = MaterialTheme.colorScheme.primary,  // ← GoldAmber
                 fontSize = 10.sp,
                 fontWeight = FontWeight.ExtraBold,
                 letterSpacing = 5.sp
             )
             Text(
                 text = "My Collection",
-                color = TextWarm,
+                color = MaterialTheme.colorScheme.onBackground,  // ← TextWarm
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = (-0.5).sp
@@ -222,7 +234,11 @@ private fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
         value = query,
         onValueChange = onQueryChange,
         placeholder = {
-            Text("Search title, genre, type...", color = TextMuted, fontSize = 13.sp)
+            Text(
+                "Search title, genre, type...",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,  // ← TextMuted
+                fontSize = 13.sp
+            )
         },
         leadingIcon = {
             Text("🔍", fontSize = 15.sp, modifier = Modifier.padding(start = 4.dp))
@@ -235,7 +251,11 @@ private fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
                         .clickable { onQueryChange("") }
                         .padding(4.dp)
                 ) {
-                    Text("✕", color = TextMuted, fontSize = 13.sp)
+                    Text(
+                        "✕",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,  // ← TextMuted
+                        fontSize = 13.sp
+                    )
                 }
             }
         },
@@ -248,13 +268,13 @@ private fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = GoldAmber.copy(alpha = 0.6f),
-            unfocusedBorderColor = BorderSubtle,
-            focusedContainerColor = SurfaceElevated,
-            unfocusedContainerColor = SurfaceElevated,
-            cursorColor = GoldAmber,
-            focusedTextColor = TextWarm,
-            unfocusedTextColor = TextWarm
+            focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),   // ← GoldAmber
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline,                    // ← BorderSubtle
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,            // ← SurfaceElevated
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,          // ← SurfaceElevated
+            cursorColor = MaterialTheme.colorScheme.primary,                             // ← GoldAmber
+            focusedTextColor = MaterialTheme.colorScheme.onBackground,                  // ← TextWarm
+            unfocusedTextColor = MaterialTheme.colorScheme.onBackground                 // ← TextWarm
         ),
         textStyle = TextStyle(fontSize = 13.sp)
     )
@@ -281,13 +301,15 @@ private fun FilterRow(selected: WatchStatus?, onSelect: (WatchStatus?) -> Unit) 
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(20.dp))
-                        .background(Brush.horizontalGradient(listOf(GoldAmberDim, GoldAmber)))
+                        .background(
+                            Brush.horizontalGradient(listOf(GoldAmberDim, GoldAmber))
+                        )
                         .clickable { onSelect(status) }
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Text(
                         text = label,
-                        color = BackgroundDark,
+                        color = MaterialTheme.colorScheme.background,  // ← BackgroundDark
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 0.3.sp
@@ -297,14 +319,17 @@ private fun FilterRow(selected: WatchStatus?, onSelect: (WatchStatus?) -> Unit) 
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(20.dp))
-                        .background(SurfaceDark)
-                        .border(BorderStroke(1.dp, BorderSubtle), RoundedCornerShape(20.dp))
+                        .background(MaterialTheme.colorScheme.surface)  // ← SurfaceDark
+                        .border(
+                            BorderStroke(1.dp, MaterialTheme.colorScheme.outline),  // ← BorderSubtle
+                            RoundedCornerShape(20.dp)
+                        )
                         .clickable { onSelect(status) }
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Text(
                         text = label,
-                        color = TextMuted,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,  // ← TextMuted
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
                         letterSpacing = 0.3.sp
@@ -342,12 +367,23 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(Brush.linearGradient(colorStops = arrayOf(0f to SurfaceElevated, 1f to SurfaceDark)))
+            .background(
+                Brush.linearGradient(
+                    colorStops = arrayOf(
+                        0f to MaterialTheme.colorScheme.surfaceVariant,  // ← SurfaceElevated
+                        1f to MaterialTheme.colorScheme.surface          // ← SurfaceDark
+                    )
+                )
+            )
             .border(
                 BorderStroke(
                     1.dp,
                     Brush.linearGradient(
-                        colors = listOf(BorderSubtle.copy(alpha = 0.8f), BorderSubtle.copy(alpha = 0.3f), Color.Transparent)
+                        colors = listOf(
+                            MaterialTheme.colorScheme.outline.copy(alpha = 0.8f),  // ← BorderSubtle
+                            MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                            Color.Transparent
+                        )
                     )
                 ),
                 RoundedCornerShape(16.dp)
@@ -360,7 +396,9 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
                 .offset(x = (-10).dp, y = (-10).dp)
                 .blur(30.dp)
                 .background(
-                    Brush.radialGradient(colors = listOf(statusColor.copy(alpha = 0.15f), Color.Transparent)),
+                    Brush.radialGradient(
+                        colors = listOf(statusColor.copy(alpha = 0.15f), Color.Transparent)
+                    ),
                     shape = CircleShape
                 )
         )
@@ -369,13 +407,19 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
             modifier = Modifier.padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Avatar huruf pertama judul
             Box(contentAlignment = Alignment.Center) {
                 Box(
                     modifier = Modifier
                         .size(66.dp)
                         .blur(12.dp)
                         .background(
-                            Brush.radialGradient(colors = listOf(TheaterRed.copy(alpha = 0.4f), Color.Transparent)),
+                            Brush.radialGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f),  // ← TheaterRed
+                                    Color.Transparent
+                                )
+                            ),
                             shape = CircleShape
                         )
                 )
@@ -383,16 +427,31 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
                     modifier = Modifier
                         .size(56.dp)
                         .clip(RoundedCornerShape(13.dp))
-                        .background(Brush.linearGradient(colorStops = arrayOf(0f to VelvetRed, 1f to TheaterRed)))
+                        .background(
+                            Brush.linearGradient(
+                                colorStops = arrayOf(
+                                    0f to MaterialTheme.colorScheme.tertiary,   // ← VelvetRed
+                                    1f to MaterialTheme.colorScheme.secondary   // ← TheaterRed
+                                )
+                            )
+                        )
                         .border(
-                            BorderStroke(1.dp, Brush.linearGradient(listOf(GoldAmber.copy(alpha = 0.3f), Color.Transparent))),
+                            BorderStroke(
+                                1.dp,
+                                Brush.linearGradient(
+                                    listOf(
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),  // ← GoldAmber
+                                        Color.Transparent
+                                    )
+                                )
+                            ),
                             RoundedCornerShape(13.dp)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = movie.title.take(1).uppercase(),
-                        color = TextWarm,
+                        color = MaterialTheme.colorScheme.onBackground,  // ← TextWarm
                         fontSize = 22.sp,
                         fontWeight = FontWeight.ExtraBold
                     )
@@ -401,10 +460,13 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
 
             Spacer(modifier = Modifier.width(14.dp))
 
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
                 Text(
                     text = movie.title,
-                    color = TextWarm,
+                    color = MaterialTheme.colorScheme.onBackground,  // ← TextWarm
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
@@ -418,7 +480,10 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
                     Box(
                         modifier = Modifier
                             .background(statusColor.copy(alpha = 0.12f), RoundedCornerShape(5.dp))
-                            .border(BorderStroke(0.5.dp, statusColor.copy(alpha = 0.35f)), RoundedCornerShape(5.dp))
+                            .border(
+                                BorderStroke(0.5.dp, statusColor.copy(alpha = 0.35f)),
+                                RoundedCornerShape(5.dp)
+                            )
                             .padding(horizontal = 7.dp, vertical = 3.dp)
                     ) {
                         Text(
@@ -434,10 +499,14 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(3.dp)
                         ) {
-                            Text("★", color = GoldAmber, fontSize = 11.sp)
+                            Text(
+                                "★",
+                                color = MaterialTheme.colorScheme.primary,  // ← GoldAmber
+                                fontSize = 11.sp
+                            )
                             Text(
                                 text = movie.rating.toString(),
-                                color = GoldAmber,
+                                color = MaterialTheme.colorScheme.primary,  // ← GoldAmber
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -446,7 +515,7 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
                 }
                 Text(
                     text = "${movie.type.displayName}  ·  ${movie.genre.displayName}",
-                    color = TextMuted,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,  // ← TextMuted
                     fontSize = 11.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -461,13 +530,16 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
                     ) {
                         LinearProgressIndicator(
                             progress = { movie.progressPercent / 100f },
-                            modifier = Modifier.weight(1f).height(3.dp).clip(RoundedCornerShape(2.dp)),
-                            color = GoldAmber,
-                            trackColor = VelvetRed.copy(alpha = 0.25f)
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(3.dp)
+                                .clip(RoundedCornerShape(2.dp)),
+                            color = MaterialTheme.colorScheme.primary,               // ← GoldAmber
+                            trackColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.25f) // ← VelvetRed
                         )
                         Text(
                             text = "${movie.watchedEpisodes}/${movie.totalEpisodes}",
-                            color = TextMuted,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,  // ← TextMuted
                             fontSize = 10.sp
                         )
                     }
@@ -475,7 +547,12 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
             }
 
             Spacer(modifier = Modifier.width(6.dp))
-            Text("›", color = TextMuted, fontSize = 20.sp, fontWeight = FontWeight.Light)
+            Text(
+                "›",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,  // ← TextMuted
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Light
+            )
         }
     }
 }
@@ -483,7 +560,11 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
 @Composable
 private fun LoadingState() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(color = GoldAmber, strokeWidth = 1.5.dp, modifier = Modifier.size(32.dp))
+        CircularProgressIndicator(
+            color = MaterialTheme.colorScheme.primary,  // ← GoldAmber
+            strokeWidth = 1.5.dp,
+            modifier = Modifier.size(32.dp)
+        )
     }
 }
 
@@ -501,7 +582,12 @@ private fun EmptyState() {
                         .size(100.dp)
                         .blur(30.dp)
                         .background(
-                            Brush.radialGradient(colors = listOf(GoldAmber.copy(alpha = 0.2f), Color.Transparent)),
+                            Brush.radialGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),  // ← GoldAmber
+                                    Color.Transparent
+                                )
+                            ),
                             shape = CircleShape
                         )
                 )
@@ -510,12 +596,16 @@ private fun EmptyState() {
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "Your collection is empty",
-                color = TextWarm,
+                color = MaterialTheme.colorScheme.onBackground,  // ← TextWarm
                 fontSize = 17.sp,
                 fontWeight = FontWeight.SemiBold,
                 letterSpacing = 0.1.sp
             )
-            Text(text = "Tap + to add your first title", color = TextMuted, fontSize = 13.sp)
+            Text(
+                text = "Tap + to add your first title",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,  // ← TextMuted
+                fontSize = 13.sp
+            )
         }
     }
 }
@@ -528,7 +618,11 @@ private fun EmptyFilterState() {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text("🔍", fontSize = 36.sp)
-            Text(text = "No titles in this category", color = TextMuted, fontSize = 14.sp)
+            Text(
+                text = "No titles in this category",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,  // ← TextMuted
+                fontSize = 14.sp
+            )
         }
     }
 }
@@ -543,11 +637,15 @@ private fun NoResultsState(query: String) {
             Text("🎬", fontSize = 40.sp)
             Text(
                 text = "No results for \"$query\"",
-                color = TextWarm,
+                color = MaterialTheme.colorScheme.onBackground,  // ← TextWarm
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold
             )
-            Text(text = "Try a different title or genre", color = TextMuted, fontSize = 12.sp)
+            Text(
+                text = "Try a different title or genre",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,  // ← TextMuted
+                fontSize = 12.sp
+            )
         }
     }
 }
@@ -555,6 +653,10 @@ private fun NoResultsState(query: String) {
 @Composable
 private fun ErrorState(message: String) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = message, color = TheaterRed, fontSize = 13.sp)
+        Text(
+            text = message,
+            color = MaterialTheme.colorScheme.secondary,  // ← TheaterRed
+            fontSize = 13.sp
+        )
     }
 }
