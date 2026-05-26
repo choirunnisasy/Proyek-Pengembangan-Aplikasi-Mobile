@@ -1,8 +1,6 @@
 package com.example.rewind.presentation.navigation
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +19,7 @@ import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Psychology
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -50,23 +49,14 @@ import com.example.rewind.presentation.screens.home.HomeScreen
 import com.example.rewind.presentation.screens.profile.ProfileScreen
 import com.example.rewind.presentation.screens.settings.SettingsScreen
 import com.example.rewind.presentation.screens.splash.SplashScreen
-import com.example.rewind.presentation.theme.BackgroundDark
 import com.example.rewind.presentation.theme.BorderGold
-import com.example.rewind.presentation.theme.BorderSubtle
 import com.example.rewind.presentation.theme.GoldAmber
-import com.example.rewind.presentation.theme.GoldAmberDim
-import com.example.rewind.presentation.theme.SurfaceDark
-import com.example.rewind.presentation.theme.SurfaceElevated
-import com.example.rewind.presentation.theme.TextMuted
-import com.example.rewind.presentation.screens.search.SearchScreen
-import androidx.compose.material.icons.rounded.Search
 
 private val bottomNavRoutes: List<Route> = listOf(
     Route.Home,
     Route.AIAssistant,
     Route.Settings,
-    Route.Profile,
-    Route.Search
+    Route.Profile
 )
 
 @Composable
@@ -80,7 +70,7 @@ fun AppNavHost() {
     }
 
     Scaffold(
-        containerColor = BackgroundDark,
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             if (showBottomBar) {
                 RewindBottomBar(
@@ -146,12 +136,6 @@ fun AppNavHost() {
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
-
-            composable<Route.Search> {
-                SearchScreen(
-                    onNavigateBack = { navController.popBackStack() }
-                )
-            }
         }
     }
 }
@@ -171,14 +155,13 @@ private fun RewindBottomBar(
         BottomNavItem(Route.Home, Icons.Rounded.Home, "Home"),
         BottomNavItem(Route.AIAssistant, Icons.Rounded.Psychology, "AI"),
         BottomNavItem(Route.Settings, Icons.Rounded.Settings, "Settings"),
-        BottomNavItem(Route.Profile, Icons.Rounded.Person, "Profile"),
-        BottomNavItem(Route.Search, Icons.Rounded.Search, "Search")
+        BottomNavItem(Route.Profile, Icons.Rounded.Person, "Profile")
     )
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(BackgroundDark)
+            .background(MaterialTheme.colorScheme.surface)
     ) {
         Box(
             modifier = Modifier
@@ -248,7 +231,10 @@ private fun BottomNavItemView(
                         .blur(12.dp)
                         .background(
                             Brush.radialGradient(
-                                colors = listOf(GoldAmber.copy(alpha = 0.4f), Color.Transparent)
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                                    Color.Transparent
+                                )
                             ),
                             shape = CircleShape
                         )
@@ -257,13 +243,21 @@ private fun BottomNavItemView(
             Icon(
                 imageVector = item.icon,
                 contentDescription = item.label,
-                tint = if (isSelected) GoldAmber else TextMuted,
+                tint = if (isSelected) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
                 modifier = Modifier.size(22.dp)
             )
         }
         Text(
             text = item.label,
-            color = if (isSelected) GoldAmber else TextMuted,
+            color = if (isSelected) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
             fontSize = 10.sp,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
             letterSpacing = 0.3.sp
