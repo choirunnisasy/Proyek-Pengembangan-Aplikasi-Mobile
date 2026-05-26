@@ -86,7 +86,6 @@ fun HomeScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Tampilkan snackbar saat berhasil/gagal add ke koleksi
     LaunchedEffect(addMessage) {
         addMessage?.let {
             snackbarHostState.showSnackbar(it)
@@ -95,8 +94,7 @@ fun HomeScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-
-        // Dekoratif blur background
+        // Decorative backgrounds
         Box(
             modifier = Modifier.size(300.dp).offset(x = (-60).dp, y = (-40).dp).blur(100.dp)
                 .background(
@@ -121,18 +119,18 @@ fun HomeScreen(
                 onQueryChange = { viewModel.onSearchQueryChange(it) }
             )
 
-            // Kalau ada query dan hasil lokal kosong → tampilkan hasil TMDB
             val isSearching = searchQuery.length >= 2
-            val localEmpty = uiState is HomeUiState.NoResults
 
-            if (isSearching && localEmpty) {
-                // Hasil TMDB
-                TmdbSearchSection(
+            if (isSearching) {
+                // Tampilan Hasil Pencarian Gabungan (Lokal + TMDB)
+                SearchCombinedResults(
+                    uiState = uiState,
                     tmdbState = tmdbState,
-                    onAddClick = { viewModel.addTmdbToCollection(it) }
+                    onMovieClick = onMovieClick,
+                    onAddTmdbClick = { viewModel.addTmdbToCollection(it) }
                 )
             } else {
-                // Hasil lokal seperti biasa
+                // Tampilan Koleksi Normal dengan Filter
                 FilterRow(selected = selectedFilter, onSelect = { selectedFilter = it })
 
                 when (val state = uiState) {
@@ -172,7 +170,6 @@ fun HomeScreen(
             }
         }
 
-        // Snackbar
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 80.dp)
@@ -181,87 +178,117 @@ fun HomeScreen(
 }
 
 @Composable
-private fun TmdbSearchSection(
+private fun SearchCombinedResults(
+    uiState: HomeUiState,
     tmdbState: TmdbSearchState,
-    onAddClick: (TmdbMovieDto) -> Unit
+    onMovieClick: (Long) -> Unit,
+    onAddTmdbClick: (TmdbMovieDto) -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "🎬 Temukan di TMDB",
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 0.3.sp
-            )
-            Text(
-                text = "Tidak ada di koleksi lokal",
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 11.sp
-            )
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        // --- BAGIAN KOLEKSI LOKAL ---
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp, bottom = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text("📌", fontSize = 14.sp)
+                Text(
+                    text = "Di Koleksi Kamu",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp
+                )
+            }
+        }
+
+        when (uiState) {
+            is HomeUiState.Success -> {
+                items(uiState.movies, key = { "local_${it.id}" }) { movie ->
+                    MovieCard(movie = movie, onClick = { onMovieClick(movie.id) })
+                }
+            }
+            is HomeUiState.NoResults -> {
+                item {
+                    Text(
+                        "Tidak ada di koleksi lokal",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
+                    )
+                }
+            }
+            is HomeUiState.Loading -> {
+                item {
+                    Box(Modifier.fillMaxWidth().height(60.dp), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                    }
+                }
+            }
+            else -> {}
+        }
+
+        // --- BAGIAN TMDB ---
+        item {
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text("🌐", fontSize = 14.sp)
+                Text(
+                    text = "Cari di TMDB",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp
+                )
+            }
         }
 
         when (tmdbState) {
             is TmdbSearchState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxWidth().height(120.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.primary,
-                        strokeWidth = 1.5.dp,
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
-            }
-
-            is TmdbSearchState.Success -> {
-                LazyColumn(
-                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 4.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(tmdbState.results.take(10)) { item ->
-                        TmdbResultCard(
-                            item = item,
-                            onAddClick = { onAddClick(item) }
-                        )
+                item {
+                    Box(Modifier.fillMaxWidth().height(120.dp), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(modifier = Modifier.size(28.dp), strokeWidth = 1.5.dp)
                     }
-                    item { Spacer(modifier = Modifier.height(96.dp)) }
                 }
             }
-
+            is TmdbSearchState.Success -> {
+                items(tmdbState.results.take(10), key = { "tmdb_${it.id}" }) { item ->
+                    TmdbResultCard(item = item, onAddClick = { onAddTmdbClick(item) })
+                }
+            }
             is TmdbSearchState.Empty -> {
-                Box(
-                    modifier = Modifier.fillMaxWidth().height(120.dp),
-                    contentAlignment = Alignment.Center
-                ) {
+                item {
                     Text(
                         "Tidak ditemukan di TMDB",
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 13.sp
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
                     )
                 }
             }
-
             is TmdbSearchState.Error -> {
-                Box(
-                    modifier = Modifier.fillMaxWidth().height(120.dp),
-                    contentAlignment = Alignment.Center
-                ) {
+                item {
                     Text(
-                        "Gagal memuat: ${tmdbState.message}",
+                        "Gagal memuat hasil TMDB",
                         color = MaterialTheme.colorScheme.error,
-                        fontSize = 12.sp
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(start = 4.dp)
                     )
                 }
             }
-
-            is TmdbSearchState.Idle -> Unit
+            else -> {}
         }
+
+        item { Spacer(modifier = Modifier.height(100.dp)) }
     }
 }
 
@@ -271,7 +298,7 @@ private fun TmdbResultCard(item: TmdbMovieDto, onAddClick: () -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
         )
     ) {
         Row(
@@ -314,7 +341,6 @@ private fun TmdbResultCard(item: TmdbMovieDto, onAddClick: () -> Unit) {
                     )
                     if (item.voteAverage > 0) {
                         val roundedRating = (item.voteAverage * 10).roundToInt() / 10.0
-
                         Text(
                             text = "★ $roundedRating",
                             style = MaterialTheme.typography.labelSmall,
@@ -329,16 +355,6 @@ private fun TmdbResultCard(item: TmdbMovieDto, onAddClick: () -> Unit) {
                         )
                     }
                 }
-                item.overview?.let { overview ->
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = overview,
-                        style = MaterialTheme.typography.bodySmall,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
             }
 
             Spacer(modifier = Modifier.width(8.dp))
@@ -348,7 +364,7 @@ private fun TmdbResultCard(item: TmdbMovieDto, onAddClick: () -> Unit) {
                 modifier = Modifier.height(36.dp),
                 contentPadding = PaddingValues(horizontal = 12.dp)
             ) {
-                Text("+ Tambah", fontSize = 11.sp)
+                Text("+ Koleksi", fontSize = 11.sp)
             }
         }
     }
