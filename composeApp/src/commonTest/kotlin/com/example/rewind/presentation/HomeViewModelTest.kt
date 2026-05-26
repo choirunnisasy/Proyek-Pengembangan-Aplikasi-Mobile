@@ -9,6 +9,9 @@ import com.example.rewind.domain.model.WatchStatus
 import com.example.rewind.domain.usecase.DeleteMovieUseCase
 import com.example.rewind.domain.usecase.GetAllMoviesUseCase
 import com.example.rewind.domain.usecase.MovieSortBy
+import com.example.rewind.domain.usecase.SearchTmdbUseCase
+import com.example.rewind.domain.usecase.SaveMovieUseCase
+import com.example.rewind.domain.usecase.GetTrendingUseCase
 import com.example.rewind.presentation.screens.home.HomeUiState
 import com.example.rewind.presentation.screens.home.HomeViewModel
 import kotlinx.coroutines.Dispatchers
@@ -31,6 +34,10 @@ class HomeViewModelTest {
 
     private lateinit var getAllMoviesUseCase: GetAllMoviesUseCase
     private lateinit var deleteMovieUseCase: DeleteMovieUseCase
+    private lateinit var searchTmdbUseCase: SearchTmdbUseCase
+    private lateinit var saveMovieUseCase: SaveMovieUseCase
+    private lateinit var getTrendingUseCase: GetTrendingUseCase
+
     private lateinit var viewModel: HomeViewModel
     private lateinit var fakeRepository: FakeMovieRepository
 
@@ -41,10 +48,16 @@ class HomeViewModelTest {
         fakeRepository = FakeMovieRepository()
         getAllMoviesUseCase = GetAllMoviesUseCase(fakeRepository)
         deleteMovieUseCase = DeleteMovieUseCase(fakeRepository)
+        searchTmdbUseCase = SearchTmdbUseCase(fakeRepository)
+        saveMovieUseCase = SaveMovieUseCase(fakeRepository)
+        getTrendingUseCase = GetTrendingUseCase(fakeRepository)
 
         viewModel = HomeViewModel(
             getAllMoviesUseCase,
-            deleteMovieUseCase
+            deleteMovieUseCase,
+            searchTmdbUseCase,
+            saveMovieUseCase,
+            getTrendingUseCase
         )
     }
 
@@ -55,7 +68,13 @@ class HomeViewModelTest {
 
     @Test
     fun `initial state should be Loading then Empty`() = runTest {
-        val vm = HomeViewModel(getAllMoviesUseCase, deleteMovieUseCase)
+        val vm = HomeViewModel(
+            getAllMoviesUseCase,
+            deleteMovieUseCase,
+            searchTmdbUseCase,
+            saveMovieUseCase,
+            getTrendingUseCase
+        )
         vm.uiState.test {
             advanceUntilIdle()
             val finalState = expectMostRecentItem()
@@ -67,7 +86,13 @@ class HomeViewModelTest {
     fun `state should be Success when movies exist`() = runTest {
         fakeRepository.insertMovie(createTestMovie("Spiderman"))
 
-        val vm = HomeViewModel(getAllMoviesUseCase, deleteMovieUseCase)
+        val vm = HomeViewModel(
+            getAllMoviesUseCase,
+            deleteMovieUseCase,
+            searchTmdbUseCase,
+            saveMovieUseCase,
+            getTrendingUseCase
+        )
 
         vm.uiState.test {
             advanceUntilIdle()
@@ -81,7 +106,13 @@ class HomeViewModelTest {
         fakeRepository.insertMovie(createTestMovie("A Movie"))
         fakeRepository.insertMovie(createTestMovie("Z Movie"))
 
-        val vm = HomeViewModel(getAllMoviesUseCase, deleteMovieUseCase)
+        val vm = HomeViewModel(
+            getAllMoviesUseCase,
+            deleteMovieUseCase,
+            searchTmdbUseCase,
+            saveMovieUseCase,
+            getTrendingUseCase
+        )
 
         vm.uiState.test {
             advanceUntilIdle()
@@ -100,7 +131,13 @@ class HomeViewModelTest {
         val id = fakeRepository.insertMovie(createTestMovie("To Delete"))
 
         // 2. Buat ViewModel baru setelah data ada
-        val vm = HomeViewModel(getAllMoviesUseCase, deleteMovieUseCase)
+        val vm = HomeViewModel(
+            getAllMoviesUseCase,
+            deleteMovieUseCase,
+            searchTmdbUseCase,
+            saveMovieUseCase,
+            getTrendingUseCase
+        )
 
         vm.uiState.test {
             // 3. Tunggu state awal terbentuk — harusnya Success karena ada 1 film
