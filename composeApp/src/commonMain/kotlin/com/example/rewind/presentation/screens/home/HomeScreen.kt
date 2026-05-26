@@ -4,20 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -25,32 +12,16 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -58,17 +29,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import com.example.rewind.data.remote.dto.TmdbMovieDto
 import com.example.rewind.domain.model.Movie
 import com.example.rewind.domain.model.WatchStatus
-import com.example.rewind.presentation.theme.BorderGold
-import com.example.rewind.presentation.theme.GoldAmber
-import com.example.rewind.presentation.theme.GoldAmberDim
-import com.example.rewind.presentation.theme.StatusDropped
-import com.example.rewind.presentation.theme.StatusFinished
-import com.example.rewind.presentation.theme.StatusOnHold
-import com.example.rewind.presentation.theme.StatusWantToWatch
-import com.example.rewind.presentation.theme.StatusWatching
+import com.example.rewind.presentation.theme.*
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
 
@@ -81,10 +46,14 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val tmdbState by viewModel.tmdbState.collectAsState()
+    val trendingState by viewModel.trendingState.collectAsState()
     val addMessage by viewModel.addMessage.collectAsState()
     var selectedFilter by remember { mutableStateOf<WatchStatus?>(null) }
+    var isSearchFocused by remember { mutableStateOf(false) }
+    var selectedTmdbItem by remember { mutableStateOf<TmdbMovieDto?>(null) }
 
     val snackbarHostState = remember { SnackbarHostState() }
+    val showSearchContent = isSearchFocused || searchQuery.isNotEmpty()
 
     LaunchedEffect(addMessage) {
         addMessage?.let {
@@ -94,7 +63,7 @@ fun HomeScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        // Decorative backgrounds
+        // Dekoratif blur background
         Box(
             modifier = Modifier.size(300.dp).offset(x = (-60).dp, y = (-40).dp).blur(100.dp)
                 .background(
@@ -116,21 +85,28 @@ fun HomeScreen(
             HomeHeader()
             SearchBar(
                 query = searchQuery,
-                onQueryChange = { viewModel.onSearchQueryChange(it) }
+                onQueryChange = { viewModel.onSearchQueryChange(it) },
+                onFocusChange = { isSearchFocused = it }
             )
 
-            val isSearching = searchQuery.length >= 2
-
-            if (isSearching) {
-                // Tampilan Hasil Pencarian Gabungan (Lokal + TMDB)
-                SearchCombinedResults(
-                    uiState = uiState,
-                    tmdbState = tmdbState,
-                    onMovieClick = onMovieClick,
-                    onAddTmdbClick = { viewModel.addTmdbToCollection(it) }
-                )
+            if (showSearchContent) {
+                if (searchQuery.isEmpty()) {
+                    // Tampilkan Trending saat baru klik search bar tapi belum ngetik
+                    TrendingSection(
+                        state = trendingState,
+                        onItemClick = { selectedTmdbItem = it }
+                    )
+                } else {
+                    // Tampilkan Hasil Gabungan (Lokal + TMDB) saat sedang mencari
+                    SearchCombinedResults(
+                        uiState = uiState,
+                        tmdbState = tmdbState,
+                        onMovieClick = onMovieClick,
+                        onTmdbClick = { selectedTmdbItem = it }
+                    )
+                }
             } else {
-                // Tampilan Koleksi Normal dengan Filter
+                // Tampilan Koleksi Normal
                 FilterRow(selected = selectedFilter, onSelect = { selectedFilter = it })
 
                 when (val state = uiState) {
@@ -149,27 +125,42 @@ fun HomeScreen(
             }
         }
 
-        // FAB
-        Box(modifier = Modifier.align(Alignment.BottomEnd).padding(24.dp)) {
-            Box(
-                modifier = Modifier.size(70.dp).blur(20.dp)
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), Color.Transparent)
-                        ), shape = CircleShape
-                    )
-            )
-            FloatingActionButton(
-                onClick = onAddClick,
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.background,
-                shape = CircleShape,
-                elevation = FloatingActionButtonDefaults.elevation(12.dp)
-            ) {
-                Text("+", fontSize = 28.sp, fontWeight = FontWeight.Light)
+        // FAB - Sembunyikan saat sedang mencari
+        if (!showSearchContent) {
+            Box(modifier = Modifier.align(Alignment.BottomEnd).padding(24.dp)) {
+                Box(
+                    modifier = Modifier.size(70.dp).blur(20.dp)
+                        .background(
+                            Brush.radialGradient(
+                                colors = listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), Color.Transparent)
+                            ), shape = CircleShape
+                        )
+                )
+                FloatingActionButton(
+                    onClick = onAddClick,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.background,
+                    shape = CircleShape,
+                    elevation = FloatingActionButtonDefaults.elevation(12.dp)
+                ) {
+                    Text("+", fontSize = 28.sp, fontWeight = FontWeight.Light)
+                }
             }
         }
 
+        // Dialog Detail & Tambah Film
+        selectedTmdbItem?.let { item ->
+            TmdbDetailDialog(
+                item = item,
+                onDismiss = { selectedTmdbItem = null },
+                onConfirmAdd = { status ->
+                    viewModel.addTmdbToCollection(item, status)
+                    selectedTmdbItem = null
+                }
+            )
+        }
+
+        // Snackbar
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 80.dp)
@@ -178,18 +169,55 @@ fun HomeScreen(
 }
 
 @Composable
+private fun TrendingSection(
+    state: TmdbSearchState,
+    onItemClick: (TmdbMovieDto) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
+        Spacer(modifier = Modifier.height(16.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("🔥", fontSize = 18.sp)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                "Lagi Trending Minggu Ini",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+
+        when (state) {
+            is TmdbSearchState.Loading -> LoadingState()
+            is TmdbSearchState.Success -> {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(bottom = 100.dp)
+                ) {
+                    items(state.results) { item ->
+                        TmdbResultCard(item = item, onClick = { onItemClick(item) })
+                    }
+                }
+            }
+            is TmdbSearchState.Error -> ErrorState(state.message)
+            else -> Unit
+        }
+    }
+}
+
+@Composable
 private fun SearchCombinedResults(
     uiState: HomeUiState,
     tmdbState: TmdbSearchState,
     onMovieClick: (Long) -> Unit,
-    onAddTmdbClick: (TmdbMovieDto) -> Unit
+    onTmdbClick: (TmdbMovieDto) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // --- BAGIAN KOLEKSI LOKAL ---
+        // --- SEKSI KOLEKSI LOKAL ---
         item {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(top = 12.dp, bottom = 4.dp),
@@ -233,7 +261,7 @@ private fun SearchCombinedResults(
             else -> {}
         }
 
-        // --- BAGIAN TMDB ---
+        // --- SEKSI TMDB ---
         item {
             Spacer(modifier = Modifier.height(12.dp))
             Row(
@@ -243,7 +271,7 @@ private fun SearchCombinedResults(
             ) {
                 Text("🌐", fontSize = 14.sp)
                 Text(
-                    text = "Cari di TMDB",
+                    text = "Hasil dari TMDB",
                     color = MaterialTheme.colorScheme.primary,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
@@ -262,7 +290,7 @@ private fun SearchCombinedResults(
             }
             is TmdbSearchState.Success -> {
                 items(tmdbState.results.take(10), key = { "tmdb_${it.id}" }) { item ->
-                    TmdbResultCard(item = item, onAddClick = { onAddTmdbClick(item) })
+                    TmdbResultCard(item = item, onClick = { onTmdbClick(item) })
                 }
             }
             is TmdbSearchState.Empty -> {
@@ -293,34 +321,23 @@ private fun SearchCombinedResults(
 }
 
 @Composable
-private fun TmdbResultCard(item: TmdbMovieDto, onAddClick: () -> Unit) {
+private fun TmdbResultCard(item: TmdbMovieDto, onClick: () -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().height(100.dp).clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
         )
     ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(MaterialTheme.colorScheme.surface),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = if (item.isTvSeries) "📺" else "🎬",
-                    fontSize = 22.sp
-                )
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
+        Row(modifier = Modifier.fillMaxSize()) {
+            AsyncImage(
+                model = item.posterUrl("w200"),
+                contentDescription = item.displayTitle,
+                modifier = Modifier.width(70.dp).fillMaxHeight().clip(RoundedCornerShape(12.dp)),
+                contentScale = ContentScale.Crop
+            )
+            
+            Column(modifier = Modifier.padding(12.dp).weight(1f)) {
                 Text(
                     text = item.displayTitle,
                     style = MaterialTheme.typography.titleSmall,
@@ -344,7 +361,7 @@ private fun TmdbResultCard(item: TmdbMovieDto, onAddClick: () -> Unit) {
                         Text(
                             text = "★ $roundedRating",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary
+                            color = GoldAmber
                         )
                     }
                     item.displayDate?.take(4)?.let { year ->
@@ -355,19 +372,106 @@ private fun TmdbResultCard(item: TmdbMovieDto, onAddClick: () -> Unit) {
                         )
                     }
                 }
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            FilledTonalButton(
-                onClick = onAddClick,
-                modifier = Modifier.height(36.dp),
-                contentPadding = PaddingValues(horizontal = 12.dp)
-            ) {
-                Text("+ Koleksi", fontSize = 11.sp)
+                Text(
+                    text = item.overview ?: "",
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                )
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TmdbDetailDialog(
+    item: TmdbMovieDto,
+    onDismiss: () -> Unit,
+    onConfirmAdd: (WatchStatus) -> Unit
+) {
+    var selectedStatus by remember { mutableStateOf(WatchStatus.PLAN_TO_WATCH) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+        modifier = Modifier.fillMaxWidth(0.9f).clip(RoundedCornerShape(24.dp)),
+        content = {
+            Surface(
+                shape = RoundedCornerShape(24.dp),
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 4.dp
+            ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Box(modifier = Modifier.fillMaxWidth().height(200.dp)) {
+                        AsyncImage(
+                            model = item.backdropUrl() ?: item.posterUrl(),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                        Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f)))))
+                        Text(
+                            item.displayTitle,
+                            modifier = Modifier.align(Alignment.BottomStart).padding(16.dp),
+                            color = Color.White,
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Text(
+                            item.overview ?: "Tidak ada deskripsi tersedia.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 5,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        
+                        Spacer(modifier = Modifier.height(20.dp))
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        Text("Tambahkan ke Koleksi Sebagai:", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                        
+                        val statuses = listOf(
+                            WatchStatus.WATCHING to "Sedang Ditonton",
+                            WatchStatus.PLAN_TO_WATCH to "Direncanakan",
+                            WatchStatus.COMPLETED to "Sudah Selesai",
+                            WatchStatus.ON_HOLD to "Ditunda",
+                            WatchStatus.DROPPED to "Berhenti"
+                        )
+                        
+                        statuses.forEach { (status, label) ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth()
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable { selectedStatus = status }
+                                    .padding(vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(selected = selectedStatus == status, onClick = { selectedStatus = status })
+                                Text(label, style = MaterialTheme.typography.bodyLarge)
+                            }
+                        }
+                        
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                            TextButton(onClick = onDismiss) { Text("Batal") }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Button(
+                                onClick = { onConfirmAdd(selectedStatus) },
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text("Tambah")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    )
 }
 
 @Composable
@@ -407,7 +511,11 @@ private fun HomeHeader() {
 }
 
 @Composable
-private fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
+private fun SearchBar(
+    query: String, 
+    onQueryChange: (String) -> Unit,
+    onFocusChange: (Boolean) -> Unit
+) {
     val focusManager = LocalFocusManager.current
     OutlinedTextField(
         value = query,
@@ -416,12 +524,16 @@ private fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
         leadingIcon = { Text("🔍", fontSize = 15.sp, modifier = Modifier.padding(start = 4.dp)) },
         trailingIcon = {
             if (query.isNotEmpty()) {
-                Box(modifier = Modifier.clip(RoundedCornerShape(6.dp)).clickable { onQueryChange("") }.padding(4.dp)) {
+                Box(modifier = Modifier.clip(RoundedCornerShape(6.dp)).clickable { 
+                    onQueryChange("")
+                    focusManager.clearFocus()
+                }.padding(4.dp)) {
                     Text("✕", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
                 }
             }
         },
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp).heightIn(min = 48.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp).heightIn(min = 48.dp)
+            .onFocusChanged { onFocusChange(it.isFocused) },
         singleLine = true,
         shape = RoundedCornerShape(14.dp),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
@@ -461,7 +573,7 @@ private fun FilterRow(selected: WatchStatus?, onSelect: (WatchStatus?) -> Unit) 
 @Composable
 private fun MovieList(movies: List<Movie>, onMovieClick: (Long) -> Unit) {
     LazyColumn(contentPadding = PaddingValues(horizontal = 20.dp, vertical = 4.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        items(movies, key = { it.id }) { movie -> MovieCard(movie = movie, onClick = { onMovieClick(movie.id) }) }
+        items(movies, key = { "movie_${it.id}" }) { movie -> MovieCard(movie = movie, onClick = { onMovieClick(movie.id) }) }
         item { Spacer(modifier = Modifier.height(96.dp)) }
     }
 }
@@ -484,14 +596,22 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
         Box(modifier = Modifier.size(80.dp).offset(x = (-10).dp, y = (-10).dp).blur(30.dp).background(Brush.radialGradient(colors = listOf(statusColor.copy(alpha = 0.15f), Color.Transparent)), shape = CircleShape))
         Row(modifier = Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(contentAlignment = Alignment.Center) {
-                Box(modifier = Modifier.size(66.dp).blur(12.dp).background(Brush.radialGradient(colors = listOf(MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f), Color.Transparent)), shape = CircleShape))
-                Box(
-                    modifier = Modifier.size(56.dp).clip(RoundedCornerShape(13.dp))
-                        .background(Brush.linearGradient(colorStops = arrayOf(0f to MaterialTheme.colorScheme.tertiary, 1f to MaterialTheme.colorScheme.secondary)))
-                        .border(BorderStroke(1.dp, Brush.linearGradient(listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), Color.Transparent))), RoundedCornerShape(13.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = movie.title.take(1).uppercase(), color = MaterialTheme.colorScheme.onBackground, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
+                if (movie.posterUrl != null) {
+                    AsyncImage(
+                        model = movie.posterUrl,
+                        contentDescription = movie.title,
+                        modifier = Modifier.size(56.dp).clip(RoundedCornerShape(13.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier.size(56.dp).clip(RoundedCornerShape(13.dp))
+                            .background(Brush.linearGradient(colorStops = arrayOf(0f to MaterialTheme.colorScheme.tertiary, 1f to MaterialTheme.colorScheme.secondary)))
+                            .border(BorderStroke(1.dp, Brush.linearGradient(listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), Color.Transparent))), RoundedCornerShape(13.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = movie.title.take(1).uppercase(), color = MaterialTheme.colorScheme.onBackground, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
+                    }
                 }
             }
             Spacer(modifier = Modifier.width(14.dp))
@@ -525,7 +645,7 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
 
 @Composable
 private fun LoadingState() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    Box(modifier = Modifier.fillMaxWidth().height(120.dp), contentAlignment = Alignment.Center) {
         CircularProgressIndicator(color = MaterialTheme.colorScheme.primary, strokeWidth = 1.5.dp, modifier = Modifier.size(32.dp))
     }
 }
@@ -568,7 +688,7 @@ private fun NoResultsState(query: String) {
 
 @Composable
 private fun ErrorState(message: String) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    Box(modifier = Modifier.fillMaxWidth().height(120.dp), contentAlignment = Alignment.Center) {
         Text(text = message, color = MaterialTheme.colorScheme.secondary, fontSize = 13.sp)
     }
 }

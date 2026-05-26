@@ -13,6 +13,7 @@ import com.example.rewind.domain.usecase.GetAllMoviesUseCase
 import com.example.rewind.domain.usecase.MovieSortBy
 import com.example.rewind.domain.usecase.SaveMovieUseCase
 import com.example.rewind.domain.usecase.SearchTmdbUseCase
+import com.example.rewind.domain.usecase.GetTrendingUseCase
 import com.example.rewind.data.remote.dto.TmdbGenreMapper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -44,7 +45,8 @@ class HomeViewModel(
     private val getAllMovies: GetAllMoviesUseCase,
     private val deleteMovieUseCase: DeleteMovieUseCase,
     private val searchTmdbUseCase: SearchTmdbUseCase,
-    private val saveMovieUseCase: SaveMovieUseCase
+    private val saveMovieUseCase: SaveMovieUseCase,
+    private val getTrendingUseCase: GetTrendingUseCase
 ) : ViewModel() {
 
     private val _sortBy = MutableStateFlow(MovieSortBy.UPDATED_DESC)
@@ -54,11 +56,19 @@ class HomeViewModel(
     private val _tmdbState = MutableStateFlow<TmdbSearchState>(TmdbSearchState.Idle)
     val tmdbState: StateFlow<TmdbSearchState> = _tmdbState.asStateFlow()
 
+    // State untuk Trending
+    private val _trendingState = MutableStateFlow<TmdbSearchState>(TmdbSearchState.Idle)
+    val trendingState: StateFlow<TmdbSearchState> = _trendingState.asStateFlow()
+
     // State notifikasi add to collection
     private val _addMessage = MutableStateFlow<String?>(null)
     val addMessage: StateFlow<String?> = _addMessage.asStateFlow()
 
     private var tmdbJob: Job? = null
+
+    init {
+        fetchTrending()
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     val uiState: StateFlow<HomeUiState> = combine(
@@ -85,6 +95,21 @@ class HomeViewModel(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = HomeUiState.Loading
     )
+
+    fun fetchTrending() {
+        viewModelScope.launch {
+            _trendingState.value = TmdbSearchState.Loading
+            when (val result = getTrendingUseCase()) {
+                is NetworkResult.Success -> {
+                    _trendingState.value = TmdbSearchState.Success(result.data)
+                }
+                is NetworkResult.Error -> {
+                    _trendingState.value = TmdbSearchState.Error(result.message)
+                }
+                is NetworkResult.Loading -> Unit
+            }
+        }
+    }
 
     fun onSearchQueryChange(query: String) {
         searchQuery.value = query
@@ -130,8 +155,8 @@ class HomeViewModel(
         }
     }
 
-    // Tambah film dari TMDB ke koleksi lokal
-    fun addTmdbToCollection(item: TmdbMovieDto) {
+    // Tambah film dari TMDB ke koleksi lokal dengan status pilihan & menyimpan poster
+    fun addTmdbToCollection(item: TmdbMovieDto, status: WatchStatus) {
         viewModelScope.launch {
             val genre = try {
                 MovieGenre.valueOf(TmdbGenreMapper.fromGenreIds(item.genreIds))
@@ -143,13 +168,14 @@ class HomeViewModel(
                 title = item.displayTitle,
                 genre = genre,
                 type = if (item.isTvSeries) MovieType.SERIES else MovieType.MOVIE,
-                status = WatchStatus.PLAN_TO_WATCH,
+                status = status,
                 rating = null,
                 review = item.overview?.take(200) ?: "",
                 totalEpisodes = null,
                 watchedEpisodes = 0,
                 createdAt = Clock.System.now(),
-                updatedAt = Clock.System.now()
+                updatedAt = Clock.System.now(),
+                posterUrl = item.posterUrl("w500") // Simpan URL poster ke database lokal
             )
 
             val result = saveMovieUseCase(movie)
