@@ -1,17 +1,21 @@
 package com.example.rewind.presentation
 
 import app.cash.turbine.test
+import com.example.rewind.core.network.NetworkResult
+import com.example.rewind.data.remote.dto.TmdbMovieDetailDto
+import com.example.rewind.data.remote.dto.TmdbMovieDto
 import com.example.rewind.data.repository.FakeMovieRepository
 import com.example.rewind.domain.model.Movie
 import com.example.rewind.domain.model.MovieGenre
 import com.example.rewind.domain.model.MovieType
 import com.example.rewind.domain.model.WatchStatus
+import com.example.rewind.domain.repository.TmdbRepository
 import com.example.rewind.domain.usecase.DeleteMovieUseCase
 import com.example.rewind.domain.usecase.GetAllMoviesUseCase
-import com.example.rewind.domain.usecase.MovieSortBy
-import com.example.rewind.domain.usecase.SearchTmdbUseCase
-import com.example.rewind.domain.usecase.SaveMovieUseCase
 import com.example.rewind.domain.usecase.GetTrendingUseCase
+import com.example.rewind.domain.usecase.MovieSortBy
+import com.example.rewind.domain.usecase.SaveMovieUseCase
+import com.example.rewind.domain.usecase.SearchTmdbUseCase
 import com.example.rewind.presentation.screens.home.HomeUiState
 import com.example.rewind.presentation.screens.home.HomeViewModel
 import kotlinx.coroutines.Dispatchers
@@ -27,6 +31,14 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
+// Implementasi Fake untuk TmdbRepository khusus untuk testing
+class FakeTmdbRepository : TmdbRepository {
+    override suspend fun searchMulti(query: String, page: Int): NetworkResult<List<TmdbMovieDto>> = NetworkResult.Success(emptyList())
+    override suspend fun getMovieDetail(tmdbId: Int): NetworkResult<TmdbMovieDetailDto> = NetworkResult.Error("Not implemented")
+    override suspend fun getTvDetail(tmdbId: Int): NetworkResult<TmdbMovieDetailDto> = NetworkResult.Error("Not implemented")
+    override suspend fun getTrending(): NetworkResult<List<TmdbMovieDto>> = NetworkResult.Success(emptyList())
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModelTest {
 
@@ -40,17 +52,20 @@ class HomeViewModelTest {
 
     private lateinit var viewModel: HomeViewModel
     private lateinit var fakeRepository: FakeMovieRepository
+    private lateinit var fakeTmdbRepository: FakeTmdbRepository
 
     @BeforeTest
     fun setup() {
         Dispatchers.setMain(testDispatcher)
 
         fakeRepository = FakeMovieRepository()
+        fakeTmdbRepository = FakeTmdbRepository()
+        
         getAllMoviesUseCase = GetAllMoviesUseCase(fakeRepository)
         deleteMovieUseCase = DeleteMovieUseCase(fakeRepository)
-        searchTmdbUseCase = SearchTmdbUseCase(fakeRepository)
+        searchTmdbUseCase = SearchTmdbUseCase(fakeTmdbRepository)
         saveMovieUseCase = SaveMovieUseCase(fakeRepository)
-        getTrendingUseCase = GetTrendingUseCase(fakeRepository)
+        getTrendingUseCase = GetTrendingUseCase(fakeTmdbRepository)
 
         viewModel = HomeViewModel(
             getAllMoviesUseCase,
@@ -127,10 +142,8 @@ class HomeViewModelTest {
 
     @Test
     fun `deleteMovie should remove movie`() = runTest {
-        // 1. Insert 1 film ke fake repository
         val id = fakeRepository.insertMovie(createTestMovie("To Delete"))
 
-        // 2. Buat ViewModel baru setelah data ada
         val vm = HomeViewModel(
             getAllMoviesUseCase,
             deleteMovieUseCase,
@@ -140,16 +153,13 @@ class HomeViewModelTest {
         )
 
         vm.uiState.test {
-            // 3. Tunggu state awal terbentuk — harusnya Success karena ada 1 film
             advanceUntilIdle()
             val initialState = expectMostRecentItem()
             assertTrue(initialState is HomeUiState.Success)
 
-            // 4. Hapus film di dalam blok test agar Turbine bisa menangkap perubahannya
             vm.deleteMovie(id)
             advanceUntilIdle()
 
-            // 5. Setelah dihapus, tidak ada film tersisa → harusnya Empty
             val stateAfterDelete = expectMostRecentItem()
             assertTrue(stateAfterDelete is HomeUiState.Empty)
         }

@@ -6,7 +6,7 @@ import com.example.rewind.data.remote.dto.TmdbMovieDto
 import com.example.rewind.domain.repository.TmdbRepository
 
 class SearchTmdbUseCase(
-    private val repository: com.example.rewind.data.repository.FakeMovieRepository
+    private val repository: TmdbRepository
 ) {
     suspend operator fun invoke(
         query: String,
@@ -21,7 +21,7 @@ class SearchTmdbUseCase(
 }
 
 class GetTrendingUseCase(
-    private val repository: com.example.rewind.data.repository.FakeMovieRepository
+    private val repository: TmdbRepository
 ) {
     suspend operator fun invoke(): NetworkResult<List<TmdbMovieDto>> {
         return repository.getTrending()
