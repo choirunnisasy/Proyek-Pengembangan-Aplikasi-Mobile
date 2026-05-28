@@ -28,8 +28,8 @@ class TmdbService(
 ) {
     companion object {
         private const val BASE_URL = "https://api.themoviedb.org/3"
-        private const val DEFAULT_LANGUAGE = "id-ID"   // Bahasa Indonesia
-        private const val FALLBACK_LANGUAGE = "en-US"  // Fallback jika ID tidak ada
+        private const val DEFAULT_LANGUAGE = "id-ID"
+        private const val FALLBACK_LANGUAGE = "en-US"
     }
 
     /**
