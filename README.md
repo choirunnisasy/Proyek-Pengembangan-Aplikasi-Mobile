@@ -87,7 +87,7 @@ graph TD
 
 https://github.com/user-attachments/assets/f2e51409-5ccb-4ddc-a641-064c27d1e5c3
 
-https://github.com/user-attachments/assets/0d9e4f59-5b0c-4b07-83dc-899882e3fd22
+https://github.com/user-attachments/assets/1207e725-c0d3-4f95-8303-b1aa204dc24a
 
 ## 🚀 Setup & Installation
 1. **Clone Repository:**
@@ -102,7 +102,7 @@ https://github.com/user-attachments/assets/0d9e4f59-5b0c-4b07-83dc-899882e3fd22
 * Pilih konfigurasi run target (`composeApp` untuk Android Emulator/Device atau Desktop).
 * Klik tombol **Run** (ikon segitiga hijau).
 
-> *Proyek ini masih dalam tahap awal pengembangan (Sprint 2).*
+> *Proyek ini masih dalam tahap awal pengembangan (Sprint 3).*
 
 ## 👨‍🏫 Dosen Pengampu
 ### Muhammad Habib Algifari, S.Kom., M.TI.
