@@ -87,6 +87,8 @@ graph TD
 
 https://github.com/user-attachments/assets/f2e51409-5ccb-4ddc-a641-064c27d1e5c3
 
+https://github.com/user-attachments/assets/0d9e4f59-5b0c-4b07-83dc-899882e3fd22
+
 ## 🚀 Setup & Installation
 1. **Clone Repository:**
    ```bash
