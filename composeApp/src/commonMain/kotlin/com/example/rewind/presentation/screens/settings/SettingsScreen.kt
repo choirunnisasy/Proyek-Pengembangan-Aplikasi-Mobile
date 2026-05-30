@@ -1,5 +1,17 @@
 package com.example.rewind.presentation.screens.settings
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,6 +21,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.koin.compose.viewmodel.koinViewModel
@@ -21,7 +34,6 @@ fun SettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    // Dialog edit username
     var showNameDialog by remember { mutableStateOf(false) }
     var showBioDialog by remember { mutableStateOf(false) }
 
@@ -54,7 +66,17 @@ fun SettingsScreen(
             TopAppBar(
                 title = { Text("Pengaturan", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    val interactionSource = remember { MutableInteractionSource() }
+                    val isPressed by interactionSource.collectIsPressedAsState()
+                    val scale by animateFloatAsState(
+                        targetValue = if (isPressed) 0.8f else 1f,
+                        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)
+                    )
+                    IconButton(
+                        onClick = onNavigateBack,
+                        interactionSource = interactionSource,
+                        modifier = Modifier.graphicsLayer(scaleX = scale, scaleY = scale)
+                    ) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Kembali")
                     }
                 }
@@ -62,8 +84,17 @@ fun SettingsScreen(
         }
     ) { padding ->
         if (uiState.isLoading) {
+            val infiniteTransition = rememberInfiniteTransition()
+            val alpha by infiniteTransition.animateFloat(
+                initialValue = 0.3f,
+                targetValue = 1f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(800, easing = LinearEasing),
+                    repeatMode = RepeatMode.Reverse
+                )
+            )
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
+                CircularProgressIndicator(modifier = Modifier.graphicsLayer(alpha = alpha))
             }
             return@Scaffold
         }
@@ -74,8 +105,6 @@ fun SettingsScreen(
                 .padding(padding),
             contentPadding = PaddingValues(vertical = 8.dp)
         ) {
-
-            // ===== PROFIL =====
             item {
                 SettingsSectionHeader("Profil")
             }
@@ -96,7 +125,6 @@ fun SettingsScreen(
                 )
             }
 
-            // ===== TAMPILAN =====
             item { Spacer(Modifier.height(8.dp)) }
             item { SettingsSectionHeader("Tampilan") }
             item {
@@ -109,7 +137,6 @@ fun SettingsScreen(
                 )
             }
 
-            // ===== PREFERENSI =====
             item { Spacer(Modifier.height(8.dp)) }
             item { SettingsSectionHeader("Preferensi") }
             item {
@@ -119,7 +146,6 @@ fun SettingsScreen(
                 )
             }
 
-            // ===== TENTANG =====
             item { Spacer(Modifier.height(8.dp)) }
             item { SettingsSectionHeader("Tentang") }
             item {
@@ -141,8 +167,6 @@ fun SettingsScreen(
         }
     }
 }
-
-// ==================== KOMPONEN SETTINGS ====================
 
 @Composable
 private fun SettingsSectionHeader(title: String) {
@@ -184,6 +208,7 @@ private fun SettingsToggleItem(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SettingsClickableItem(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
@@ -191,12 +216,21 @@ private fun SettingsClickableItem(
     subtitle: String,
     onClick: () -> Unit
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.96f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)
+    )
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 2.dp),
+            .padding(horizontal = 16.dp, vertical = 2.dp)
+            .graphicsLayer(scaleX = scale, scaleY = scale),
         shape = RoundedCornerShape(12.dp),
-        onClick = onClick
+        onClick = onClick,
+        interactionSource = interactionSource
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -244,8 +278,6 @@ private fun SettingsInfoItem(
     }
 }
 
-// ==================== SORT BY SELECTOR ====================
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SortBySelector(currentSort: String, onSortChange: (String) -> Unit) {
@@ -262,7 +294,8 @@ private fun SortBySelector(currentSort: String, onSortChange: (String) -> Unit) 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 2.dp),
+            .padding(horizontal = 16.dp, vertical = 2.dp)
+            .animateContentSize(),
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -273,7 +306,18 @@ private fun SortBySelector(currentSort: String, onSortChange: (String) -> Unit) 
                     Text("Urutan Default", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
                     Text(selectedLabel, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                IconButton(onClick = { expanded = true }) {
+
+                val interactionSource = remember { MutableInteractionSource() }
+                val isPressed by interactionSource.collectIsPressedAsState()
+                val scale by animateFloatAsState(
+                    targetValue = if (isPressed) 0.8f else 1f,
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)
+                )
+                IconButton(
+                    onClick = { expanded = true },
+                    interactionSource = interactionSource,
+                    modifier = Modifier.graphicsLayer(scaleX = scale, scaleY = scale)
+                ) {
                     Icon(Icons.Default.ChevronRight, contentDescription = null)
                 }
             }
@@ -296,8 +340,6 @@ private fun SortBySelector(currentSort: String, onSortChange: (String) -> Unit) 
         }
     }
 }
-
-// ==================== EDIT TEXT DIALOG ====================
 
 @Composable
 private fun EditTextDialog(
