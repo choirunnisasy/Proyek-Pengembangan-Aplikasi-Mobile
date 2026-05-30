@@ -22,10 +22,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -45,21 +44,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.rewind.domain.model.Movie
 import com.example.rewind.domain.model.WatchStatus
-import com.example.rewind.presentation.theme.BackgroundDark
-import com.example.rewind.presentation.theme.BorderGold
-import com.example.rewind.presentation.theme.BorderSubtle
 import com.example.rewind.presentation.theme.GoldAmber
 import com.example.rewind.presentation.theme.GoldAmberDim
+import com.example.rewind.presentation.theme.LocalRewindColors
 import com.example.rewind.presentation.theme.StatusDropped
 import com.example.rewind.presentation.theme.StatusFinished
 import com.example.rewind.presentation.theme.StatusOnHold
 import com.example.rewind.presentation.theme.StatusWantToWatch
 import com.example.rewind.presentation.theme.StatusWatching
-import com.example.rewind.presentation.theme.SurfaceDark
-import com.example.rewind.presentation.theme.SurfaceElevated
-import com.example.rewind.presentation.theme.TextMuted
-import com.example.rewind.presentation.theme.TextSecondary
-import com.example.rewind.presentation.theme.TextWarm
 import com.example.rewind.presentation.theme.TheaterRed
 import com.example.rewind.presentation.theme.VelvetRed
 import org.koin.compose.viewmodel.koinViewModel
@@ -74,6 +66,11 @@ fun DetailScreen(
     val uiState by viewModel.uiState.collectAsState()
     var showDeleteDialog by remember { mutableStateOf(false) }
 
+    val rewindColors = LocalRewindColors.current
+    val bg = MaterialTheme.colorScheme.background
+    val surface = MaterialTheme.colorScheme.surface
+    val onBg = MaterialTheme.colorScheme.onBackground
+
     LaunchedEffect(movieId) {
         viewModel.loadMovie(movieId)
     }
@@ -81,12 +78,12 @@ fun DetailScreen(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            containerColor = SurfaceElevated,
+            containerColor = rewindColors.surfaceElevated,
             shape = RoundedCornerShape(20.dp),
             title = {
                 Text(
                     "Remove from Collection?",
-                    color = TextWarm,
+                    color = onBg,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )
@@ -94,7 +91,7 @@ fun DetailScreen(
             text = {
                 Text(
                     "This title will be permanently deleted.",
-                    color = TextSecondary,
+                    color = rewindColors.textSecondary,
                     fontSize = 13.sp,
                     lineHeight = 20.sp
                 )
@@ -118,12 +115,12 @@ fun DetailScreen(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(10.dp))
-                        .background(SurfaceDark)
-                        .border(BorderStroke(1.dp, BorderSubtle), RoundedCornerShape(10.dp))
+                        .background(surface)
+                        .border(BorderStroke(1.dp, rewindColors.borderSubtle), RoundedCornerShape(10.dp))
                         .clickable { showDeleteDialog = false }
                         .padding(horizontal = 16.dp, vertical = 9.dp)
                 ) {
-                    Text("Cancel", color = TextMuted, fontSize = 13.sp)
+                    Text("Cancel", color = rewindColors.textMuted, fontSize = 13.sp)
                 }
             }
         )
@@ -132,7 +129,7 @@ fun DetailScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundDark)
+            .background(bg)
     ) {
         when (val state = uiState) {
             is DetailUiState.Loading -> {
@@ -147,7 +144,7 @@ fun DetailScreen(
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Text("🎞️", fontSize = 44.sp)
-                        Text("Title not found", color = TextMuted, fontSize = 14.sp)
+                        Text("Title not found", color = rewindColors.textMuted, fontSize = 14.sp)
                     }
                 }
             }
@@ -165,6 +162,11 @@ fun DetailScreen(
 
 @Composable
 private fun MovieDetail(movie: Movie, onBack: () -> Unit, onDelete: () -> Unit, onEdit: () -> Unit) {
+    val rewindColors = LocalRewindColors.current
+    val bg = MaterialTheme.colorScheme.background
+    val surface = MaterialTheme.colorScheme.surface
+    val onBg = MaterialTheme.colorScheme.onBackground
+
     val (statusColor, statusLabel) = when (movie.status) {
         WatchStatus.COMPLETED -> StatusFinished to "Completed"
         WatchStatus.WATCHING -> StatusWatching to "Watching"
@@ -191,7 +193,7 @@ private fun MovieDetail(movie: Movie, onBack: () -> Unit, onDelete: () -> Unit, 
                             colorStops = arrayOf(
                                 0f to VelvetRed,
                                 0.5f to TheaterRed,
-                                1f to SurfaceDark
+                                1f to surface
                             )
                         )
                     )
@@ -204,8 +206,8 @@ private fun MovieDetail(movie: Movie, onBack: () -> Unit, onDelete: () -> Unit, 
                         Brush.verticalGradient(
                             colorStops = arrayOf(
                                 0f to Color.Transparent,
-                                0.5f to BackgroundDark.copy(alpha = 0.3f),
-                                1f to BackgroundDark
+                                0.5f to bg.copy(alpha = 0.3f),
+                                1f to bg
                             )
                         )
                     )
@@ -241,7 +243,7 @@ private fun MovieDetail(movie: Movie, onBack: () -> Unit, onDelete: () -> Unit, 
 
             Text(
                 text = movie.title.take(2).uppercase(),
-                color = TextWarm.copy(alpha = 0.07f),
+                color = onBg.copy(alpha = 0.07f),
                 fontSize = 110.sp,
                 fontWeight = FontWeight.ExtraBold,
                 modifier = Modifier.align(Alignment.Center)
@@ -259,19 +261,18 @@ private fun MovieDetail(movie: Movie, onBack: () -> Unit, onDelete: () -> Unit, 
                     modifier = Modifier
                         .size(38.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(BackgroundDark.copy(alpha = 0.55f))
+                        .background(bg.copy(alpha = 0.55f))
                         .border(
-                            BorderStroke(1.dp, BorderSubtle.copy(alpha = 0.5f)),
+                            BorderStroke(1.dp, rewindColors.borderSubtle.copy(alpha = 0.5f)),
                             RoundedCornerShape(10.dp)
                         )
                         .clickable(onClick = onBack),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("←", color = TextWarm, fontSize = 17.sp)
+                    Text("←", color = onBg, fontSize = 17.sp)
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    // Tombol Edit — BARU
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
@@ -289,7 +290,6 @@ private fun MovieDetail(movie: Movie, onBack: () -> Unit, onDelete: () -> Unit, 
                         )
                     }
 
-                    // Tombol Remove — sama seperti sebelumnya
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
@@ -341,7 +341,7 @@ private fun MovieDetail(movie: Movie, onBack: () -> Unit, onDelete: () -> Unit, 
 
             Text(
                 text = movie.title,
-                color = TextWarm,
+                color = onBg,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
                 lineHeight = 32.sp,
@@ -354,26 +354,26 @@ private fun MovieDetail(movie: Movie, onBack: () -> Unit, onDelete: () -> Unit, 
             ) {
                 Box(
                     modifier = Modifier
-                        .background(SurfaceElevated, RoundedCornerShape(6.dp))
-                        .border(BorderStroke(1.dp, BorderSubtle), RoundedCornerShape(6.dp))
+                        .background(rewindColors.surfaceElevated, RoundedCornerShape(6.dp))
+                        .border(BorderStroke(1.dp, rewindColors.borderSubtle), RoundedCornerShape(6.dp))
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
                         text = movie.type.displayName,
-                        color = TextSecondary,
+                        color = rewindColors.textSecondary,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Medium
                     )
                 }
                 Box(
                     modifier = Modifier
-                        .background(SurfaceElevated, RoundedCornerShape(6.dp))
-                        .border(BorderStroke(1.dp, BorderSubtle), RoundedCornerShape(6.dp))
+                        .background(rewindColors.surfaceElevated, RoundedCornerShape(6.dp))
+                        .border(BorderStroke(1.dp, rewindColors.borderSubtle), RoundedCornerShape(6.dp))
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
                         text = movie.genre.displayName,
-                        color = TextSecondary,
+                        color = rewindColors.textSecondary,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Medium
                     )
@@ -391,7 +391,7 @@ private fun MovieDetail(movie: Movie, onBack: () -> Unit, onDelete: () -> Unit, 
                             )
                         )
                         .border(
-                            BorderStroke(1.dp, Brush.horizontalGradient(listOf(BorderGold.copy(alpha = 0.5f), Color.Transparent))),
+                            BorderStroke(1.dp, Brush.horizontalGradient(listOf(rewindColors.borderGold.copy(alpha = 0.5f), Color.Transparent))),
                             RoundedCornerShape(12.dp)
                         )
                         .padding(horizontal = 16.dp, vertical = 12.dp)
@@ -415,7 +415,7 @@ private fun MovieDetail(movie: Movie, onBack: () -> Unit, onDelete: () -> Unit, 
                             )
                             Text(
                                 text = "Your Rating",
-                                color = TextMuted,
+                                color = rewindColors.textMuted,
                                 fontSize = 10.sp,
                                 letterSpacing = 0.5.sp
                             )
@@ -429,8 +429,8 @@ private fun MovieDetail(movie: Movie, onBack: () -> Unit, onDelete: () -> Unit, 
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
-                        .background(SurfaceElevated)
-                        .border(BorderStroke(1.dp, BorderSubtle), RoundedCornerShape(12.dp))
+                        .background(rewindColors.surfaceElevated)
+                        .border(BorderStroke(1.dp, rewindColors.borderSubtle), RoundedCornerShape(12.dp))
                         .padding(horizontal = 16.dp, vertical = 14.dp)
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -441,14 +441,14 @@ private fun MovieDetail(movie: Movie, onBack: () -> Unit, onDelete: () -> Unit, 
                         ) {
                             Text(
                                 text = "EPISODES",
-                                color = TextMuted,
+                                color = rewindColors.textMuted,
                                 fontSize = 9.sp,
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 1.5.sp
                             )
                             Text(
                                 text = "${movie.watchedEpisodes} / ${movie.totalEpisodes}",
-                                color = TextWarm,
+                                color = onBg,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -464,7 +464,7 @@ private fun MovieDetail(movie: Movie, onBack: () -> Unit, onDelete: () -> Unit, 
                         )
                         Text(
                             text = "${movie.progressPercent.toInt()}% completed",
-                            color = TextMuted,
+                            color = rewindColors.textMuted,
                             fontSize = 10.sp
                         )
                     }
@@ -477,7 +477,7 @@ private fun MovieDetail(movie: Movie, onBack: () -> Unit, onDelete: () -> Unit, 
                     .height(1.dp)
                     .background(
                         Brush.horizontalGradient(
-                            listOf(Color.Transparent, BorderSubtle, BorderSubtle, Color.Transparent)
+                            listOf(Color.Transparent, rewindColors.borderSubtle, rewindColors.borderSubtle, Color.Transparent)
                         )
                     )
             )
@@ -495,11 +495,11 @@ private fun MovieDetail(movie: Movie, onBack: () -> Unit, onDelete: () -> Unit, 
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(14.dp))
-                            .background(SurfaceElevated)
+                            .background(rewindColors.surfaceElevated)
                             .border(
                                 BorderStroke(
                                     1.dp,
-                                    Brush.verticalGradient(listOf(BorderGold.copy(alpha = 0.3f), BorderSubtle))
+                                    Brush.verticalGradient(listOf(rewindColors.borderGold.copy(alpha = 0.3f), rewindColors.borderSubtle))
                                 ),
                                 RoundedCornerShape(14.dp)
                             )
@@ -527,7 +527,7 @@ private fun MovieDetail(movie: Movie, onBack: () -> Unit, onDelete: () -> Unit, 
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = movie.review,
-                                color = TextWarm,
+                                color = onBg,
                                 fontSize = 14.sp,
                                 lineHeight = 23.sp,
                                 fontStyle = FontStyle.Italic
@@ -548,7 +548,7 @@ private fun MovieDetail(movie: Movie, onBack: () -> Unit, onDelete: () -> Unit, 
                             )
                         )
                         .border(
-                            BorderStroke(1.dp, Brush.horizontalGradient(listOf(BorderGold.copy(alpha = 0.5f), Color.Transparent))),
+                            BorderStroke(1.dp, Brush.horizontalGradient(listOf(rewindColors.borderGold.copy(alpha = 0.5f), Color.Transparent))),
                             RoundedCornerShape(12.dp)
                         )
                         .padding(horizontal = 16.dp, vertical = 12.dp)
@@ -567,7 +567,7 @@ private fun MovieDetail(movie: Movie, onBack: () -> Unit, onDelete: () -> Unit, 
                             )
                             Text(
                                 text = "Rating above 8.0",
-                                color = TextMuted,
+                                color = rewindColors.textMuted,
                                 fontSize = 11.sp
                             )
                         }
