@@ -1,6 +1,17 @@
 package com.example.rewind.presentation.screens.search
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -20,6 +31,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
@@ -43,7 +55,6 @@ fun SearchScreen(
     var query by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
 
-    // Snackbar untuk notifikasi add to collection
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(addState) {
         when (val state = addState) {
@@ -74,11 +85,21 @@ fun SearchScreen(
                         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                         trailingIcon = {
                             if (query.isNotEmpty()) {
-                                IconButton(onClick = {
-                                    query = ""
-                                    viewModel.clearSearch()
-                                    focusManager.clearFocus()
-                                }) {
+                                val clearInteractionSource = remember { MutableInteractionSource() }
+                                val isClearPressed by clearInteractionSource.collectIsPressedAsState()
+                                val clearScale by animateFloatAsState(
+                                    targetValue = if (isClearPressed) 0.8f else 1f,
+                                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)
+                                )
+                                IconButton(
+                                    onClick = {
+                                        query = ""
+                                        viewModel.clearSearch()
+                                        focusManager.clearFocus()
+                                    },
+                                    interactionSource = clearInteractionSource,
+                                    modifier = Modifier.graphicsLayer(scaleX = clearScale, scaleY = clearScale)
+                                ) {
                                     Icon(Icons.Default.Clear, contentDescription = "Hapus")
                                 }
                             }
@@ -91,7 +112,17 @@ fun SearchScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    val backInteractionSource = remember { MutableInteractionSource() }
+                    val isBackPressed by backInteractionSource.collectIsPressedAsState()
+                    val backScale by animateFloatAsState(
+                        targetValue = if (isBackPressed) 0.8f else 1f,
+                        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)
+                    )
+                    IconButton(
+                        onClick = onNavigateBack,
+                        interactionSource = backInteractionSource,
+                        modifier = Modifier.graphicsLayer(scaleX = backScale, scaleY = backScale)
+                    ) {
                         Icon(Icons.Default.Clear, contentDescription = "Kembali")
                     }
                 }
@@ -105,15 +136,26 @@ fun SearchScreen(
         ) {
             when (val state = searchState) {
                 is SearchUiState.Idle -> {
-                    // Tampilkan trending saat belum ada query
                     TrendingSection(
                         trendingState = trendingState,
                         onAddClick = { viewModel.addToCollection(it) }
                     )
                 }
                 is SearchUiState.Loading -> {
+                    val infiniteTransition = rememberInfiniteTransition()
+                    val alpha by infiniteTransition.animateFloat(
+                        initialValue = 0.3f,
+                        targetValue = 1f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(800, easing = LinearEasing),
+                            repeatMode = RepeatMode.Reverse
+                        )
+                    )
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.graphicsLayer(alpha = alpha)
+                        )
                     }
                 }
                 is SearchUiState.Success -> {
@@ -151,7 +193,18 @@ fun SearchScreen(
                                 color = MaterialTheme.colorScheme.error
                             )
                             Spacer(Modifier.height(16.dp))
-                            Button(onClick = { viewModel.onQueryChange(query) }) {
+
+                            val retryInteractionSource = remember { MutableInteractionSource() }
+                            val isRetryPressed by retryInteractionSource.collectIsPressedAsState()
+                            val retryScale by animateFloatAsState(
+                                targetValue = if (isRetryPressed) 0.9f else 1f,
+                                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)
+                            )
+                            Button(
+                                onClick = { viewModel.onQueryChange(query) },
+                                interactionSource = retryInteractionSource,
+                                modifier = Modifier.graphicsLayer(scaleX = retryScale, scaleY = retryScale)
+                            ) {
                                 Text("Coba Lagi")
                             }
                         }
@@ -161,8 +214,6 @@ fun SearchScreen(
         }
     }
 }
-
-// ==================== TRENDING SECTION ====================
 
 @Composable
 private fun TrendingSection(
@@ -179,8 +230,17 @@ private fun TrendingSection(
 
         when (trendingState) {
             is TrendingUiState.Loading -> {
+                val infiniteTransition = rememberInfiniteTransition()
+                val alpha by infiniteTransition.animateFloat(
+                    initialValue = 0.3f,
+                    targetValue = 1f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(800, easing = LinearEasing),
+                        repeatMode = RepeatMode.Reverse
+                    )
+                )
                 Box(Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(modifier = Modifier.graphicsLayer(alpha = alpha))
                 }
             }
             is TrendingUiState.Success -> {
@@ -222,7 +282,6 @@ private fun TrendingCard(item: TmdbMovieDto, onAddClick: () -> Unit) {
                         .height(180.dp)
                         .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
                 )
-                // Badge tipe (Film/Series)
                 Surface(
                     modifier = Modifier.padding(4.dp).align(Alignment.TopEnd),
                     shape = RoundedCornerShape(4.dp),
@@ -257,13 +316,23 @@ private fun TrendingCard(item: TmdbMovieDto, onAddClick: () -> Unit) {
                             tint = MaterialTheme.colorScheme.primary
                         )
                         Text(
-                            " ${"%.1f".format(item.voteAverage)}",
+                            " ${kotlin.math.round(item.voteAverage * 10.0) / 10.0}",
                             style = MaterialTheme.typography.labelSmall
                         )
                     }
+
+                    val addInteractionSource = remember { MutableInteractionSource() }
+                    val isAddPressed by addInteractionSource.collectIsPressedAsState()
+                    val addScale by animateFloatAsState(
+                        targetValue = if (isAddPressed) 0.7f else 1f,
+                        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)
+                    )
                     IconButton(
                         onClick = onAddClick,
-                        modifier = Modifier.size(24.dp)
+                        interactionSource = addInteractionSource,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .graphicsLayer(scaleX = addScale, scaleY = addScale)
                     ) {
                         Icon(
                             Icons.Default.Add, "Tambah ke koleksi",
@@ -276,8 +345,6 @@ private fun TrendingCard(item: TmdbMovieDto, onAddClick: () -> Unit) {
         }
     }
 }
-
-// ==================== SEARCH RESULT LIST ====================
 
 @Composable
 private fun SearchResultList(
@@ -306,7 +373,6 @@ private fun SearchResultItem(item: TmdbMovieDto, onAddClick: () -> Unit) {
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Poster
             AsyncImage(
                 model = item.posterUrl("w185"),
                 contentDescription = item.displayTitle,
@@ -317,7 +383,6 @@ private fun SearchResultItem(item: TmdbMovieDto, onAddClick: () -> Unit) {
                     .background(MaterialTheme.colorScheme.surfaceVariant)
             )
             Spacer(Modifier.width(12.dp))
-            // Info
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     item.displayTitle,
@@ -348,7 +413,7 @@ private fun SearchResultItem(item: TmdbMovieDto, onAddClick: () -> Unit) {
                             tint = MaterialTheme.colorScheme.primary
                         )
                         Text(
-                            " ${"%.1f".format(item.voteAverage)}",
+                            " ${kotlin.math.round(item.voteAverage * 10.0) / 10.0}",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -357,7 +422,7 @@ private fun SearchResultItem(item: TmdbMovieDto, onAddClick: () -> Unit) {
                 item.displayDate?.let { date ->
                     Spacer(Modifier.height(2.dp))
                     Text(
-                        date.take(4), // Hanya tahun
+                        date.take(4),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -373,8 +438,18 @@ private fun SearchResultItem(item: TmdbMovieDto, onAddClick: () -> Unit) {
                     )
                 }
             }
-            // Add button
-            FilledTonalIconButton(onClick = onAddClick) {
+
+            val addInteractionSource = remember { MutableInteractionSource() }
+            val isAddPressed by addInteractionSource.collectIsPressedAsState()
+            val addScale by animateFloatAsState(
+                targetValue = if (isAddPressed) 0.85f else 1f,
+                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)
+            )
+            FilledTonalIconButton(
+                onClick = onAddClick,
+                interactionSource = addInteractionSource,
+                modifier = Modifier.graphicsLayer(scaleX = addScale, scaleY = addScale)
+            ) {
                 Icon(Icons.Default.Add, contentDescription = "Tambah ke koleksi")
             }
         }
