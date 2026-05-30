@@ -1,19 +1,28 @@
 package com.example.rewind.presentation.screens.ai
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -51,6 +60,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -179,13 +189,19 @@ fun AIAssistantScreen(
                         .border(BorderStroke(1.dp, rewindColors.borderGold.copy(alpha = 0.2f)), RoundedCornerShape(10.dp))
                         .padding(horizontal = 14.dp, vertical = 10.dp)
                 ) {
-                    Text(
-                        text = uiState.selectedAction.description,
-                        color = rewindColors.textSecondary,
-                        fontSize = 12.sp,
-                        fontStyle = FontStyle.Italic,
-                        lineHeight = 18.sp
-                    )
+                    AnimatedContent(
+                        targetState = uiState.selectedAction.description,
+                        transitionSpec = { fadeIn(tween(300)) togetherWith fadeOut(tween(300)) },
+                        label = "ActionDescriptionAnim"
+                    ) { description ->
+                        Text(
+                            text = description,
+                            color = rewindColors.textSecondary,
+                            fontSize = 12.sp,
+                            fontStyle = FontStyle.Italic,
+                            lineHeight = 18.sp
+                        )
+                    }
                 }
 
                 SectionLabel("YOUR INPUT")
@@ -271,6 +287,14 @@ private fun AIHeader(onNavigateBack: () -> Unit) {
     val surface = MaterialTheme.colorScheme.surface
     val onBg = MaterialTheme.colorScheme.onBackground
 
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.9f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+        label = "BackBtnScale"
+    )
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -306,10 +330,15 @@ private fun AIHeader(onNavigateBack: () -> Unit) {
             Box(
                 modifier = Modifier
                     .size(38.dp)
+                    .graphicsLayer(scaleX = scale, scaleY = scale)
                     .clip(RoundedCornerShape(10.dp))
                     .background(rewindColors.surfaceElevated)
                     .border(BorderStroke(1.dp, rewindColors.borderSubtle), RoundedCornerShape(10.dp))
-                    .clickable(onClick = onNavigateBack),
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = LocalIndication.current,
+                        onClick = onNavigateBack
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Text("←", color = GoldAmber, fontSize = 17.sp)
@@ -422,12 +451,23 @@ private fun ActionChips(selectedAction: AIAction, onActionSelected: (AIAction) -
     ) {
         items(AIAction.entries) { action ->
             val isSelected = selectedAction == action
+            val interactionSource = remember { MutableInteractionSource() }
+            val isPressed by interactionSource.collectIsPressedAsState()
+            val scale by animateFloatAsState(
+                targetValue = if (isPressed) 0.9f else 1f,
+                label = "ChipScale"
+            )
+
             if (isSelected) {
                 Box(
                     modifier = Modifier
+                        .graphicsLayer(scaleX = scale, scaleY = scale)
                         .clip(RoundedCornerShape(20.dp))
                         .background(Brush.horizontalGradient(listOf(GoldAmberDim, GoldAmber)))
-                        .clickable { onActionSelected(action) }
+                        .clickable(
+                            interactionSource = interactionSource,
+                            indication = LocalIndication.current
+                        ) { onActionSelected(action) }
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Text(
@@ -441,10 +481,14 @@ private fun ActionChips(selectedAction: AIAction, onActionSelected: (AIAction) -
             } else {
                 Box(
                     modifier = Modifier
+                        .graphicsLayer(scaleX = scale, scaleY = scale)
                         .clip(RoundedCornerShape(20.dp))
                         .background(surface)
                         .border(BorderStroke(1.dp, rewindColors.borderSubtle), RoundedCornerShape(20.dp))
-                        .clickable { onActionSelected(action) }
+                        .clickable(
+                            interactionSource = interactionSource,
+                            indication = LocalIndication.current
+                        ) { onActionSelected(action) }
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Text(
@@ -463,6 +507,13 @@ private fun ActionChips(selectedAction: AIAction, onActionSelected: (AIAction) -
 private fun RunButton(isLoading: Boolean, canExecute: Boolean, onClick: () -> Unit) {
     val bg = MaterialTheme.colorScheme.background
 
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed && canExecute && !isLoading) 0.95f else 1f,
+        label = "RunBtnScale"
+    )
+
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
@@ -480,6 +531,7 @@ private fun RunButton(isLoading: Boolean, canExecute: Boolean, onClick: () -> Un
         }
         Box(
             modifier = Modifier
+                .graphicsLayer(scaleX = scale, scaleY = scale)
                 .fillMaxWidth()
                 .height(52.dp)
                 .clip(RoundedCornerShape(14.dp))
@@ -491,7 +543,12 @@ private fun RunButton(isLoading: Boolean, canExecute: Boolean, onClick: () -> Un
                             listOf(GoldAmberDim.copy(alpha = 0.3f), GoldAmber.copy(alpha = 0.3f))
                         )
                 )
-                .clickable(enabled = canExecute && !isLoading, onClick = onClick),
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = LocalIndication.current,
+                    enabled = canExecute && !isLoading,
+                    onClick = onClick
+                ),
             contentAlignment = Alignment.Center
         ) {
             if (isLoading) {
@@ -614,14 +671,23 @@ private fun ResultCard(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
+                    val copyInteractionSource = remember { MutableInteractionSource() }
+                    val copyPressed by copyInteractionSource.collectIsPressedAsState()
+                    val copyScale by animateFloatAsState(targetValue = if (copyPressed) 0.95f else 1f, label = "CopyScale")
+
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .height(42.dp)
+                            .graphicsLayer(scaleX = copyScale, scaleY = copyScale)
                             .clip(RoundedCornerShape(10.dp))
                             .background(surface)
                             .border(BorderStroke(1.dp, rewindColors.borderSubtle), RoundedCornerShape(10.dp))
-                            .clickable(onClick = onCopy),
+                            .clickable(
+                                interactionSource = copyInteractionSource,
+                                indication = LocalIndication.current,
+                                onClick = onCopy
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -632,13 +698,22 @@ private fun ResultCard(
                         )
                     }
                     if (noteId != null) {
+                        val applyInteractionSource = remember { MutableInteractionSource() }
+                        val applyPressed by applyInteractionSource.collectIsPressedAsState()
+                        val applyScale by animateFloatAsState(targetValue = if (applyPressed) 0.95f else 1f, label = "ApplyScale")
+
                         Box(
                             modifier = Modifier
                                 .weight(1f)
                                 .height(42.dp)
+                                .graphicsLayer(scaleX = applyScale, scaleY = applyScale)
                                 .clip(RoundedCornerShape(10.dp))
                                 .background(Brush.horizontalGradient(listOf(GoldAmberDim, GoldAmber)))
-                                .clickable(onClick = onApply),
+                                .clickable(
+                                    interactionSource = applyInteractionSource,
+                                    indication = LocalIndication.current,
+                                    onClick = onApply
+                                ),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
