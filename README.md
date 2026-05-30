@@ -15,23 +15,23 @@ Program Studi Teknik Informatika Institut Teknologi Sumatera (ITERA)
 
 ## Tentang Aplikasi
 
-**Rewind** aadalah aplikasi mobile personal tracker untuk film dan series berbasis Kotlin Multiplatform. Pengguna bisa mencari film atau series, menambahkannya ke koleksi pribadi, mencatat status tontonan, memberi rating, dan menulis kesan singkat. Data film diambil secara real-time dari *TMDB API, koleksi disimpan lokal menggunakan **SQLDelight, dan dilengkapi asisten **AI berbasis Google Gemini* yang membantu menulis review dan merekomendasikan tontonan berikutnya.
+**Rewind** adalah aplikasi mobile personal tracker untuk film dan series berbasis Kotlin Multiplatform. Pengguna bisa mencari film atau series, menambahkannya ke koleksi pribadi, mencatat status tontonan, memberi rating, dan menulis kesan singkat. Data film diambil secara real-time dari TMDB API, koleksi disimpan lokal menggunakan SQLDelight, dan dilengkapi asisten *AI berbasis Google Gemini* yang membantu menulis review dan merekomendasikan tontonan berikutnya.
 
 ## 🌟 Features
 
 ### 📦 Minimum Requirements
 - [x] **Setup & Configuration** — Repository setup, Clean Architecture structure, Koin DI integration, and GitHub Actions CI pipeline.
-- [ ] **Search Film & Series** — Pencarian film dan series secara real-time terintegrasi dengan TMDB API.
+- [x] **Search Film & Series** — Pencarian film dan series secara real-time terintegrasi dengan TMDB API.
 - [x] **Koleksi Pribadi (CRUD)** — Manajemen koleksi lokal untuk menyimpan tontonan dengan status *Want to Watch, Watching, Finished, Dropped*.
-- [ ] **Rating & Review** — Pengguna dapat memberikan rating dan menyimpan catatan kesan singkat secara offline.
-- [ ] **State Management** — Implementasi UI State menggunakan `Sealed Interface` dan `StateFlow` untuk pembaruan data secara reaktif.
+- [x] **Rating & Review** — Pengguna dapat memberikan rating dan menyimpan catatan kesan singkat secara offline.
+- [x] **State Management** — Implementasi UI State menggunakan `Sealed Interface` dan `StateFlow` untuk pembaruan data secara reaktif.
 - [x] **Multi-screen Navigation** — Navigasi type-safe antar halaman (Home, Detail, Add/Edit) menggunakan argumen passing.
 
 ### 🎁 Bonus Features
-- [ ] **AI Integration (+10%)** — Integrasi Google Gemini API sebagai asisten pintar untuk membantu menulis review dan memberikan rekomendasi film.
-- [ ] **Offline First Support (+5%)** — Aplikasi tetap berfungsi penuh secara offline dengan sinkronisasi data lokal via SQLDelight.
-- [ ] **Dark Mode Support (+5%)** — Tampilan tema gelap (*twilight palette*) otomatis yang nyaman di mata untuk penggunaan larut malam.
-- [ ] **Animations (+5%)** — Transisi antarpahalaman dan efek animasi mikro pada komponen UI untuk meningkatkan user experience.
+- [x] **AI Integration (+10%)** — Integrasi Google Gemini API sebagai asisten pintar untuk membantu menulis review dan memberikan rekomendasi film.
+- [x] **Offline First Support (+5%)** — Aplikasi tetap berfungsi penuh secara offline dengan sinkronisasi data lokal via SQLDelight.
+- [x] **Dark Mode Support (+5%)** — Tampilan tema gelap (*twilight palette*) otomatis yang nyaman di mata untuk penggunaan larut malam.
+- [x] **Animations (+5%)** — Transisi antarpahalaman dan efek animasi mikro pada komponen UI untuk meningkatkan user experience.
 
 ## 🛠️ Tech Stack
 * **Framework:** Kotlin Multiplatform (KMP) & Compose Multiplatform
