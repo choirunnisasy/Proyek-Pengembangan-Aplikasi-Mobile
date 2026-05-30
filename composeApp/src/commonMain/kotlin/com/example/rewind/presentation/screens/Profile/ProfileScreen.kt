@@ -1,9 +1,20 @@
 package com.example.rewind.presentation.screens.profile
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -21,6 +32,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -70,20 +82,26 @@ fun ProfileScreen(
         Column(modifier = Modifier.fillMaxSize()) {
             ProfileHeader(onNavigateBack = onNavigateBack)
 
-            when (val state = uiState) {
-                is ProfileUiState.Loading -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(
-                            color = MaterialTheme.colorScheme.primary,
-                            strokeWidth = 1.5.dp,
-                            modifier = Modifier.size(32.dp)
-                        )
+            AnimatedContent(
+                targetState = uiState,
+                transitionSpec = { fadeIn(tween(300)) togetherWith fadeOut(tween(300)) },
+                label = "ProfileStateAnimation"
+            ) { state ->
+                when (state) {
+                    is ProfileUiState.Loading -> {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(
+                                color = MaterialTheme.colorScheme.primary,
+                                strokeWidth = 1.5.dp,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
                     }
+                    is ProfileUiState.Success -> ProfileContent(
+                        state = state,
+                        viewModel = viewModel
+                    )
                 }
-                is ProfileUiState.Success -> ProfileContent(
-                    state = state,
-                    viewModel = viewModel
-                )
             }
         }
     }
@@ -96,6 +114,14 @@ private fun ProfileHeader(onNavigateBack: () -> Unit) {
     val primary = MaterialTheme.colorScheme.primary
     val outline = MaterialTheme.colorScheme.outline
     val onBackground = MaterialTheme.colorScheme.onBackground
+
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.9f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+        label = "BackBtnScale"
+    )
 
     Box(
         modifier = Modifier
@@ -128,10 +154,15 @@ private fun ProfileHeader(onNavigateBack: () -> Unit) {
             Box(
                 modifier = Modifier
                     .size(38.dp)
+                    .graphicsLayer(scaleX = scale, scaleY = scale)
                     .clip(RoundedCornerShape(10.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant)
                     .border(BorderStroke(1.dp, outline.copy(alpha = 0.4f)), RoundedCornerShape(10.dp))
-                    .clickable(onClick = onNavigateBack),
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = LocalIndication.current,
+                        onClick = onNavigateBack
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Text("←", color = primary, fontSize = 17.sp)
@@ -376,36 +407,72 @@ private fun IdentityCard(
                         verticalArrangement = Arrangement.spacedBy(6.dp),
                         horizontalAlignment = Alignment.End
                     ) {
+                        val saveInteractionSource = remember { MutableInteractionSource() }
+                        val savePressed by saveInteractionSource.collectIsPressedAsState()
+                        val saveScale by animateFloatAsState(
+                            targetValue = if (savePressed) 0.92f else 1f,
+                            label = "SaveScale"
+                        )
+
+                        val cancelInteractionSource = remember { MutableInteractionSource() }
+                        val cancelPressed by cancelInteractionSource.collectIsPressedAsState()
+                        val cancelScale by animateFloatAsState(
+                            targetValue = if (cancelPressed) 0.92f else 1f,
+                            label = "CancelScale"
+                        )
+
                         Box(
                             modifier = Modifier
+                                .graphicsLayer(scaleX = saveScale, scaleY = saveScale)
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(Brush.horizontalGradient(listOf(GoldAmberDim, GoldAmber)))
-                                .clickable(onClick = onSaveClick)
+                                .clickable(
+                                    interactionSource = saveInteractionSource,
+                                    indication = LocalIndication.current,
+                                    onClick = onSaveClick
+                                )
                                 .padding(horizontal = 12.dp, vertical = 6.dp)
                         ) {
                             Text("Save", color = BackgroundDark, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                         }
                         Box(
                             modifier = Modifier
+                                .graphicsLayer(scaleX = cancelScale, scaleY = cancelScale)
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(surface)
                                 .border(BorderStroke(1.dp, outline.copy(alpha = 0.4f)), RoundedCornerShape(8.dp))
-                                .clickable(onClick = onCancelClick)
+                                .clickable(
+                                    interactionSource = cancelInteractionSource,
+                                    indication = LocalIndication.current,
+                                    onClick = onCancelClick
+                                )
                                 .padding(horizontal = 12.dp, vertical = 6.dp)
                         ) {
                             Text("Cancel", color = onSurfaceVariant, fontSize = 11.sp)
                         }
                     }
                 } else {
+                    val editInteractionSource = remember { MutableInteractionSource() }
+                    val editPressed by editInteractionSource.collectIsPressedAsState()
+                    val editScale by animateFloatAsState(
+                        targetValue = if (editPressed) 0.9f else 1f,
+                        label = "EditScale"
+                    )
+
                     Box(
                         modifier = Modifier
+                            .graphicsLayer(scaleX = editScale, scaleY = editScale)
                             .clip(RoundedCornerShape(8.dp))
                             .background(primary.copy(alpha = 0.1f))
                             .border(
                                 BorderStroke(1.dp, primary.copy(alpha = 0.35f)),
                                 RoundedCornerShape(8.dp)
                             )
-                            .clickable(onClick = onEditClick)
+                            .clickable(
+                                interactionSource = editInteractionSource,
+                                indication = LocalIndication.current,
+                                onClick = onEditClick
+                            )
                             .padding(horizontal = 10.dp, vertical = 6.dp)
                     ) {
                         Text("✏️", fontSize = 13.sp)
@@ -541,7 +608,12 @@ private fun StatusBreakdown(state: ProfileUiState.Success) {
             statusItems.forEach { (status, pair) ->
                 val (color, label) = pair
                 val count = state.statusCounts[status] ?: 0
-                val progress = if (state.totalMovies > 0) count.toFloat() / state.totalMovies else 0f
+                val targetProgress = if (state.totalMovies > 0) count.toFloat() / state.totalMovies else 0f
+                val animatedProgress by animateFloatAsState(
+                    targetValue = targetProgress,
+                    animationSpec = tween(1000),
+                    label = "StatusProgressAnim"
+                )
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -559,7 +631,7 @@ private fun StatusBreakdown(state: ProfileUiState.Success) {
                     }
 
                     LinearProgressIndicator(
-                        progress = { progress },
+                        progress = { animatedProgress },
                         modifier = Modifier.weight(1f).height(6.dp).clip(RoundedCornerShape(3.dp)),
                         color = color,
                         trackColor = color.copy(alpha = 0.08f)
@@ -595,7 +667,13 @@ private fun GenreBreakdown(state: ProfileUiState.Success) {
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             state.topGenres.take(5).forEachIndexed { index, (genre, count) ->
-                val progress = if (state.totalMovies > 0) count.toFloat() / state.totalMovies else 0f
+                val targetProgress = if (state.totalMovies > 0) count.toFloat() / state.totalMovies else 0f
+                val animatedProgress by animateFloatAsState(
+                    targetValue = targetProgress,
+                    animationSpec = tween(1000),
+                    label = "GenreProgressAnim"
+                )
+
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -610,7 +688,7 @@ private fun GenreBreakdown(state: ProfileUiState.Success) {
                         overflow = TextOverflow.Ellipsis
                     )
                     LinearProgressIndicator(
-                        progress = { progress },
+                        progress = { animatedProgress },
                         modifier = Modifier.weight(1f).height(6.dp).clip(RoundedCornerShape(3.dp)),
                         color = primary,
                         trackColor = primary.copy(alpha = 0.08f)
