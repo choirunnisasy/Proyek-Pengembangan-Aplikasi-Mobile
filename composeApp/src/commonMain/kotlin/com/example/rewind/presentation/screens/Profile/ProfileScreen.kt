@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,21 +37,34 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val background = MaterialTheme.colorScheme.background
+    val surface = MaterialTheme.colorScheme.surface
 
     Box(
-        modifier = Modifier.fillMaxSize().background(BackgroundDark)
+        modifier = Modifier
+            .fillMaxSize()
+            .background(background)
     ) {
-        // Background glows
         Box(
-            modifier = Modifier.size(300.dp).offset(x = (-80).dp, y = (-60).dp).blur(120.dp)
-                .background(Brush.radialGradient(
-                    listOf(TheaterRed.copy(alpha = 0.18f), Color.Transparent)), CircleShape)
+            modifier = Modifier
+                .size(300.dp)
+                .offset(x = (-80).dp, y = (-60).dp)
+                .blur(120.dp)
+                .background(
+                    Brush.radialGradient(listOf(TheaterRed.copy(alpha = 0.18f), Color.Transparent)),
+                    CircleShape
+                )
         )
         Box(
-            modifier = Modifier.size(200.dp).align(Alignment.TopEnd)
-                .offset(x = 60.dp, y = 100.dp).blur(100.dp)
-                .background(Brush.radialGradient(
-                    listOf(GoldAmber.copy(alpha = 0.1f), Color.Transparent)), CircleShape)
+            modifier = Modifier
+                .size(200.dp)
+                .align(Alignment.TopEnd)
+                .offset(x = 60.dp, y = 100.dp)
+                .blur(100.dp)
+                .background(
+                    Brush.radialGradient(listOf(GoldAmber.copy(alpha = 0.1f), Color.Transparent)),
+                    CircleShape
+                )
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -60,7 +74,8 @@ fun ProfileScreen(
                 is ProfileUiState.Loading -> {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator(
-                            color = GoldAmber, strokeWidth = 1.5.dp,
+                            color = MaterialTheme.colorScheme.primary,
+                            strokeWidth = 1.5.dp,
                             modifier = Modifier.size(32.dp)
                         )
                     }
@@ -76,36 +91,68 @@ fun ProfileScreen(
 
 @Composable
 private fun ProfileHeader(onNavigateBack: () -> Unit) {
+    val surface = MaterialTheme.colorScheme.surface
+    val background = MaterialTheme.colorScheme.background
+    val primary = MaterialTheme.colorScheme.primary
+    val outline = MaterialTheme.colorScheme.outline
+    val onBackground = MaterialTheme.colorScheme.onBackground
+
     Box(
-        modifier = Modifier.fillMaxWidth()
-            .background(Brush.verticalGradient(
-                listOf(SurfaceDark, SurfaceDark.copy(alpha = 0.8f), BackgroundDark)
-            ))
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                Brush.verticalGradient(
+                    listOf(surface, surface.copy(alpha = 0.8f), background)
+                )
+            )
             .padding(horizontal = 20.dp, vertical = 18.dp)
     ) {
-        // Gold divider bottom
         Box(
-            modifier = Modifier.fillMaxWidth().height(1.dp).align(Alignment.BottomCenter)
-                .background(Brush.horizontalGradient(listOf(
-                    Color.Transparent, BorderGold.copy(alpha = 0.4f),
-                    GoldAmber.copy(alpha = 0.3f), BorderGold.copy(alpha = 0.4f), Color.Transparent
-                )))
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .align(Alignment.BottomCenter)
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(
+                            Color.Transparent,
+                            outline.copy(alpha = 0.4f),
+                            primary.copy(alpha = 0.3f),
+                            outline.copy(alpha = 0.4f),
+                            Color.Transparent
+                        )
+                    )
+                )
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
-                modifier = Modifier.size(38.dp).clip(RoundedCornerShape(10.dp))
-                    .background(SurfaceElevated)
-                    .border(BorderStroke(1.dp, BorderSubtle), RoundedCornerShape(10.dp))
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .border(BorderStroke(1.dp, outline.copy(alpha = 0.4f)), RoundedCornerShape(10.dp))
                     .clickable(onClick = onNavigateBack),
                 contentAlignment = Alignment.Center
-            ) { Text("←", color = GoldAmber, fontSize = 17.sp) }
+            ) {
+                Text("←", color = primary, fontSize = 17.sp)
+            }
 
             Spacer(Modifier.width(16.dp))
             Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
-                Text("MY PROFILE", color = GoldAmber, fontSize = 9.sp,
-                    fontWeight = FontWeight.ExtraBold, letterSpacing = 4.sp)
-                Text("Stats & Collection", color = TextWarm, fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold, letterSpacing = (-0.3).sp)
+                Text(
+                    "MY PROFILE",
+                    color = primary,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 4.sp
+                )
+                Text(
+                    "Stats & Collection",
+                    color = onBackground,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = (-0.3).sp
+                )
             }
         }
     }
@@ -121,7 +168,8 @@ private fun ProfileContent(
     val editBio by viewModel.editBio.collectAsState()
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
@@ -169,17 +217,37 @@ private fun IdentityCard(
     onSaveClick: () -> Unit,
     onCancelClick: () -> Unit
 ) {
+    val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
+    val outline = MaterialTheme.colorScheme.outline
+    val primary = MaterialTheme.colorScheme.primary
+    val onBackground = MaterialTheme.colorScheme.onBackground
+    val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
+    val surface = MaterialTheme.colorScheme.surface
+
     Box(
-        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp))
-            .background(SurfaceElevated)
-            .border(BorderStroke(1.dp, Brush.linearGradient(
-                listOf(BorderGold.copy(alpha = 0.5f), BorderSubtle, Color.Transparent)
-            )), RoundedCornerShape(24.dp))
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp))
+            .background(surfaceVariant)
+            .border(
+                BorderStroke(
+                    1.dp,
+                    Brush.linearGradient(
+                        listOf(outline.copy(alpha = 0.5f), outline.copy(alpha = 0.2f), Color.Transparent)
+                    )
+                ),
+                RoundedCornerShape(24.dp)
+            )
     ) {
         Box(
-            modifier = Modifier.size(120.dp).offset(x = (-20).dp, y = (-20).dp).blur(40.dp)
-                .background(Brush.radialGradient(
-                    listOf(GoldAmber.copy(alpha = 0.12f), Color.Transparent)), CircleShape)
+            modifier = Modifier
+                .size(120.dp)
+                .offset(x = (-20).dp, y = (-20).dp)
+                .blur(40.dp)
+                .background(
+                    Brush.radialGradient(listOf(primary.copy(alpha = 0.12f), Color.Transparent)),
+                    CircleShape
+                )
         )
 
         Column(
@@ -192,28 +260,50 @@ private fun IdentityCard(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Box(modifier = Modifier.size(84.dp).blur(20.dp)
-                        .background(Brush.radialGradient(
-                            listOf(GoldAmber.copy(alpha = 0.3f), Color.Transparent)), CircleShape))
                     Box(
-                        modifier = Modifier.size(72.dp).clip(CircleShape)
-                            .background(Brush.linearGradient(
-                                colorStops = arrayOf(0f to VelvetRed, 1f to TheaterRed)))
-                            .border(BorderStroke(2.dp, Brush.linearGradient(
-                                listOf(GoldAmber.copy(alpha = 0.6f), GoldAmberDim.copy(alpha = 0.3f))
-                            )), CircleShape),
+                        modifier = Modifier
+                            .size(84.dp)
+                            .blur(20.dp)
+                            .background(
+                                Brush.radialGradient(listOf(primary.copy(alpha = 0.3f), Color.Transparent)),
+                                CircleShape
+                            )
+                    )
+                    Box(
+                        modifier = Modifier
+                            .size(72.dp)
+                            .clip(CircleShape)
+                            .background(
+                                Brush.linearGradient(
+                                    colorStops = arrayOf(0f to VelvetRed, 1f to TheaterRed)
+                                )
+                            )
+                            .border(
+                                BorderStroke(
+                                    2.dp,
+                                    Brush.linearGradient(
+                                        listOf(primary.copy(alpha = 0.6f), GoldAmberDim.copy(alpha = 0.3f))
+                                    )
+                                ),
+                                CircleShape
+                            ),
                         contentAlignment = Alignment.Center
-                    ) { Text("🎬", fontSize = 30.sp) }
+                    ) {
+                        Text("🎬", fontSize = 30.sp)
+                    }
                     Box(
-                        modifier = Modifier.size(14.dp).align(Alignment.BottomEnd)
-                            .clip(CircleShape).background(StatusFinished)
-                            .border(BorderStroke(2.dp, SurfaceElevated), CircleShape)
+                        modifier = Modifier
+                            .size(14.dp)
+                            .align(Alignment.BottomEnd)
+                            .clip(CircleShape)
+                            .background(StatusFinished)
+                            .border(BorderStroke(2.dp, surfaceVariant), CircleShape)
                     )
                 }
 
                 Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.weight(1f) // Kunci agar teks fleksibel dan tidak menabrak tombol kanan
+                    modifier = Modifier.weight(1f)
                 ) {
                     if (isEditMode) {
                         BasicTextField(
@@ -221,26 +311,33 @@ private fun IdentityCard(
                             onValueChange = onNameChange,
                             singleLine = true,
                             textStyle = TextStyle(
-                                color = TextWarm,
+                                color = onBackground,
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold
                             ),
                             decorationBox = { innerTextField ->
                                 Box(
-                                    modifier = Modifier.fillMaxWidth()
-                                        .border(BorderStroke(1.dp, GoldAmber.copy(alpha = 0.5f)),
-                                            RoundedCornerShape(8.dp))
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .border(
+                                            BorderStroke(1.dp, primary.copy(alpha = 0.5f)),
+                                            RoundedCornerShape(8.dp)
+                                        )
                                         .padding(horizontal = 10.dp, vertical = 6.dp)
                                 ) { innerTextField() }
                             }
                         )
                     } else {
-                        Text(state.userName, color = TextWarm, fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold, letterSpacing = (-0.3).sp)
+                        Text(
+                            state.userName,
+                            color = onBackground,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = (-0.3).sp
+                        )
                     }
 
-                    Text("@cinephile", color = GoldAmber, fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium)
+                    Text("@cinephile", color = primary, fontSize = 12.sp, fontWeight = FontWeight.Medium)
 
                     if (isEditMode) {
                         BasicTextField(
@@ -248,21 +345,29 @@ private fun IdentityCard(
                             onValueChange = onBioChange,
                             maxLines = 3,
                             textStyle = TextStyle(
-                                color = TextMuted,
+                                color = onSurfaceVariant,
                                 fontSize = 12.sp
                             ),
                             decorationBox = { innerTextField ->
                                 Box(
-                                    modifier = Modifier.fillMaxWidth()
-                                        .border(BorderStroke(1.dp, BorderSubtle),
-                                            RoundedCornerShape(8.dp))
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .border(
+                                            BorderStroke(1.dp, outline.copy(alpha = 0.4f)),
+                                            RoundedCornerShape(8.dp)
+                                        )
                                         .padding(horizontal = 10.dp, vertical = 6.dp)
                                 ) { innerTextField() }
                             }
                         )
                     } else {
-                        Text(state.userBio, color = TextMuted, fontSize = 12.sp,
-                            fontStyle = FontStyle.Italic, lineHeight = 17.sp)
+                        Text(
+                            state.userBio,
+                            color = onSurfaceVariant,
+                            fontSize = 12.sp,
+                            fontStyle = FontStyle.Italic,
+                            lineHeight = 17.sp
+                        )
                     }
                 }
 
@@ -271,7 +376,6 @@ private fun IdentityCard(
                         verticalArrangement = Arrangement.spacedBy(6.dp),
                         horizontalAlignment = Alignment.End
                     ) {
-                        // Tombol Save
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
@@ -281,24 +385,26 @@ private fun IdentityCard(
                         ) {
                             Text("Save", color = BackgroundDark, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                         }
-                        // Tombol Cancel
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(SurfaceDark)
-                                .border(BorderStroke(1.dp, BorderSubtle), RoundedCornerShape(8.dp))
+                                .background(surface)
+                                .border(BorderStroke(1.dp, outline.copy(alpha = 0.4f)), RoundedCornerShape(8.dp))
                                 .clickable(onClick = onCancelClick)
                                 .padding(horizontal = 12.dp, vertical = 6.dp)
                         ) {
-                            Text("Cancel", color = TextMuted, fontSize = 11.sp)
+                            Text("Cancel", color = onSurfaceVariant, fontSize = 11.sp)
                         }
                     }
                 } else {
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
-                            .background(GoldAmber.copy(alpha = 0.1f))
-                            .border(BorderStroke(1.dp, GoldAmber.copy(alpha = 0.35f)), RoundedCornerShape(8.dp))
+                            .background(primary.copy(alpha = 0.1f))
+                            .border(
+                                BorderStroke(1.dp, primary.copy(alpha = 0.35f)),
+                                RoundedCornerShape(8.dp)
+                            )
                             .clickable(onClick = onEditClick)
                             .padding(horizontal = 10.dp, vertical = 6.dp)
                     ) {
@@ -306,14 +412,22 @@ private fun IdentityCard(
                     }
                 }
             }
-            // Divider
-            Box(modifier = Modifier.fillMaxWidth().height(1.dp)
-                .background(Brush.horizontalGradient(
-                    listOf(BorderGold.copy(alpha = 0.3f), Color.Transparent))))
 
-            // Mini stats
-            Row(modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(outline.copy(alpha = 0.3f), Color.Transparent)
+                        )
+                    )
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
                 MiniStat("${state.totalMovies}", "Total")
                 StatDivider()
                 MiniStat("${state.statusCounts[WatchStatus.COMPLETED] ?: 0}", "Done")
@@ -328,28 +442,32 @@ private fun IdentityCard(
 
 @Composable
 private fun MiniStat(value: String, label: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(value, color = GoldAmber, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        Text(label, color = TextMuted, fontSize = 10.sp, letterSpacing = 0.5.sp)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        Text(value, color = MaterialTheme.colorScheme.primary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        Text(label, color = MaterialTheme.colorScheme.outline, fontSize = 10.sp, letterSpacing = 0.5.sp)
     }
 }
 
 @Composable
 private fun StatDivider() {
-    Box(modifier = Modifier.width(1.dp).height(28.dp)
-        .background(BorderSubtle.copy(alpha = 0.5f)))
+    Box(
+        modifier = Modifier
+            .width(1.dp)
+            .height(28.dp)
+            .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+    )
 }
 
 @Composable
 private fun QuickStatsRow(state: ProfileUiState.Success) {
-    Row(modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        // Completion rate card
-        val completionRate = if (state.totalMovies > 0)
-            ((state.statusCounts[WatchStatus.COMPLETED] ?: 0).toFloat() / state.totalMovies * 100).toInt()
-        else 0
+    val completionRate = if (state.totalMovies > 0)
+        ((state.statusCounts[WatchStatus.COMPLETED] ?: 0).toFloat() / state.totalMovies * 100).toInt()
+    else 0
 
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         QuickStatCard(
             modifier = Modifier.weight(1f),
             emoji = "🏆",
@@ -383,21 +501,26 @@ private fun QuickStatCard(
     color: Color
 ) {
     Box(
-        modifier = modifier.clip(RoundedCornerShape(14.dp))
+        modifier = modifier
+            .clip(RoundedCornerShape(14.dp))
             .background(color.copy(alpha = 0.08f))
             .border(BorderStroke(1.dp, color.copy(alpha = 0.25f)), RoundedCornerShape(14.dp))
             .padding(12.dp)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(emoji, fontSize = 20.sp)
-            Text(value, color = TextWarm, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            Text(label, color = TextMuted, fontSize = 10.sp)
+            Text(value, color = MaterialTheme.colorScheme.onBackground, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text(label, color = MaterialTheme.colorScheme.outline, fontSize = 10.sp)
         }
     }
 }
 
 @Composable
 private fun StatusBreakdown(state: ProfileUiState.Success) {
+    val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
+    val outline = MaterialTheme.colorScheme.outline
+    val onBackground = MaterialTheme.colorScheme.onBackground
+
     val statusItems = listOf(
         WatchStatus.COMPLETED to (StatusFinished to "Completed"),
         WatchStatus.WATCHING to (StatusWatching to "Watching"),
@@ -407,27 +530,33 @@ private fun StatusBreakdown(state: ProfileUiState.Success) {
     )
 
     Box(
-        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
-            .background(SurfaceElevated)
-            .border(BorderStroke(1.dp, BorderSubtle), RoundedCornerShape(16.dp))
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(surfaceVariant)
+            .border(BorderStroke(1.dp, outline.copy(alpha = 0.3f)), RoundedCornerShape(16.dp))
             .padding(16.dp)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
             statusItems.forEach { (status, pair) ->
                 val (color, label) = pair
                 val count = state.statusCounts[status] ?: 0
-                val progress = if (state.totalMovies > 0)
-                    count.toFloat() / state.totalMovies else 0f
+                val progress = if (state.totalMovies > 0) count.toFloat() / state.totalMovies else 0f
 
-                Row(verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
                     Box(
-                        modifier = Modifier.width(70.dp)
+                        modifier = Modifier
+                            .width(70.dp)
                             .background(color.copy(alpha = 0.12f), RoundedCornerShape(5.dp))
                             .border(BorderStroke(0.5.dp, color.copy(alpha = 0.3f)), RoundedCornerShape(5.dp))
                             .padding(horizontal = 6.dp, vertical = 3.dp),
                         contentAlignment = Alignment.Center
-                    ) { Text(label, color = color, fontSize = 9.sp, fontWeight = FontWeight.Bold) }
+                    ) {
+                        Text(label, color = color, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                    }
 
                     LinearProgressIndicator(
                         progress = { progress },
@@ -436,9 +565,13 @@ private fun StatusBreakdown(state: ProfileUiState.Success) {
                         trackColor = color.copy(alpha = 0.08f)
                     )
 
-                    Text("$count", color = TextWarm, fontSize = 13.sp,
+                    Text(
+                        "$count",
+                        color = onBackground,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.width(20.dp))
+                        modifier = Modifier.width(20.dp)
+                    )
                 }
             }
         }
@@ -447,31 +580,42 @@ private fun StatusBreakdown(state: ProfileUiState.Success) {
 
 @Composable
 private fun GenreBreakdown(state: ProfileUiState.Success) {
+    val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
+    val outline = MaterialTheme.colorScheme.outline
+    val primary = MaterialTheme.colorScheme.primary
+    val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
+
     Box(
-        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
-            .background(SurfaceElevated)
-            .border(BorderStroke(1.dp, BorderSubtle), RoundedCornerShape(16.dp))
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(surfaceVariant)
+            .border(BorderStroke(1.dp, outline.copy(alpha = 0.3f)), RoundedCornerShape(16.dp))
             .padding(16.dp)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             state.topGenres.take(5).forEachIndexed { index, (genre, count) ->
-                val progress = if (state.totalMovies > 0)
-                    count.toFloat() / state.totalMovies else 0f
-                Row(verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("${index + 1}", color = TextMuted, fontSize = 11.sp,
-                        modifier = Modifier.width(14.dp))
-                    Text(genre, color = TextSecondary, fontSize = 12.sp,
-                        modifier = Modifier.width(80.dp), maxLines = 1,
-                        overflow = TextOverflow.Ellipsis)
+                val progress = if (state.totalMovies > 0) count.toFloat() / state.totalMovies else 0f
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Text("${index + 1}", color = outline, fontSize = 11.sp, modifier = Modifier.width(14.dp))
+                    Text(
+                        genre,
+                        color = onSurfaceVariant,
+                        fontSize = 12.sp,
+                        modifier = Modifier.width(80.dp),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                     LinearProgressIndicator(
                         progress = { progress },
                         modifier = Modifier.weight(1f).height(6.dp).clip(RoundedCornerShape(3.dp)),
-                        color = GoldAmber,
-                        trackColor = GoldAmber.copy(alpha = 0.08f)
+                        color = primary,
+                        trackColor = primary.copy(alpha = 0.08f)
                     )
-                    Text("$count", color = TextMuted, fontSize = 12.sp,
-                        modifier = Modifier.width(20.dp))
+                    Text("$count", color = outline, fontSize = 12.sp, modifier = Modifier.width(20.dp))
                 }
             }
         }
@@ -487,12 +631,8 @@ private fun AchievementsGrid(achievements: List<Achievement>) {
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 rowItems.forEach { achievement ->
-                    AchievementCard(
-                        achievement = achievement,
-                        modifier = Modifier.weight(1f)
-                    )
+                    AchievementCard(achievement = achievement, modifier = Modifier.weight(1f))
                 }
-                // Fill empty slot kalau ganjil
                 if (rowItems.size < 2) {
                     Spacer(modifier = Modifier.weight(1f))
                 }
@@ -504,6 +644,10 @@ private fun AchievementsGrid(achievements: List<Achievement>) {
 @Composable
 private fun AchievementCard(achievement: Achievement, modifier: Modifier) {
     val unlocked = achievement.unlocked
+    val primary = MaterialTheme.colorScheme.primary
+    val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
+    val surface = MaterialTheme.colorScheme.surface
+    val outline = MaterialTheme.colorScheme.outline
 
     Box(
         modifier = modifier
@@ -514,29 +658,24 @@ private fun AchievementCard(achievement: Achievement, modifier: Modifier) {
                     Brush.linearGradient(
                         colorStops = arrayOf(
                             0f to GoldAmberDim.copy(alpha = 0.25f),
-                            0.6f to SurfaceElevated,
+                            0.6f to surfaceVariant,
                             1f to VelvetRed.copy(alpha = 0.08f)
                         )
                     )
                 else
-                    Brush.linearGradient(listOf(SurfaceDark, SurfaceDark))
+                    Brush.linearGradient(listOf(surface, surface))
             )
             .border(
                 BorderStroke(
                     if (unlocked) 1.dp else 0.5.dp,
                     if (unlocked)
-                        Brush.linearGradient(
-                            listOf(GoldAmber.copy(alpha = 0.6f), BorderGold.copy(alpha = 0.2f))
-                        )
+                        Brush.linearGradient(listOf(primary.copy(alpha = 0.6f), outline.copy(alpha = 0.2f)))
                     else
-                        Brush.linearGradient(
-                            listOf(BorderSubtle.copy(alpha = 0.3f), BorderSubtle.copy(alpha = 0.1f))
-                        )
+                        Brush.linearGradient(listOf(outline.copy(alpha = 0.3f), outline.copy(alpha = 0.1f)))
                 ),
                 RoundedCornerShape(18.dp)
             )
     ) {
-        // Glow effect untuk yang unlocked
         if (unlocked) {
             Box(
                 modifier = Modifier
@@ -545,21 +684,16 @@ private fun AchievementCard(achievement: Achievement, modifier: Modifier) {
                     .offset(x = 20.dp, y = (-20).dp)
                     .blur(30.dp)
                     .background(
-                        Brush.radialGradient(
-                            listOf(GoldAmber.copy(alpha = 0.25f), Color.Transparent)
-                        ),
+                        Brush.radialGradient(listOf(primary.copy(alpha = 0.25f), Color.Transparent)),
                         CircleShape
                     )
             )
         }
 
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxSize().padding(16.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Emoji + lock indicator
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -570,16 +704,14 @@ private fun AchievementCard(achievement: Achievement, modifier: Modifier) {
                         .size(44.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .background(
-                            if (unlocked)
-                                GoldAmber.copy(alpha = 0.12f)
-                            else
-                                BorderSubtle.copy(alpha = 0.08f)
+                            if (unlocked) primary.copy(alpha = 0.12f)
+                            else outline.copy(alpha = 0.08f)
                         )
                         .border(
                             BorderStroke(
                                 0.5.dp,
-                                if (unlocked) GoldAmber.copy(alpha = 0.3f)
-                                else BorderSubtle.copy(alpha = 0.2f)
+                                if (unlocked) primary.copy(alpha = 0.3f)
+                                else outline.copy(alpha = 0.2f)
                             ),
                             RoundedCornerShape(12.dp)
                         ),
@@ -592,32 +724,28 @@ private fun AchievementCard(achievement: Achievement, modifier: Modifier) {
                     )
                 }
 
-                // Status badge
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(6.dp))
                         .background(
-                            if (unlocked)
-                                StatusFinished.copy(alpha = 0.15f)
-                            else
-                                BorderSubtle.copy(alpha = 0.1f)
+                            if (unlocked) StatusFinished.copy(alpha = 0.15f)
+                            else outline.copy(alpha = 0.1f)
                         )
                         .padding(horizontal = 6.dp, vertical = 3.dp)
                 ) {
                     Text(
                         text = if (unlocked) "✓" else "🔒",
-                        color = if (unlocked) StatusFinished else TextMuted.copy(alpha = 0.4f),
+                        color = if (unlocked) StatusFinished else outline.copy(alpha = 0.4f),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
 
-            // Title + description
             Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Text(
                     text = achievement.title,
-                    color = if (unlocked) GoldAmber else TextMuted.copy(alpha = 0.5f),
+                    color = if (unlocked) primary else outline.copy(alpha = 0.5f),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
@@ -625,7 +753,7 @@ private fun AchievementCard(achievement: Achievement, modifier: Modifier) {
                 )
                 Text(
                     text = achievement.description,
-                    color = if (unlocked) TextSecondary else TextMuted.copy(alpha = 0.35f),
+                    color = if (unlocked) MaterialTheme.colorScheme.onSurfaceVariant else outline.copy(alpha = 0.35f),
                     fontSize = 10.sp,
                     lineHeight = 14.sp,
                     maxLines = 2,
@@ -638,10 +766,17 @@ private fun AchievementCard(achievement: Achievement, modifier: Modifier) {
 
 @Composable
 private fun RecentActivity(movies: List<com.example.rewind.domain.model.Movie>) {
+    val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
+    val outline = MaterialTheme.colorScheme.outline
+    val onBackground = MaterialTheme.colorScheme.onBackground
+    val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
+
     Box(
-        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
-            .background(SurfaceElevated)
-            .border(BorderStroke(1.dp, BorderSubtle), RoundedCornerShape(16.dp))
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(surfaceVariant)
+            .border(BorderStroke(1.dp, outline.copy(alpha = 0.3f)), RoundedCornerShape(16.dp))
             .padding(16.dp)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -653,43 +788,54 @@ private fun RecentActivity(movies: List<com.example.rewind.domain.model.Movie>) 
                     WatchStatus.ON_HOLD -> StatusOnHold to "On Hold"
                     WatchStatus.DROPPED -> StatusDropped to "Dropped"
                 }
-                Row(verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    // Index number
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
                     Box(
-                        modifier = Modifier.size(28.dp).clip(CircleShape)
-                            .background(SurfaceDark)
-                            .border(BorderStroke(1.dp, BorderSubtle), CircleShape),
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clip(CircleShape)
+                            .background(surfaceVariant)
+                            .border(BorderStroke(1.dp, outline.copy(alpha = 0.3f)), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("${index + 1}", color = TextMuted, fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold)
+                        Text("${index + 1}", color = outline, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     }
 
-                    Column(modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text(movie.title, color = TextWarm, fontSize = 13.sp,
-                            fontWeight = FontWeight.SemiBold, maxLines = 1,
-                            overflow = TextOverflow.Ellipsis)
-                        Text("${movie.type.displayName} · ${movie.genre.displayName}",
-                            color = TextMuted, fontSize = 11.sp)
+                    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(
+                            movie.title,
+                            color = onBackground,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            "${movie.type.displayName} · ${movie.genre.displayName}",
+                            color = onSurfaceVariant,
+                            fontSize = 11.sp
+                        )
                     }
 
                     Box(
                         modifier = Modifier
                             .background(statusColor.copy(alpha = 0.12f), RoundedCornerShape(5.dp))
-                            .border(BorderStroke(0.5.dp, statusColor.copy(alpha = 0.3f)),
-                                RoundedCornerShape(5.dp))
+                            .border(BorderStroke(0.5.dp, statusColor.copy(alpha = 0.3f)), RoundedCornerShape(5.dp))
                             .padding(horizontal = 7.dp, vertical = 3.dp)
                     ) {
-                        Text(statusLabel, color = statusColor, fontSize = 9.sp,
-                            fontWeight = FontWeight.Bold)
+                        Text(statusLabel, color = statusColor, fontSize = 9.sp, fontWeight = FontWeight.Bold)
                     }
                 }
 
                 if (index < movies.size - 1) {
-                    Box(modifier = Modifier.fillMaxWidth().height(1.dp)
-                        .background(BorderSubtle.copy(alpha = 0.4f)))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(1.dp)
+                            .background(outline.copy(alpha = 0.2f))
+                    )
                 }
             }
         }
@@ -698,6 +844,11 @@ private fun RecentActivity(movies: List<com.example.rewind.domain.model.Movie>) 
 
 @Composable
 private fun SectionTitle(text: String) {
-    Text(text, color = GoldAmber, fontSize = 9.sp,
-        fontWeight = FontWeight.ExtraBold, letterSpacing = 2.5.sp)
+    Text(
+        text,
+        color = MaterialTheme.colorScheme.primary,
+        fontSize = 9.sp,
+        fontWeight = FontWeight.ExtraBold,
+        letterSpacing = 2.5.sp
+    )
 }
