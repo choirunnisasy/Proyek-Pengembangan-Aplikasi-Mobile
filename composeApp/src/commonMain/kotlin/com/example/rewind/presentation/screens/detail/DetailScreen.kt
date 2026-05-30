@@ -1,9 +1,22 @@
 package com.example.rewind.presentation.screens.detail
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +51,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -97,12 +111,23 @@ fun DetailScreen(
                 )
             },
             confirmButton = {
+                val removeInteractionSource = remember { MutableInteractionSource() }
+                val removePressed by removeInteractionSource.collectIsPressedAsState()
+                val removeScale by animateFloatAsState(
+                    targetValue = if (removePressed) 0.9f else 1f,
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+                    label = "removeDialogScale"
+                )
                 Box(
                     modifier = Modifier
+                        .graphicsLayer(scaleX = removeScale, scaleY = removeScale)
                         .clip(RoundedCornerShape(10.dp))
                         .background(TheaterRed.copy(alpha = 0.15f))
                         .border(BorderStroke(1.dp, TheaterRed.copy(alpha = 0.4f)), RoundedCornerShape(10.dp))
-                        .clickable {
+                        .clickable(
+                            interactionSource = removeInteractionSource,
+                            indication = LocalIndication.current
+                        ) {
                             viewModel.deleteMovie(movieId) { onNavigateBack() }
                             showDeleteDialog = false
                         }
@@ -112,12 +137,23 @@ fun DetailScreen(
                 }
             },
             dismissButton = {
+                val cancelInteractionSource = remember { MutableInteractionSource() }
+                val cancelPressed by cancelInteractionSource.collectIsPressedAsState()
+                val cancelScale by animateFloatAsState(
+                    targetValue = if (cancelPressed) 0.9f else 1f,
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+                    label = "cancelDialogScale"
+                )
                 Box(
                     modifier = Modifier
+                        .graphicsLayer(scaleX = cancelScale, scaleY = cancelScale)
                         .clip(RoundedCornerShape(10.dp))
                         .background(surface)
                         .border(BorderStroke(1.dp, rewindColors.borderSubtle), RoundedCornerShape(10.dp))
-                        .clickable { showDeleteDialog = false }
+                        .clickable(
+                            interactionSource = cancelInteractionSource,
+                            indication = LocalIndication.current
+                        ) { showDeleteDialog = false }
                         .padding(horizontal = 16.dp, vertical = 9.dp)
                 ) {
                     Text("Cancel", color = rewindColors.textMuted, fontSize = 13.sp)
@@ -133,8 +169,22 @@ fun DetailScreen(
     ) {
         when (val state = uiState) {
             is DetailUiState.Loading -> {
+                val infiniteTransition = rememberInfiniteTransition(label = "loadingTransition")
+                val alpha by infiniteTransition.animateFloat(
+                    initialValue = 0.3f,
+                    targetValue = 1f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(800, easing = LinearEasing),
+                        repeatMode = RepeatMode.Reverse
+                    ),
+                    label = "loadingAlpha"
+                )
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = GoldAmber, strokeWidth = 1.5.dp, modifier = Modifier.size(32.dp))
+                    CircularProgressIndicator(
+                        color = GoldAmber,
+                        strokeWidth = 1.5.dp,
+                        modifier = Modifier.size(32.dp).graphicsLayer(alpha = alpha)
+                    )
                 }
             }
             is DetailUiState.NotFound -> {
@@ -257,28 +307,52 @@ private fun MovieDetail(movie: Movie, onBack: () -> Unit, onDelete: () -> Unit, 
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                val backInteractionSource = remember { MutableInteractionSource() }
+                val backPressed by backInteractionSource.collectIsPressedAsState()
+                val backScale by animateFloatAsState(
+                    targetValue = if (backPressed) 0.85f else 1f,
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+                    label = "backBtnScale"
+                )
                 Box(
                     modifier = Modifier
                         .size(38.dp)
+                        .graphicsLayer(scaleX = backScale, scaleY = backScale)
                         .clip(RoundedCornerShape(10.dp))
                         .background(bg.copy(alpha = 0.55f))
                         .border(
                             BorderStroke(1.dp, rewindColors.borderSubtle.copy(alpha = 0.5f)),
                             RoundedCornerShape(10.dp)
                         )
-                        .clickable(onClick = onBack),
+                        .clickable(
+                            interactionSource = backInteractionSource,
+                            indication = LocalIndication.current,
+                            onClick = onBack
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text("←", color = onBg, fontSize = 17.sp)
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    val editInteractionSource = remember { MutableInteractionSource() }
+                    val editPressed by editInteractionSource.collectIsPressedAsState()
+                    val editScale by animateFloatAsState(
+                        targetValue = if (editPressed) 0.9f else 1f,
+                        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+                        label = "editBtnScale"
+                    )
                     Box(
                         modifier = Modifier
+                            .graphicsLayer(scaleX = editScale, scaleY = editScale)
                             .clip(RoundedCornerShape(10.dp))
                             .background(GoldAmber.copy(alpha = 0.15f))
                             .border(BorderStroke(1.dp, GoldAmber.copy(alpha = 0.35f)), RoundedCornerShape(10.dp))
-                            .clickable(onClick = onEdit)
+                            .clickable(
+                                interactionSource = editInteractionSource,
+                                indication = LocalIndication.current,
+                                onClick = onEdit
+                            )
                             .padding(horizontal = 14.dp, vertical = 9.dp)
                     ) {
                         Text(
@@ -290,12 +364,24 @@ private fun MovieDetail(movie: Movie, onBack: () -> Unit, onDelete: () -> Unit, 
                         )
                     }
 
+                    val deleteInteractionSource = remember { MutableInteractionSource() }
+                    val deletePressed by deleteInteractionSource.collectIsPressedAsState()
+                    val deleteScale by animateFloatAsState(
+                        targetValue = if (deletePressed) 0.9f else 1f,
+                        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+                        label = "deleteBtnScale"
+                    )
                     Box(
                         modifier = Modifier
+                            .graphicsLayer(scaleX = deleteScale, scaleY = deleteScale)
                             .clip(RoundedCornerShape(10.dp))
                             .background(TheaterRed.copy(alpha = 0.18f))
                             .border(BorderStroke(1.dp, TheaterRed.copy(alpha = 0.35f)), RoundedCornerShape(10.dp))
-                            .clickable(onClick = onDelete)
+                            .clickable(
+                                interactionSource = deleteInteractionSource,
+                                indication = LocalIndication.current,
+                                onClick = onDelete
+                            )
                             .padding(horizontal = 14.dp, vertical = 9.dp)
                     ) {
                         Text(
@@ -453,8 +539,17 @@ private fun MovieDetail(movie: Movie, onBack: () -> Unit, onDelete: () -> Unit, 
                                 fontWeight = FontWeight.SemiBold
                             )
                         }
+
+                        var startProgress by remember { mutableStateOf(false) }
+                        LaunchedEffect(Unit) { startProgress = true }
+                        val animatedProgress by animateFloatAsState(
+                            targetValue = if (startProgress) movie.progressPercent / 100f else 0f,
+                            animationSpec = tween(1200, easing = FastOutSlowInEasing),
+                            label = "episodeProgress"
+                        )
+
                         LinearProgressIndicator(
-                            progress = { movie.progressPercent / 100f },
+                            progress = { animatedProgress },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(4.dp)
