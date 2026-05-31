@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -59,10 +60,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import com.example.rewind.domain.model.Movie
 import com.example.rewind.domain.model.WatchStatus
 import com.example.rewind.presentation.theme.BorderGold
@@ -387,6 +390,149 @@ private fun DetailHeader(
 }
 
 @Composable
+private fun MovieHero(movie: Movie, statusColor: Color, statusLabel: String, bg: Color) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(220.dp)
+    ) {
+        if (movie.posterUrl != null) {
+            AsyncImage(
+                model = movie.posterUrl,
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .blur(22.dp),
+                contentScale = ContentScale.Crop
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.35f))
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.linearGradient(
+                            colorStops = arrayOf(
+                                0f to VelvetRed,
+                                0.6f to TheaterRed,
+                                1f to bg
+                            )
+                        )
+                    )
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .height(80.dp)
+                .background(
+                    Brush.verticalGradient(
+                        listOf(bg.copy(alpha = 0.6f), Color.Transparent)
+                    )
+                )
+        )
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .height(110.dp)
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color.Transparent, bg.copy(alpha = 0.7f), bg)
+                    )
+                )
+        )
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .fillMaxHeight()
+                .width(70.dp)
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(bg.copy(alpha = 0.75f), Color.Transparent)
+                    )
+                )
+        )
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .fillMaxHeight()
+                .width(70.dp)
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(Color.Transparent, bg.copy(alpha = 0.75f))
+                    )
+                )
+        )
+
+        Box(
+            modifier = Modifier
+                .size(160.dp)
+                .align(Alignment.TopEnd)
+                .offset(x = 40.dp, y = (-20).dp)
+                .blur(55.dp)
+                .background(
+                    Brush.radialGradient(listOf(GoldAmber.copy(alpha = 0.25f), Color.Transparent)),
+                    shape = CircleShape
+                )
+        )
+
+        Box(
+            modifier = Modifier
+                .size(130.dp)
+                .align(Alignment.BottomStart)
+                .offset(x = (-10).dp, y = 10.dp)
+                .blur(45.dp)
+                .background(
+                    Brush.radialGradient(listOf(statusColor.copy(alpha = 0.4f), Color.Transparent)),
+                    shape = CircleShape
+                )
+        )
+
+        if (movie.posterUrl == null) {
+            Text(
+                text = movie.title.take(2).uppercase(),
+                color = Color.White.copy(alpha = 0.06f),
+                fontSize = 110.sp,
+                fontWeight = FontWeight.Black,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(horizontal = 20.dp, vertical = 16.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .background(Color.Black.copy(alpha = 0.45f), RoundedCornerShape(20.dp))
+                    .border(BorderStroke(1.dp, statusColor.copy(alpha = 0.75f)), RoundedCornerShape(20.dp))
+                    .padding(horizontal = 12.dp, vertical = 5.dp)
+            ) {
+                Text(
+                    text = statusLabel.uppercase(),
+                    color = statusColor,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 1.2.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun MovieDetail(
     movie: Movie,
     onBack: () -> Unit,
@@ -418,92 +564,12 @@ private fun MovieDetail(
             onDelete = onDelete
         )
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(220.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.linearGradient(
-                            colorStops = arrayOf(
-                                0f to VelvetRed,
-                                0.6f to TheaterRed,
-                                1f to surface
-                            )
-                        )
-                    )
-            )
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            colorStops = arrayOf(
-                                0f to Color.Transparent,
-                                0.55f to bg.copy(alpha = 0.2f),
-                                1f to bg
-                            )
-                        )
-                    )
-            )
-
-            Box(
-                modifier = Modifier
-                    .size(240.dp)
-                    .align(Alignment.TopEnd)
-                    .offset(x = 50.dp, y = (-30).dp)
-                    .blur(70.dp)
-                    .background(
-                        Brush.radialGradient(listOf(GoldAmber.copy(alpha = 0.18f), Color.Transparent)),
-                        shape = CircleShape
-                    )
-            )
-
-            Box(
-                modifier = Modifier
-                    .size(160.dp)
-                    .align(Alignment.BottomStart)
-                    .offset(x = (-20).dp, y = 20.dp)
-                    .blur(50.dp)
-                    .background(
-                        Brush.radialGradient(listOf(statusColor.copy(alpha = 0.3f), Color.Transparent)),
-                        shape = CircleShape
-                    )
-            )
-
-            Text(
-                text = movie.title.take(2).uppercase(),
-                color = Color.White.copy(alpha = 0.06f),
-                fontSize = 110.sp,
-                fontWeight = FontWeight.Black,
-                modifier = Modifier.align(Alignment.Center)
-            )
-
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(horizontal = 24.dp, vertical = 18.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .background(Color.Black.copy(alpha = 0.35f), RoundedCornerShape(20.dp))
-                        .border(BorderStroke(1.dp, statusColor.copy(alpha = 0.7f)), RoundedCornerShape(20.dp))
-                        .padding(horizontal = 12.dp, vertical = 5.dp)
-                ) {
-                    Text(
-                        text = statusLabel.uppercase(),
-                        color = statusColor,
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        letterSpacing = 1.2.sp
-                    )
-                }
-            }
-        }
+        MovieHero(
+            movie = movie,
+            statusColor = statusColor,
+            statusLabel = statusLabel,
+            bg = bg
+        )
 
         Column(
             modifier = Modifier
@@ -755,9 +821,7 @@ private fun SectionCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
-                    .background(
-                        Brush.verticalGradient(listOf(glowColor, Color.Transparent))
-                    )
+                    .background(Brush.verticalGradient(listOf(glowColor, Color.Transparent)))
             )
         }
         Box(modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp)) {
@@ -772,10 +836,7 @@ private fun MetaChip(label: String) {
     Box(
         modifier = Modifier
             .background(rewindColors.surfaceElevated, RoundedCornerShape(20.dp))
-            .border(
-                BorderStroke(1.dp, rewindColors.borderGold.copy(alpha = 0.35f)),
-                RoundedCornerShape(20.dp)
-            )
+            .border(BorderStroke(1.dp, rewindColors.borderGold.copy(alpha = 0.35f)), RoundedCornerShape(20.dp))
             .padding(horizontal = 12.dp, vertical = 5.dp)
     ) {
         Text(
