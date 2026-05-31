@@ -77,6 +77,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.rewind.presentation.theme.BorderGold
 import com.example.rewind.presentation.theme.GoldAmber
 import com.example.rewind.presentation.theme.GoldAmberDim
 import com.example.rewind.presentation.theme.LocalRewindColors
@@ -264,7 +265,6 @@ fun AIAssistantScreen(
 @Composable
 private fun AIHeader(onNavigateBack: () -> Unit) {
     val rewindColors = LocalRewindColors.current
-    val bg = MaterialTheme.colorScheme.background
     val surface = MaterialTheme.colorScheme.surface
     val onBg = MaterialTheme.colorScheme.onBackground
 
@@ -279,16 +279,7 @@ private fun AIHeader(onNavigateBack: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                Brush.verticalGradient(
-                    colorStops = arrayOf(
-                        0f to surface,
-                        0.75f to surface.copy(alpha = 0.85f),
-                        1f to bg
-                    )
-                )
-            )
-            .padding(horizontal = 20.dp, vertical = 16.dp)
+            .background(surface)
     ) {
         Box(
             modifier = Modifier
@@ -299,9 +290,9 @@ private fun AIHeader(onNavigateBack: () -> Unit) {
                     Brush.horizontalGradient(
                         listOf(
                             Color.Transparent,
-                            rewindColors.borderGold.copy(alpha = 0.5f),
-                            GoldAmber.copy(alpha = 0.3f),
-                            rewindColors.borderGold.copy(alpha = 0.5f),
+                            BorderGold.copy(alpha = 0.3f),
+                            GoldAmber.copy(alpha = 0.2f),
+                            BorderGold.copy(alpha = 0.3f),
                             Color.Transparent
                         )
                     )
@@ -309,16 +300,18 @@ private fun AIHeader(onNavigateBack: () -> Unit) {
         )
 
         Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 18.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(42.dp)
                     .graphicsLayer(scaleX = scale, scaleY = scale)
                     .clip(CircleShape)
                     .background(rewindColors.surfaceElevated)
-                    .border(BorderStroke(1.dp, rewindColors.borderGold.copy(alpha = 0.6f)), CircleShape)
+                    .border(BorderStroke(1.dp, rewindColors.borderGold.copy(alpha = 0.55f)), CircleShape)
                     .clickable(
                         interactionSource = interactionSource,
                         indication = LocalIndication.current,
@@ -330,40 +323,38 @@ private fun AIHeader(onNavigateBack: () -> Unit) {
                     imageVector = Icons.Filled.ArrowBack,
                     contentDescription = "Kembali",
                     tint = GoldAmber,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(19.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.width(14.dp))
+            Spacer(modifier = Modifier.width(16.dp))
 
-            Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(3.dp),
+                modifier = Modifier.weight(1f)
+            ) {
                 Text(
                     text = "AI ASSISTANT",
                     color = GoldAmber,
-                    fontSize = 9.sp,
+                    fontSize = 10.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 3.5.sp
+                    letterSpacing = 3.sp
                 )
                 Text(
                     text = "Talk with Echo",
                     color = onBg,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold,
-                    letterSpacing = (-0.3).sp
+                    letterSpacing = (-0.3).sp,
+                    lineHeight = 24.sp
                 )
             }
 
-            Spacer(modifier = Modifier.weight(1f))
-
             Box(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(42.dp)
                     .clip(CircleShape)
-                    .background(
-                        Brush.linearGradient(
-                            listOf(GoldAmberDim.copy(alpha = 0.25f), GoldAmber.copy(alpha = 0.12f))
-                        )
-                    )
+                    .background(rewindColors.surfaceElevated)
                     .border(BorderStroke(1.dp, rewindColors.borderGold.copy(alpha = 0.55f)), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
@@ -371,7 +362,7 @@ private fun AIHeader(onNavigateBack: () -> Unit) {
                     imageVector = Icons.Filled.AutoAwesome,
                     contentDescription = null,
                     tint = GoldAmber,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(19.dp)
                 )
             }
         }
@@ -558,10 +549,7 @@ private fun ActionChips(selectedAction: AIAction, onActionSelected: (AIAction) -
                         .graphicsLayer(scaleX = scale, scaleY = scale)
                         .clip(RoundedCornerShape(20.dp))
                         .background(Brush.horizontalGradient(listOf(GoldAmberDim, GoldAmber)))
-                        .border(
-                            BorderStroke(1.dp, GoldAmber.copy(alpha = 0.6f)),
-                            RoundedCornerShape(20.dp)
-                        )
+                        .border(BorderStroke(1.dp, GoldAmber.copy(alpha = 0.6f)), RoundedCornerShape(20.dp))
                         .clickable(
                             interactionSource = interactionSource,
                             indication = LocalIndication.current
