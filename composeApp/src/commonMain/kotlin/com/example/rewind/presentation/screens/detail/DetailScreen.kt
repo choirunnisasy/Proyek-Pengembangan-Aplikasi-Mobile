@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -59,10 +60,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.rewind.domain.model.Movie
 import com.example.rewind.domain.model.WatchStatus
+import com.example.rewind.presentation.theme.BorderGold
 import com.example.rewind.presentation.theme.GoldAmber
 import com.example.rewind.presentation.theme.GoldAmberDim
 import com.example.rewind.presentation.theme.LocalRewindColors
@@ -135,8 +138,8 @@ fun DetailScreen(
                     modifier = Modifier
                         .graphicsLayer(scaleX = scale, scaleY = scale)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(TheaterRed.copy(alpha = 0.15f))
-                        .border(BorderStroke(1.dp, TheaterRed.copy(alpha = 0.6f)), RoundedCornerShape(12.dp))
+                        .background(TheaterRed.copy(alpha = 0.12f))
+                        .border(BorderStroke(1.dp, TheaterRed.copy(alpha = 0.5f)), RoundedCornerShape(12.dp))
                         .clickable(interactionSource = interSrc, indication = LocalIndication.current) {
                             viewModel.deleteMovie(movieId) { onNavigateBack() }
                             showDeleteDialog = false
@@ -234,6 +237,156 @@ fun DetailScreen(
 }
 
 @Composable
+private fun DetailHeader(
+    title: String,
+    onBack: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
+    val rewindColors = LocalRewindColors.current
+    val surface = MaterialTheme.colorScheme.surface
+    val onBg = MaterialTheme.colorScheme.onBackground
+
+    val backSrc = remember { MutableInteractionSource() }
+    val backPressed by backSrc.collectIsPressedAsState()
+    val backScale by animateFloatAsState(
+        targetValue = if (backPressed) 0.88f else 1f,
+        animationSpec = spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessLow),
+        label = "backScale"
+    )
+
+    val editSrc = remember { MutableInteractionSource() }
+    val editPressed by editSrc.collectIsPressedAsState()
+    val editScale by animateFloatAsState(
+        targetValue = if (editPressed) 0.88f else 1f,
+        animationSpec = spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessLow),
+        label = "editScale"
+    )
+
+    val deleteSrc = remember { MutableInteractionSource() }
+    val deletePressed by deleteSrc.collectIsPressedAsState()
+    val deleteScale by animateFloatAsState(
+        targetValue = if (deletePressed) 0.88f else 1f,
+        animationSpec = spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessLow),
+        label = "deleteScale"
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(surface)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .align(Alignment.BottomCenter)
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(
+                            Color.Transparent,
+                            BorderGold.copy(alpha = 0.3f),
+                            GoldAmber.copy(alpha = 0.2f),
+                            BorderGold.copy(alpha = 0.3f),
+                            Color.Transparent
+                        )
+                    )
+                )
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 18.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(42.dp)
+                    .graphicsLayer(scaleX = backScale, scaleY = backScale)
+                    .clip(CircleShape)
+                    .background(rewindColors.surfaceElevated)
+                    .border(BorderStroke(1.dp, rewindColors.borderGold.copy(alpha = 0.55f)), CircleShape)
+                    .clickable(interactionSource = backSrc, indication = LocalIndication.current, onClick = onBack),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowBack,
+                    contentDescription = "Kembali",
+                    tint = GoldAmber,
+                    modifier = Modifier.size(19.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(14.dp))
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(3.dp)
+            ) {
+                Text(
+                    text = "DETAIL FILM",
+                    color = GoldAmber,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 3.sp
+                )
+                Text(
+                    text = title,
+                    color = onBg,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = (-0.2).sp,
+                    lineHeight = 22.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Box(
+                    modifier = Modifier
+                        .size(42.dp)
+                        .graphicsLayer(scaleX = editScale, scaleY = editScale)
+                        .clip(CircleShape)
+                        .background(rewindColors.surfaceElevated)
+                        .border(BorderStroke(1.dp, rewindColors.borderGold.copy(alpha = 0.55f)), CircleShape)
+                        .clickable(interactionSource = editSrc, indication = LocalIndication.current, onClick = onEdit),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Edit,
+                        contentDescription = "Edit",
+                        tint = GoldAmber,
+                        modifier = Modifier.size(17.dp)
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .size(42.dp)
+                        .graphicsLayer(scaleX = deleteScale, scaleY = deleteScale)
+                        .clip(CircleShape)
+                        .background(rewindColors.surfaceElevated)
+                        .border(BorderStroke(1.dp, Color(0xFFFF6B6B).copy(alpha = 0.55f)), CircleShape)
+                        .clickable(interactionSource = deleteSrc, indication = LocalIndication.current, onClick = onDelete),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = "Hapus",
+                        tint = Color(0xFFFF6B6B),
+                        modifier = Modifier.size(17.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun MovieDetail(
     movie: Movie,
     onBack: () -> Unit,
@@ -258,11 +411,17 @@ private fun MovieDetail(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
+        DetailHeader(
+            title = movie.title,
+            onBack = onBack,
+            onEdit = onEdit,
+            onDelete = onDelete
+        )
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(280.dp)
+                .height(220.dp)
         ) {
             Box(
                 modifier = Modifier
@@ -319,121 +478,15 @@ private fun MovieDetail(
             Text(
                 text = movie.title.take(2).uppercase(),
                 color = Color.White.copy(alpha = 0.06f),
-                fontSize = 120.sp,
+                fontSize = 110.sp,
                 fontWeight = FontWeight.Black,
                 modifier = Modifier.align(Alignment.Center)
             )
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.TopCenter)
-                    .padding(horizontal = 20.dp, vertical = 18.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                val backSrc = remember { MutableInteractionSource() }
-                val backPressed by backSrc.collectIsPressedAsState()
-                val backScale by animateFloatAsState(
-                    targetValue = if (backPressed) 0.85f else 1f,
-                    animationSpec = spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessLow),
-                    label = "backScale"
-                )
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .graphicsLayer(scaleX = backScale, scaleY = backScale)
-                        .clip(CircleShape)
-                        .background(Color.Black.copy(alpha = 0.45f))
-                        .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.2f)), CircleShape)
-                        .clickable(interactionSource = backSrc, indication = LocalIndication.current, onClick = onBack),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = "Kembali",
-                        tint = Color.White,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    val editSrc = remember { MutableInteractionSource() }
-                    val editPressed by editSrc.collectIsPressedAsState()
-                    val editScale by animateFloatAsState(
-                        targetValue = if (editPressed) 0.92f else 1f,
-                        animationSpec = spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessLow),
-                        label = "editScale"
-                    )
-                    Box(
-                        modifier = Modifier
-                            .graphicsLayer(scaleX = editScale, scaleY = editScale)
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(Color.Black.copy(alpha = 0.45f))
-                            .border(BorderStroke(1.dp, GoldAmber.copy(alpha = 0.85f)), RoundedCornerShape(20.dp))
-                            .clickable(interactionSource = editSrc, indication = LocalIndication.current, onClick = onEdit)
-                            .padding(horizontal = 14.dp, vertical = 8.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(5.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Edit,
-                                contentDescription = null,
-                                tint = GoldAmber,
-                                modifier = Modifier.size(13.dp)
-                            )
-                            Text(
-                                "Edit",
-                                color = GoldAmber,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                    }
-
-                    val deleteSrc = remember { MutableInteractionSource() }
-                    val deletePressed by deleteSrc.collectIsPressedAsState()
-                    val deleteScale by animateFloatAsState(
-                        targetValue = if (deletePressed) 0.92f else 1f,
-                        animationSpec = spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessLow),
-                        label = "deleteScale"
-                    )
-                    Box(
-                        modifier = Modifier
-                            .graphicsLayer(scaleX = deleteScale, scaleY = deleteScale)
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(Color.Black.copy(alpha = 0.45f))
-                            .border(BorderStroke(1.dp, Color(0xFFFF6B6B).copy(alpha = 0.9f)), RoundedCornerShape(20.dp))
-                            .clickable(interactionSource = deleteSrc, indication = LocalIndication.current, onClick = onDelete)
-                            .padding(horizontal = 14.dp, vertical = 8.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(5.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Delete,
-                                contentDescription = null,
-                                tint = Color(0xFFFF6B6B),
-                                modifier = Modifier.size(13.dp)
-                            )
-                            Text(
-                                "Hapus",
-                                color = Color(0xFFFF6B6B),
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                    }
-                }
-            }
-
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
-                    .padding(horizontal = 24.dp, vertical = 22.dp)
+                    .padding(horizontal = 24.dp, vertical = 18.dp)
             ) {
                 Box(
                     modifier = Modifier
