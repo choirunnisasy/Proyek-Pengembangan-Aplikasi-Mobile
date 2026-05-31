@@ -83,6 +83,17 @@ import com.example.rewind.presentation.theme.LocalRewindColors
 import com.example.rewind.presentation.theme.TheaterRed
 import org.koin.compose.viewmodel.koinViewModel
 
+private fun String.stripMarkdown(): String {
+    return this
+        .replace(Regex("\\*\\*(.+?)\\*\\*"), "$1")
+        .replace(Regex("__(.+?)__"), "$1")
+        .replace(Regex("\\*(.+?)\\*"), "$1")
+        .replace(Regex("_(.+?)_"), "$1")
+        .replace(Regex("^#{1,6}\\s+", RegexOption.MULTILINE), "")
+        .replace(Regex("`{1,3}(.+?)`{1,3}"), "$1")
+        .trim()
+}
+
 @Composable
 fun AIAssistantScreen(
     noteId: Long? = null,
@@ -370,7 +381,6 @@ private fun AIHeader(onNavigateBack: () -> Unit) {
 @Composable
 private fun AIWelcomeBanner() {
     val rewindColors = LocalRewindColors.current
-    val surface = MaterialTheme.colorScheme.surface
 
     Box(
         modifier = Modifier
@@ -527,7 +537,6 @@ private fun ErrorBox(message: String) {
 private fun ActionChips(selectedAction: AIAction, onActionSelected: (AIAction) -> Unit) {
     val rewindColors = LocalRewindColors.current
     val bg = MaterialTheme.colorScheme.background
-    val surface = MaterialTheme.colorScheme.surface
 
     LazyRow(
         contentPadding = PaddingValues(vertical = 2.dp),
@@ -634,10 +643,7 @@ private fun RunButton(isLoading: Boolean, canExecute: Boolean, onClick: () -> Un
                         Brush.horizontalGradient(listOf(GoldAmberDim, GoldAmber))
                     else
                         Brush.horizontalGradient(
-                            listOf(
-                                rewindColors.surfaceElevated,
-                                rewindColors.surfaceElevated
-                            )
+                            listOf(rewindColors.surfaceElevated, rewindColors.surfaceElevated)
                         )
                 )
                 .border(
@@ -705,7 +711,6 @@ private fun ResultCard(
 ) {
     val rewindColors = LocalRewindColors.current
     val bg = MaterialTheme.colorScheme.background
-    val surface = MaterialTheme.colorScheme.surface
     val onBg = MaterialTheme.colorScheme.onBackground
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -785,7 +790,7 @@ private fun ResultCard(
                 Spacer(modifier = Modifier.height(10.dp))
 
                 Text(
-                    text = result,
+                    text = result.stripMarkdown(),
                     color = onBg,
                     fontSize = 14.sp,
                     lineHeight = 23.sp,
