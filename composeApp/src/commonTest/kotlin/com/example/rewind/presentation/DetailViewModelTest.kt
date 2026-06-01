@@ -27,7 +27,6 @@ import kotlin.test.assertTrue
 class DetailViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
-
     private lateinit var fakeRepository: FakeMovieRepository
     private lateinit var viewModel: DetailViewModel
 
@@ -61,6 +60,14 @@ class DetailViewModelTest {
         val state = viewModel.uiState.value
         assertTrue(state is DetailUiState.Success)
         assertEquals("Parasite", (state as DetailUiState.Success).movie.title)
+    }
+
+    @Test
+    fun `loadMovie emits NotFound when movie does not exist`() = runTest {
+        viewModel.loadMovie(999L)
+        advanceUntilIdle()
+
+        assertEquals(DetailUiState.NotFound, viewModel.uiState.value)
     }
 
     private fun createTestMovie(title: String = "Test Movie") = Movie(
