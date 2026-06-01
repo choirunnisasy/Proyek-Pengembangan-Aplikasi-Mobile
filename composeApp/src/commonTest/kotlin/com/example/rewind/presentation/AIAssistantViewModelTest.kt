@@ -1,11 +1,13 @@
 package com.example.rewind.presentation
 
+import app.cash.turbine.test
 import com.example.rewind.data.repository.FakeAIRepository
 import com.example.rewind.domain.repository.WritingStyle
 import com.example.rewind.domain.usecase.GenerateIdeasUseCase
 import com.example.rewind.domain.usecase.ImproveWritingUseCase
 import com.example.rewind.domain.usecase.SummarizeNoteUseCase
 import com.example.rewind.presentation.screens.ai.AIAction
+import com.example.rewind.presentation.screens.ai.AIAssistantEvent
 import com.example.rewind.presentation.screens.ai.AIAssistantViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -21,6 +23,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AIAssistantViewModelTest {
@@ -103,5 +106,37 @@ class AIAssistantViewModelTest {
         assertEquals("Parasite is a masterclass in tension.", state.result)
         assertFalse(state.isLoading)
         assertNull(state.error)
+    }
+
+    @Test
+    fun `copyResult emits CopyToClipboard event with correct result text`() = runTest {
+        fakeAIRepository.fakeResult = "Inception bends reality."
+        viewModel.onInputTextChange("Describe Inception")
+        viewModel.executeAction()
+        advanceUntilIdle()
+
+        viewModel.events.test {
+            viewModel.copyResult()
+            val event = awaitItem()
+            assertTrue(event is AIAssistantEvent.CopyToClipboard)
+            assertEquals("Inception bends reality.", (event as AIAssistantEvent.CopyToClipboard).text)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `applyToNote emits ApplyToNote event with correct result text`() = runTest {
+        fakeAIRepository.fakeResult = "A stunning visual journey."
+        viewModel.onInputTextChange("Describe Interstellar")
+        viewModel.executeAction()
+        advanceUntilIdle()
+
+        viewModel.events.test {
+            viewModel.applyToNote()
+            val event = awaitItem()
+            assertTrue(event is AIAssistantEvent.ApplyToNote)
+            assertEquals("A stunning visual journey.", (event as AIAssistantEvent.ApplyToNote).text)
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 }
