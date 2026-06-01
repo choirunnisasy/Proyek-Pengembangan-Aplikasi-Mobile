@@ -390,11 +390,11 @@ private fun DetailHeader(
 }
 
 @Composable
-private fun MovieHero(movie: Movie, statusColor: Color, statusLabel: String, bg: Color) {
+private fun MovieHero(movie: Movie, bg: Color) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(220.dp)
+            .height(200.dp)
     ) {
         if (movie.posterUrl != null) {
             AsyncImage(
@@ -405,7 +405,6 @@ private fun MovieHero(movie: Movie, statusColor: Color, statusLabel: String, bg:
                     .blur(22.dp),
                 contentScale = ContentScale.Crop
             )
-
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -432,69 +431,41 @@ private fun MovieHero(movie: Movie, statusColor: Color, statusLabel: String, bg:
                 .align(Alignment.TopCenter)
                 .fillMaxWidth()
                 .height(80.dp)
-                .background(
-                    Brush.verticalGradient(
-                        listOf(bg.copy(alpha = 0.6f), Color.Transparent)
-                    )
-                )
+                .background(Brush.verticalGradient(listOf(bg.copy(alpha = 0.7f), Color.Transparent)))
         )
 
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .height(110.dp)
-                .background(
-                    Brush.verticalGradient(
-                        listOf(Color.Transparent, bg.copy(alpha = 0.7f), bg)
-                    )
-                )
+                .height(100.dp)
+                .background(Brush.verticalGradient(listOf(Color.Transparent, bg.copy(alpha = 0.8f), bg)))
         )
 
         Box(
             modifier = Modifier
                 .align(Alignment.CenterStart)
                 .fillMaxHeight()
-                .width(70.dp)
-                .background(
-                    Brush.horizontalGradient(
-                        listOf(bg.copy(alpha = 0.75f), Color.Transparent)
-                    )
-                )
+                .width(72.dp)
+                .background(Brush.horizontalGradient(listOf(bg.copy(alpha = 0.8f), Color.Transparent)))
         )
 
         Box(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
-                .width(70.dp)
-                .background(
-                    Brush.horizontalGradient(
-                        listOf(Color.Transparent, bg.copy(alpha = 0.75f))
-                    )
-                )
+                .width(72.dp)
+                .background(Brush.horizontalGradient(listOf(Color.Transparent, bg.copy(alpha = 0.8f))))
         )
 
         Box(
             modifier = Modifier
-                .size(160.dp)
+                .size(150.dp)
                 .align(Alignment.TopEnd)
                 .offset(x = 40.dp, y = (-20).dp)
                 .blur(55.dp)
                 .background(
-                    Brush.radialGradient(listOf(GoldAmber.copy(alpha = 0.25f), Color.Transparent)),
-                    shape = CircleShape
-                )
-        )
-
-        Box(
-            modifier = Modifier
-                .size(130.dp)
-                .align(Alignment.BottomStart)
-                .offset(x = (-10).dp, y = 10.dp)
-                .blur(45.dp)
-                .background(
-                    Brush.radialGradient(listOf(statusColor.copy(alpha = 0.4f), Color.Transparent)),
+                    Brush.radialGradient(listOf(GoldAmber.copy(alpha = 0.22f), Color.Transparent)),
                     shape = CircleShape
                 )
         )
@@ -508,17 +479,75 @@ private fun MovieHero(movie: Movie, statusColor: Color, statusLabel: String, bg:
                 modifier = Modifier.align(Alignment.Center)
             )
         }
+    }
+}
 
+@Composable
+private fun StatusCard(statusColor: Color, statusLabel: String) {
+    val rewindColors = LocalRewindColors.current
+    val onBg = MaterialTheme.colorScheme.onBackground
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(rewindColors.surfaceElevated)
+            .border(
+                BorderStroke(
+                    1.dp,
+                    Brush.verticalGradient(
+                        listOf(
+                            statusColor.copy(alpha = 0.5f),
+                            rewindColors.borderSubtle.copy(alpha = 0.5f)
+                        )
+                    )
+                ),
+                RoundedCornerShape(16.dp)
+            )
+    ) {
         Box(
             modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(horizontal = 20.dp, vertical = 16.dp)
+                .fillMaxWidth()
+                .height(56.dp)
+                .background(
+                    Brush.verticalGradient(
+                        listOf(statusColor.copy(alpha = 0.08f), Color.Transparent)
+                    )
+                )
+        )
+        Row(
+            modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Box(
                 modifier = Modifier
-                    .background(Color.Black.copy(alpha = 0.45f), RoundedCornerShape(20.dp))
-                    .border(BorderStroke(1.dp, statusColor.copy(alpha = 0.75f)), RoundedCornerShape(20.dp))
-                    .padding(horizontal = 12.dp, vertical = 5.dp)
+                    .size(10.dp)
+                    .clip(CircleShape)
+                    .background(statusColor)
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    text = "STATUS TONTONAN",
+                    color = rewindColors.textMuted,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 2.sp
+                )
+                Text(
+                    text = statusLabel,
+                    color = onBg,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    letterSpacing = 0.1.sp
+                )
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            Box(
+                modifier = Modifier
+                    .background(statusColor.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
+                    .border(BorderStroke(1.dp, statusColor.copy(alpha = 0.4f)), RoundedCornerShape(20.dp))
+                    .padding(horizontal = 10.dp, vertical = 4.dp)
             ) {
                 Text(
                     text = statusLabel.uppercase(),
@@ -564,12 +593,7 @@ private fun MovieDetail(
             onDelete = onDelete
         )
 
-        MovieHero(
-            movie = movie,
-            statusColor = statusColor,
-            statusLabel = statusLabel,
-            bg = bg
-        )
+        MovieHero(movie = movie, bg = bg)
 
         Column(
             modifier = Modifier
@@ -594,6 +618,8 @@ private fun MovieDetail(
             }
 
             Spacer(modifier = Modifier.height(2.dp))
+
+            StatusCard(statusColor = statusColor, statusLabel = statusLabel)
 
             if (movie.rating != null && movie.rating > 0f) {
                 SectionCard {
