@@ -18,8 +18,9 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AIAssistantViewModelTest {
@@ -76,5 +77,31 @@ class AIAssistantViewModelTest {
         advanceUntilIdle()
 
         assertEquals(AIAction.SUMMARIZE, viewModel.uiState.value.selectedAction)
+    }
+
+    @Test
+    fun `executeAction with blank input sets error and does not trigger loading`() = runTest {
+        viewModel.executeAction()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertNotNull(state.error)
+        assertFalse(state.isLoading)
+        assertNull(state.result)
+    }
+
+    @Test
+    fun `executeAction CHAT success updates result and clears loading state`() = runTest {
+        fakeAIRepository.fakeResult = "Parasite is a masterclass in tension."
+        viewModel.onInputTextChange("Tell me about Parasite")
+        viewModel.onActionSelected(AIAction.CHAT)
+
+        viewModel.executeAction()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertEquals("Parasite is a masterclass in tension.", state.result)
+        assertFalse(state.isLoading)
+        assertNull(state.error)
     }
 }
