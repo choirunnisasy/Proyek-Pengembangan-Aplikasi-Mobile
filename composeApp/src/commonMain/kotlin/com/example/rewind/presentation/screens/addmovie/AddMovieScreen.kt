@@ -1,9 +1,28 @@
 package com.example.rewind.presentation.screens.addmovie
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,6 +62,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -105,6 +125,25 @@ fun AddMovieScreen(
     val bg = MaterialTheme.colorScheme.background
     val rewindColors = LocalRewindColors.current
 
+    val infiniteTransition = rememberInfiniteTransition(label = "ambient")
+    val glowPulse by infiniteTransition.animateFloat(
+        initialValue = 0.3f,
+        targetValue = 0.7f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(3000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "glowPulse"
+    )
+
+    val saveSrc = remember { MutableInteractionSource() }
+    val savePressed by saveSrc.collectIsPressedAsState()
+    val saveScale by animateFloatAsState(
+        targetValue = if (savePressed && uiState !is AddMovieUiState.Loading) 0.96f else 1f,
+        animationSpec = spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessLow),
+        label = "saveScale"
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -118,7 +157,21 @@ fun AddMovieScreen(
                 .blur(80.dp)
                 .background(
                     Brush.radialGradient(
-                        colors = listOf(GoldAmber.copy(alpha = 0.1f), Color.Transparent)
+                        colors = listOf(GoldAmber.copy(alpha = glowPulse * 0.15f), Color.Transparent)
+                    ),
+                    shape = CircleShape
+                )
+        )
+
+        Box(
+            modifier = Modifier
+                .size(180.dp)
+                .align(Alignment.BottomStart)
+                .offset(x = (-40).dp, y = 40.dp)
+                .blur(70.dp)
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(TheaterRed.copy(alpha = glowPulse * 0.1f), Color.Transparent)
                     ),
                     shape = CircleShape
                 )
@@ -164,14 +217,29 @@ fun AddMovieScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     MovieType.entries.forEach { type ->
                         val isSelected = selectedType == type
+                        val chipSrc = remember { MutableInteractionSource() }
+                        val chipPressed by chipSrc.collectIsPressedAsState()
+                        val chipScale by animateFloatAsState(
+                            targetValue = if (chipPressed) 0.92f else 1f,
+                            animationSpec = spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessLow),
+                            label = "typeChipScale"
+                        )
                         if (isSelected) {
                             Box(
                                 modifier = Modifier
+                                    .graphicsLayer(scaleX = chipScale, scaleY = chipScale)
                                     .clip(RoundedCornerShape(10.dp))
                                     .background(
                                         Brush.horizontalGradient(listOf(GoldAmberDim, GoldAmber))
                                     )
-                                    .clickable { selectedType = type }
+                                    .border(
+                                        BorderStroke(1.dp, GoldAmber.copy(alpha = 0.6f)),
+                                        RoundedCornerShape(10.dp)
+                                    )
+                                    .clickable(
+                                        interactionSource = chipSrc,
+                                        indication = LocalIndication.current
+                                    ) { selectedType = type }
                                     .padding(horizontal = 14.dp, vertical = 9.dp)
                             ) {
                                 Text(
@@ -184,13 +252,17 @@ fun AddMovieScreen(
                         } else {
                             Box(
                                 modifier = Modifier
+                                    .graphicsLayer(scaleX = chipScale, scaleY = chipScale)
                                     .clip(RoundedCornerShape(10.dp))
                                     .background(rewindColors.surfaceElevated)
                                     .border(
                                         BorderStroke(1.dp, rewindColors.borderSubtle),
                                         RoundedCornerShape(10.dp)
                                     )
-                                    .clickable { selectedType = type }
+                                    .clickable(
+                                        interactionSource = chipSrc,
+                                        indication = LocalIndication.current
+                                    ) { selectedType = type }
                                     .padding(horizontal = 14.dp, vertical = 9.dp)
                             ) {
                                 Text(
@@ -210,23 +282,35 @@ fun AddMovieScreen(
                 SectionLabel("STATUS")
                 StatusSelector(selected = selectedStatus, onSelect = { selectedStatus = it })
 
-                if (selectedType != MovieType.MOVIE) {
-                    SectionLabel("TOTAL EPISODES")
-                    OutlinedTextField(
-                        value = totalEpisodesText,
-                        onValueChange = { if (it.all { c -> c.isDigit() }) totalEpisodesText = it },
-                        placeholder = {
-                            Text("Number of episodes...", color = rewindColors.textMuted, fontSize = 14.sp)
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        colors = fieldColors(),
-                        shape = RoundedCornerShape(12.dp),
-                        textStyle = LocalTextStyle.current.copy(
-                            color = MaterialTheme.colorScheme.onBackground,
-                            fontSize = 14.sp
-                        )
+                AnimatedVisibility(
+                    visible = selectedType != MovieType.MOVIE,
+                    enter = fadeIn(tween(250)) + slideInVertically(
+                        animationSpec = tween(300),
+                        initialOffsetY = { -it / 2 }
+                    ),
+                    exit = fadeOut(tween(200)) + slideOutVertically(
+                        animationSpec = tween(250),
+                        targetOffsetY = { -it / 2 }
                     )
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                        SectionLabel("TOTAL EPISODES")
+                        OutlinedTextField(
+                            value = totalEpisodesText,
+                            onValueChange = { if (it.all { c -> c.isDigit() }) totalEpisodesText = it },
+                            placeholder = {
+                                Text("Number of episodes...", color = rewindColors.textMuted, fontSize = 14.sp)
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            colors = fieldColors(),
+                            shape = RoundedCornerShape(12.dp),
+                            textStyle = LocalTextStyle.current.copy(
+                                color = MaterialTheme.colorScheme.onBackground,
+                                fontSize = 14.sp
+                            )
+                        )
+                    }
                 }
 
                 SectionLabel("RATING")
@@ -253,24 +337,32 @@ fun AddMovieScreen(
                                 fontSize = 18.sp,
                                 letterSpacing = 2.sp
                             )
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        GoldAmber.copy(alpha = 0.12f),
-                                        RoundedCornerShape(6.dp)
+                            AnimatedContent(
+                                targetState = rating.toInt(),
+                                transitionSpec = {
+                                    fadeIn(tween(200)) togetherWith fadeOut(tween(150))
+                                },
+                                label = "ratingLabel"
+                            ) { ratingInt ->
+                                Box(
+                                    modifier = Modifier
+                                        .background(
+                                            GoldAmber.copy(alpha = 0.12f),
+                                            RoundedCornerShape(6.dp)
+                                        )
+                                        .border(
+                                            BorderStroke(0.5.dp, rewindColors.borderGold.copy(alpha = 0.5f)),
+                                            RoundedCornerShape(6.dp)
+                                        )
+                                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                                ) {
+                                    Text(
+                                        text = "$ratingInt / 5",
+                                        color = GoldAmber,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold
                                     )
-                                    .border(
-                                        BorderStroke(0.5.dp, rewindColors.borderGold.copy(alpha = 0.5f)),
-                                        RoundedCornerShape(6.dp)
-                                    )
-                                    .padding(horizontal = 10.dp, vertical = 4.dp)
-                            ) {
-                                Text(
-                                    text = "${rating.toInt()} / 5",
-                                    color = GoldAmber,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
+                                }
                             }
                         }
                         Slider(
@@ -314,7 +406,17 @@ fun AddMovieScreen(
                     )
                 )
 
-                if (uiState is AddMovieUiState.Error) {
+                AnimatedVisibility(
+                    visible = uiState is AddMovieUiState.Error,
+                    enter = fadeIn(tween(250)) + slideInVertically(
+                        animationSpec = tween(300),
+                        initialOffsetY = { it / 2 }
+                    ),
+                    exit = fadeOut(tween(200)) + slideOutVertically(
+                        animationSpec = tween(250),
+                        targetOffsetY = { it / 2 }
+                    )
+                ) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -326,7 +428,7 @@ fun AddMovieScreen(
                             .padding(horizontal = 14.dp, vertical = 10.dp)
                     ) {
                         Text(
-                            text = (uiState as AddMovieUiState.Error).message,
+                            text = (uiState as? AddMovieUiState.Error)?.message ?: "",
                             color = TheaterRed,
                             fontSize = 13.sp
                         )
@@ -337,19 +439,22 @@ fun AddMovieScreen(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
+                    if (uiState !is AddMovieUiState.Loading) {
+                        Box(
+                            modifier = Modifier
+                                .size(200.dp)
+                                .blur(40.dp)
+                                .background(
+                                    Brush.radialGradient(
+                                        colors = listOf(GoldAmber.copy(alpha = glowPulse * 0.18f), Color.Transparent)
+                                    ),
+                                    shape = CircleShape
+                                )
+                        )
+                    }
                     Box(
                         modifier = Modifier
-                            .size(200.dp)
-                            .blur(40.dp)
-                            .background(
-                                Brush.radialGradient(
-                                    colors = listOf(GoldAmber.copy(alpha = 0.15f), Color.Transparent)
-                                ),
-                                shape = CircleShape
-                            )
-                    )
-                    Box(
-                        modifier = Modifier
+                            .graphicsLayer(scaleX = saveScale, scaleY = saveScale)
                             .fillMaxWidth()
                             .height(52.dp)
                             .clip(RoundedCornerShape(14.dp))
@@ -364,7 +469,11 @@ fun AddMovieScreen(
                                         )
                                     )
                             )
-                            .clickable(enabled = uiState !is AddMovieUiState.Loading) {
+                            .clickable(
+                                interactionSource = saveSrc,
+                                indication = LocalIndication.current,
+                                enabled = uiState !is AddMovieUiState.Loading
+                            ) {
                                 viewModel.saveMovie(
                                     title = title,
                                     genre = selectedGenre,
@@ -378,20 +487,28 @@ fun AddMovieScreen(
                             },
                         contentAlignment = Alignment.Center
                     ) {
-                        if (uiState is AddMovieUiState.Loading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(20.dp),
-                                color = bg,
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            Text(
-                                text = if (isEditMode) "Update Collection" else "Save to Collection",
-                                color = bg,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp,
-                                letterSpacing = 0.5.sp
-                            )
+                        AnimatedContent(
+                            targetState = uiState is AddMovieUiState.Loading,
+                            transitionSpec = {
+                                fadeIn(tween(200)) togetherWith fadeOut(tween(150))
+                            },
+                            label = "saveButtonContent"
+                        ) { isLoading ->
+                            if (isLoading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    color = bg,
+                                    strokeWidth = 2.dp
+                                )
+                            } else {
+                                Text(
+                                    text = if (isEditMode) "Update Collection" else "Save to Collection",
+                                    color = bg,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp,
+                                    letterSpacing = 0.5.sp
+                                )
+                            }
                         }
                     }
                 }
@@ -408,6 +525,14 @@ private fun AddMovieHeader(onNavigateBack: () -> Unit, isEditMode: Boolean = fal
     val bg = MaterialTheme.colorScheme.background
     val surface = MaterialTheme.colorScheme.surface
     val onBg = MaterialTheme.colorScheme.onBackground
+
+    val backSrc = remember { MutableInteractionSource() }
+    val backPressed by backSrc.collectIsPressedAsState()
+    val backScale by animateFloatAsState(
+        targetValue = if (backPressed) 0.88f else 1f,
+        animationSpec = spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessLow),
+        label = "backScale"
+    )
 
     Box(
         modifier = Modifier
@@ -436,13 +561,18 @@ private fun AddMovieHeader(onNavigateBack: () -> Unit, isEditMode: Boolean = fal
             Box(
                 modifier = Modifier
                     .size(42.dp)
+                    .graphicsLayer(scaleX = backScale, scaleY = backScale)
                     .clip(CircleShape)
                     .background(rewindColors.surfaceElevated)
                     .border(
                         BorderStroke(1.dp, rewindColors.borderGold.copy(alpha = 0.55f)),
                         CircleShape
                     )
-                    .clickable(onClick = onNavigateBack),
+                    .clickable(
+                        interactionSource = backSrc,
+                        indication = LocalIndication.current,
+                        onClick = onNavigateBack
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Text("←", color = GoldAmber, fontSize = 17.sp)
@@ -501,8 +631,16 @@ private fun StatusSelector(selected: WatchStatus, onSelect: (WatchStatus) -> Uni
         statusList.forEach { (status, label) ->
             val isSelected = selected == status
             val color = statusColors[status] ?: GoldAmber
+            val chipSrc = remember { MutableInteractionSource() }
+            val chipPressed by chipSrc.collectIsPressedAsState()
+            val chipScale by animateFloatAsState(
+                targetValue = if (chipPressed) 0.88f else 1f,
+                animationSpec = spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessLow),
+                label = "statusChipScale"
+            )
             Box(
                 modifier = Modifier
+                    .graphicsLayer(scaleX = chipScale, scaleY = chipScale)
                     .clip(RoundedCornerShape(8.dp))
                     .background(
                         if (isSelected) color.copy(alpha = 0.15f) else rewindColors.surfaceElevated
@@ -514,7 +652,10 @@ private fun StatusSelector(selected: WatchStatus, onSelect: (WatchStatus) -> Uni
                         ),
                         RoundedCornerShape(8.dp)
                     )
-                    .clickable { onSelect(status) }
+                    .clickable(
+                        interactionSource = chipSrc,
+                        indication = LocalIndication.current
+                    ) { onSelect(status) }
                     .padding(horizontal = 11.dp, vertical = 8.dp)
             ) {
                 Text(
@@ -533,17 +674,33 @@ private fun GenreDropdown(selected: MovieGenre, onSelect: (MovieGenre) -> Unit) 
     val rewindColors = LocalRewindColors.current
     val onBg = MaterialTheme.colorScheme.onBackground
     var expanded by remember { mutableStateOf(false) }
+
+    val dropdownSrc = remember { MutableInteractionSource() }
+    val dropdownPressed by dropdownSrc.collectIsPressedAsState()
+    val dropdownScale by animateFloatAsState(
+        targetValue = if (dropdownPressed) 0.98f else 1f,
+        animationSpec = spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessLow),
+        label = "dropdownScale"
+    )
+
     Box {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .graphicsLayer(scaleX = dropdownScale, scaleY = dropdownScale)
                 .clip(RoundedCornerShape(12.dp))
                 .background(rewindColors.surfaceElevated)
                 .border(
-                    BorderStroke(1.dp, rewindColors.borderSubtle),
+                    BorderStroke(
+                        1.dp,
+                        if (expanded) GoldAmber.copy(alpha = 0.5f) else rewindColors.borderSubtle
+                    ),
                     RoundedCornerShape(12.dp)
                 )
-                .clickable { expanded = true }
+                .clickable(
+                    interactionSource = dropdownSrc,
+                    indication = LocalIndication.current
+                ) { expanded = true }
                 .padding(horizontal = 16.dp, vertical = 15.dp)
         ) {
             Row(
