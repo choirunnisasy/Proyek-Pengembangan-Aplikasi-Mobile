@@ -42,6 +42,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.testTag
 import coil3.compose.AsyncImage
 import com.example.rewind.data.remote.dto.TmdbMovieDto
 import com.example.rewind.domain.model.Movie
@@ -583,7 +584,7 @@ private fun SearchBar(
                 }
             }
         },
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp).heightIn(min = 48.dp)
+        modifier = Modifier.testTag("search_bar").fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp).heightIn(min = 48.dp)
             .onFocusChanged { onFocusChange(it.isFocused) },
         singleLine = true,
         shape = RoundedCornerShape(14.dp),
