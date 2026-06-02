@@ -33,10 +33,11 @@ import kotlin.test.assertTrue
 
 // Implementasi Fake untuk TmdbRepository khusus untuk testing
 class FakeTmdbRepository : TmdbRepository {
+    var trendingResult: NetworkResult<List<TmdbMovieDto>> = NetworkResult.Success(emptyList())
     override suspend fun searchMulti(query: String, page: Int): NetworkResult<List<TmdbMovieDto>> = NetworkResult.Success(emptyList())
     override suspend fun getMovieDetail(tmdbId: Int): NetworkResult<TmdbMovieDetailDto> = NetworkResult.Error("Not implemented")
     override suspend fun getTvDetail(tmdbId: Int): NetworkResult<TmdbMovieDetailDto> = NetworkResult.Error("Not implemented")
-    override suspend fun getTrending(): NetworkResult<List<TmdbMovieDto>> = NetworkResult.Success(emptyList())
+    override suspend fun getTrending(): NetworkResult<List<TmdbMovieDto>> = trendingResult
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -165,6 +166,19 @@ class HomeViewModelTest {
         }
     }
 
+    @Test
+    fun `fetchTrending should update trendingState to Success`() = runTest {
+        val dummyData = listOf(TmdbMovieDto(id = 1, title = "Avengers", overview = null, posterPath = null, genreIds = emptyList()))
+        fakeTmdbRepository.trendingResult = NetworkResult.Success(dummyData)
+
+        val vm = HomeViewModel(getAllMoviesUseCase, deleteMovieUseCase, searchTmdbUseCase, saveMovieUseCase, getTrendingUseCase)
+
+        vm.fetchTrending()
+        advanceUntilIdle()
+
+        val state = vm.trendingState.value
+        assertTrue(state is com.example.rewind.presentation.screens.home.TmdbSearchState.Success)
+    }
     private fun createTestMovie(title: String): Movie {
         return Movie(
             id = 0,
