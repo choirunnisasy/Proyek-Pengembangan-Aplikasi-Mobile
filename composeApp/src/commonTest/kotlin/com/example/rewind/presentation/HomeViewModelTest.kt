@@ -192,6 +192,17 @@ class HomeViewModelTest {
         assertTrue(message?.contains("ditambahkan ke koleksi") == true)
     }
 
+    @Test
+    fun `clearAddMessage should reset addMessage to null`() = runTest {
+        val vm = HomeViewModel(getAllMoviesUseCase, deleteMovieUseCase, searchTmdbUseCase, saveMovieUseCase, getTrendingUseCase)
+        val dummyMovie = TmdbMovieDto(id = 1, title = "Iron Man", overview = "Hero", posterPath = null, genreIds = emptyList())
+
+        vm.addTmdbToCollection(dummyMovie, WatchStatus.COMPLETED)
+        advanceUntilIdle()
+
+        vm.clearAddMessage()
+        kotlin.test.assertEquals(null, vm.addMessage.value)
+    }
     private fun createTestMovie(title: String): Movie {
         return Movie(
             id = 0,
