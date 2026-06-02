@@ -179,6 +179,19 @@ class HomeViewModelTest {
         val state = vm.trendingState.value
         assertTrue(state is com.example.rewind.presentation.screens.home.TmdbSearchState.Success)
     }
+
+    @Test
+    fun `addTmdbToCollection should update addMessage on success`() = runTest {
+        val vm = HomeViewModel(getAllMoviesUseCase, deleteMovieUseCase, searchTmdbUseCase, saveMovieUseCase, getTrendingUseCase)
+        val dummyMovie = TmdbMovieDto(id = 1, title = "Iron Man", overview = "Hero", posterPath = null, genreIds = emptyList())
+
+        vm.addTmdbToCollection(dummyMovie, WatchStatus.COMPLETED)
+        advanceUntilIdle()
+
+        val message = vm.addMessage.value
+        assertTrue(message?.contains("ditambahkan ke koleksi") == true)
+    }
+
     private fun createTestMovie(title: String): Movie {
         return Movie(
             id = 0,
