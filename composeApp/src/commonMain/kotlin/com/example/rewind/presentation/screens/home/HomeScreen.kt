@@ -806,12 +806,11 @@ private fun SearchBar(
 @Composable
 private fun FilterRow(selected: WatchStatus?, onSelect: (WatchStatus?) -> Unit) {
     val filters = listOf(
-        null to "All",
-        WatchStatus.WATCHING to "Watching",
-        WatchStatus.COMPLETED to "Completed",
-        WatchStatus.PLAN_TO_WATCH to "Planned",
-        WatchStatus.ON_HOLD to "On Hold",
-        WatchStatus.DROPPED to "Dropped"
+        null to "Semua",
+        WatchStatus.COMPLETED to "Selesai",
+        WatchStatus.PLAN_TO_WATCH to "Rencana",
+        WatchStatus.ON_HOLD to "Ditunda",
+        WatchStatus.DROPPED to "Berhenti"
     )
     LazyRow(
         contentPadding = PaddingValues(horizontal = 20.dp),
