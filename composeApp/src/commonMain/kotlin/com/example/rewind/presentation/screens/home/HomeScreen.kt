@@ -208,7 +208,7 @@ private fun MainFeed(
             item {
                 SectionHeader(
                     emoji = "🎞️",
-                    title = "My Collection"
+                    title = "Koleksi Anda"
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 FilterRow(selected = selectedFilter, onSelect = onFilterSelect)
@@ -295,14 +295,14 @@ private fun GreetingHeader() {
             }
             // Main greeting
             Text(
-                text = "Good Evening 🍿",
+                text = "Hallo🍿",
                 color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.ExtraBold,
                 letterSpacing = (-0.8).sp
             )
             Text(
-                text = "Ready for tonight's rewind?",
+                text = "Siap untuk rewind hari ini?",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Normal,
@@ -324,7 +324,7 @@ private fun GreetingHeader() {
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "✦ Tonight",
+                text = "✦ Hari ini",
                 color = GoldAmber,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold
@@ -489,7 +489,7 @@ private fun HeroCarousel(
                         .padding(horizontal = 18.dp, vertical = 8.dp)
                 ) {
                     Text(
-                        text = "＋ Add to Collection",
+                        text = "＋ Tambah ke Koleksi",
                         color = BackgroundDark,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.ExtraBold,
@@ -548,7 +548,7 @@ private fun TrendingHorizontalSection(
             ) {
                 Text("🔥", fontSize = 16.sp)
                 Text(
-                    text = "Trending Now",
+                    text = "Sedang Trending",
                     color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.ExtraBold,
