@@ -118,44 +118,8 @@ fun HomeScreen(
                         selectedFilter = selectedFilter,
                         onFilterSelect = { selectedFilter = it },
                         onMovieClick = onMovieClick,
-                        onTmdbClick = { selectedTmdbItem = it }
-                    )
-                }
-            }
-        }
-
-        // ── FAB ──────────────────────────────────────────────────────────────
-        if (!showSearchContent) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(end = 24.dp, bottom = 100.dp)
-            ) {
-                // Glow halo
-                Box(
-                    modifier = Modifier
-                        .size(72.dp)
-                        .align(Alignment.Center)
-                        .blur(24.dp)
-                        .background(
-                            Brush.radialGradient(
-                                listOf(GoldAmber.copy(alpha = 0.6f), Color.Transparent)
-                            ),
-                            CircleShape
-                        )
-                )
-                FloatingActionButton(
-                    onClick = onAddClick,
-                    containerColor = GoldAmber,
-                    contentColor = BackgroundDark,
-                    shape = CircleShape,
-                    elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp)
-                ) {
-                    Text(
-                        "+",
-                        fontSize = 26.sp,
-                        fontWeight = FontWeight.Light,
-                        color = BackgroundDark
+                        onTmdbClick = { selectedTmdbItem = it },
+                        onAddClick = onAddClick
                     )
                 }
             }
@@ -197,82 +161,102 @@ private fun MainFeed(
     selectedFilter: WatchStatus?,
     onFilterSelect: (WatchStatus?) -> Unit,
     onMovieClick: (Long) -> Unit,
-    onTmdbClick: (TmdbMovieDto) -> Unit
+    onTmdbClick: (TmdbMovieDto) -> Unit,
+    onAddClick: () -> Unit // Tambahkan parameter ini
 ) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(bottom = 120.dp)
-    ) {
-        // ── Greeting Header ──────────────────────────────────────────────────
-        item { GreetingHeader() }
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = 120.dp)
+        ) {
+            // ── Greeting Header ──────────────────────────────────────────────────
+            item { GreetingHeader() }
 
-        // ── Featured Hero Carousel (dari trending) ───────────────────────────
-        if (trendingState is TmdbSearchState.Success && trendingState.results.isNotEmpty()) {
-            item {
-                HeroCarousel(
-                    items = trendingState.results.take(5),
-                    onItemClick = onTmdbClick
-                )
-                Spacer(modifier = Modifier.height(28.dp))
+            // ── Featured Hero Carousel ───────────────────────────────────────────
+            if (trendingState is TmdbSearchState.Success && trendingState.results.isNotEmpty()) {
+                item {
+                    HeroCarousel(
+                        items = trendingState.results.take(5),
+                        onItemClick = onTmdbClick
+                    )
+                    Spacer(modifier = Modifier.height(28.dp))
+                }
             }
-        }
 
-        // ── Search Bar ───────────────────────────────────────────────────────
-        item {
-            SearchBar(
-                query = searchQuery,
-                onQueryChange = onQueryChange,
-                onFocusChange = onFocusChange
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
-        // ── Trending Now Section ─────────────────────────────────────────────
-        if (trendingState is TmdbSearchState.Success && trendingState.results.isNotEmpty()) {
+            // ── Search Bar ───────────────────────────────────────────────────────
             item {
-                TrendingHorizontalSection(
-                    items = trendingState.results,
-                    onItemClick = onTmdbClick
+                SearchBar(
+                    query = searchQuery,
+                    onQueryChange = onQueryChange,
+                    onFocusChange = onFocusChange
                 )
-                Spacer(modifier = Modifier.height(28.dp))
+                Spacer(modifier = Modifier.height(8.dp))
             }
-        }
 
-        // ── My Collection ────────────────────────────────────────────────────
-        item {
-            SectionHeader(
-                emoji = "🎞️",
-                title = "My Collection"
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            FilterRow(selected = selectedFilter, onSelect = onFilterSelect)
-            Spacer(modifier = Modifier.height(12.dp))
-        }
+            // ── Trending Now Section ─────────────────────────────────────────────
+            if (trendingState is TmdbSearchState.Success && trendingState.results.isNotEmpty()) {
+                item {
+                    TrendingHorizontalSection(
+                        items = trendingState.results,
+                        onItemClick = onTmdbClick
+                    )
+                    Spacer(modifier = Modifier.height(28.dp))
+                }
+            }
 
-        when (uiState) {
-            is HomeUiState.Loading -> item { LoadingState() }
-            is HomeUiState.Empty -> item { EmptyState() }
-            is HomeUiState.NoResults -> item { NoResultsState(query = uiState.query) }
-            is HomeUiState.Error -> item { ErrorState(message = uiState.message) }
-            is HomeUiState.Success -> {
-                val displayed = if (selectedFilter != null)
-                    uiState.movies.filter { it.status == selectedFilter }
-                else uiState.movies
+            // ── My Collection ────────────────────────────────────────────────────
+            item {
+                SectionHeader(
+                    emoji = "🎞️",
+                    title = "My Collection"
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                FilterRow(selected = selectedFilter, onSelect = onFilterSelect)
+                Spacer(modifier = Modifier.height(12.dp))
+            }
 
-                if (displayed.isEmpty()) {
-                    item { EmptyFilterState() }
-                } else {
-                    items(displayed, key = { "movie_${it.id}" }) { movie ->
-                        Box(modifier = Modifier.padding(horizontal = 20.dp)) {
-                            MovieCard(
-                                movie = movie,
-                                onClick = { onMovieClick(movie.id) },
-                                modifier = Modifier.animateItem()
-                            )
+            when (uiState) {
+                is HomeUiState.Loading -> item { LoadingState() }
+                is HomeUiState.Empty -> item { EmptyState() }
+                is HomeUiState.NoResults -> item { NoResultsState(query = uiState.query) }
+                is HomeUiState.Error -> item { ErrorState(message = uiState.message) }
+                is HomeUiState.Success -> {
+                    val displayed = if (selectedFilter != null)
+                        uiState.movies.filter { it.status == selectedFilter }
+                    else uiState.movies
+
+                    if (displayed.isEmpty()) {
+                        item { EmptyFilterState() }
+                    } else {
+                        items(displayed, key = { "movie_${it.id}" }) { movie ->
+                            Box(modifier = Modifier.padding(horizontal = 20.dp)) {
+                                MovieCard(
+                                    movie = movie,
+                                    onClick = { onMovieClick(movie.id) },
+                                    modifier = Modifier.animateItem()
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(10.dp))
                         }
-                        Spacer(modifier = Modifier.height(10.dp))
                     }
                 }
+            }
+        }
+
+        // ── FAB (Sekarang ada di dalam Box MainFeed, menempel di pojok kanan bawah)
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 24.dp, bottom = 24.dp)
+        ) {
+            FloatingActionButton(
+                onClick = onAddClick,
+                containerColor = GoldAmber,
+                contentColor = BackgroundDark,
+                shape = CircleShape,
+                elevation = FloatingActionButtonDefaults.elevation(4.dp)
+            ) {
+                Text("+", fontSize = 26.sp, fontWeight = FontWeight.Light)
             }
         }
     }
