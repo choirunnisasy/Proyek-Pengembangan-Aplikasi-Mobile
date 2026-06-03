@@ -208,7 +208,7 @@ private fun MainFeed(
             item {
                 SectionHeader(
                     emoji = "🎞️",
-                    title = "Koleksi Anda"
+                    title = "Koleksi Saya"
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 FilterRow(selected = selectedFilter, onSelect = onFilterSelect)
@@ -807,6 +807,7 @@ private fun SearchBar(
 private fun FilterRow(selected: WatchStatus?, onSelect: (WatchStatus?) -> Unit) {
     val filters = listOf(
         null to "Semua",
+        WatchStatus.WATCHING to "Sedang Ditonton",
         WatchStatus.COMPLETED to "Selesai",
         WatchStatus.PLAN_TO_WATCH to "Rencana",
         WatchStatus.ON_HOLD to "Ditunda",
@@ -1310,12 +1311,13 @@ private fun TmdbResultCard(
                 modifier = Modifier
                     .width(70.dp)
                     .fillMaxHeight()
+                    .padding(8.dp)
                     .clip(RoundedCornerShape(20.dp)),
                 contentScale = ContentScale.Crop
             )
             Column(
                 modifier = Modifier
-                    .padding(12.dp)
+                    .padding(top = 12.dp, end = 12.dp, bottom = 12.dp)
                     .weight(1f)
             ) {
                 Text(
