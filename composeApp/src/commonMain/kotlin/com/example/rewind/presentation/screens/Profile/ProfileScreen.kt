@@ -8,6 +8,13 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
@@ -364,6 +371,10 @@ private fun ProfileContent(
     val editName by viewModel.editName.collectAsState()
     val editBio by viewModel.editBio.collectAsState()
 
+    // State untuk trigger animasi
+    var visible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { visible = true }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -373,34 +384,68 @@ private fun ProfileContent(
     ) {
         Spacer(Modifier.height(8.dp))
 
-        RewindHeroSection(state = state)
-
-        IdentityCard(
-            state = state,
-            isEditMode = isEditMode,
-            editName = editName,
-            editBio = editBio,
-            onNameChange = { viewModel.editName.value = it },
-            onBioChange = { viewModel.editBio.value = it },
-            onEditClick = { viewModel.startEdit() },
-            onSaveClick = { viewModel.saveEdit() },
-            onCancelClick = { viewModel.cancelEdit() }
-        )
-
-        RewindStatsSection(state = state)
-        SectionTitle("WATCH STATUS")
-        StatusBreakdown(state = state)
-        if (state.topGenres.isNotEmpty()) {
-            SectionTitle("TOP GENRES")
-            GenreBreakdown(state = state)
+        // Tiap section pakai delay berbeda
+        AnimatedVisibility(
+            visible = visible,
+            enter = fadeIn(tween(400)) + slideInVertically(
+                tween(400), initialOffsetY = { it / 3 }
+            )
+        ) {
+            RewindHeroSection(state = state)
         }
-        SectionTitle("ACHIEVEMENTS")
-        AchievementsGrid(achievements = state.achievements)
-        if (state.recentMovies.isNotEmpty()) {
-            SectionTitle("RECENTLY WATCHED")
-            RecentPosterScroll(movies = state.recentMovies)
+
+        AnimatedVisibility(
+            visible = visible,
+            enter = fadeIn(tween(400, delayMillis = 80)) + slideInVertically(
+                tween(400, delayMillis = 80), initialOffsetY = { it / 3 }
+            )
+        ) {
+            IdentityCard(
+                state = state,
+                isEditMode = isEditMode,
+                editName = editName,
+                editBio = editBio,
+                onNameChange = { viewModel.editName.value = it },
+                onBioChange = { viewModel.editBio.value = it },
+                onEditClick = { viewModel.startEdit() },
+                onSaveClick = { viewModel.saveEdit() },
+                onCancelClick = { viewModel.cancelEdit() }
+            )
         }
-        Spacer(Modifier.height(48.dp))
+
+        AnimatedVisibility(
+            visible = visible,
+            enter = fadeIn(tween(400, delayMillis = 160)) + slideInVertically(
+                tween(400, delayMillis = 160), initialOffsetY = { it / 3 }
+            )
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                RewindStatsSection(state = state)
+                SectionTitle("WATCH STATUS")
+                StatusBreakdown(state = state)
+                if (state.topGenres.isNotEmpty()) {
+                    SectionTitle("TOP GENRES")
+                    GenreBreakdown(state = state)
+                }
+            }
+        }
+
+        AnimatedVisibility(
+            visible = visible,
+            enter = fadeIn(tween(400, delayMillis = 240)) + slideInVertically(
+                tween(400, delayMillis = 240), initialOffsetY = { it / 3 }
+            )
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                SectionTitle("ACHIEVEMENTS")
+                AchievementsGrid(achievements = state.achievements)
+                if (state.recentMovies.isNotEmpty()) {
+                    SectionTitle("RECENTLY WATCHED")
+                    RecentPosterScroll(movies = state.recentMovies)
+                }
+                Spacer(Modifier.height(48.dp))
+            }
+        }
     }
 }
 
