@@ -177,9 +177,9 @@ private fun ProfileHeader(onNavigateBack: () -> Unit) {
                 modifier = Modifier
                     .size(38.dp)
                     .graphicsLayer(scaleX = scale, scaleY = scale)
-                    .clip(RoundedCornerShape(10.dp))
+                    .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .border(BorderStroke(1.dp, outline.copy(alpha = 0.4f)), RoundedCornerShape(10.dp))
+                    .border(BorderStroke(1.dp, outline.copy(alpha = 0.4f)), CircleShape)
                     .clickable(
                         interactionSource = interactionSource,
                         indication = LocalIndication.current,
@@ -214,8 +214,6 @@ private fun ProfileHeader(onNavigateBack: () -> Unit) {
 @Composable
 private fun RewindHeroSection(state: ProfileUiState.Success) {
     val primary = MaterialTheme.colorScheme.primary
-    val onBackground = MaterialTheme.colorScheme.onBackground
-    val outline = MaterialTheme.colorScheme.outline
 
     Box(
         modifier = Modifier
@@ -235,8 +233,8 @@ private fun RewindHeroSection(state: ProfileUiState.Success) {
                     1.dp,
                     Brush.linearGradient(
                         listOf(
-                            primary.copy(alpha = 0.5f),
-                            outline.copy(alpha = 0.15f),
+                            GoldAmber.copy(alpha = 0.5f),
+                            BorderSubtle.copy(alpha = 0.15f),
                             Color.Transparent
                         )
                     )
@@ -244,7 +242,6 @@ private fun RewindHeroSection(state: ProfileUiState.Success) {
                 RoundedCornerShape(28.dp)
             )
     ) {
-        // Decorative orb di dalam card
         Box(
             modifier = Modifier
                 .size(180.dp)
@@ -263,7 +260,7 @@ private fun RewindHeroSection(state: ProfileUiState.Success) {
             modifier = Modifier.padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            // Label "2024 REWIND"
+            // Label "2026 REWIND"
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -272,11 +269,11 @@ private fun RewindHeroSection(state: ProfileUiState.Success) {
                     modifier = Modifier
                         .size(6.dp)
                         .clip(CircleShape)
-                        .background(primary)
+                        .background(GoldAmber)
                 )
                 Text(
-                    "2026 REWIND",
-                    color = primary,
+                    "2026  REWIND",
+                    color = GoldAmber,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 4.sp
@@ -285,20 +282,19 @@ private fun RewindHeroSection(state: ProfileUiState.Success) {
 
             Spacer(Modifier.height(8.dp))
 
-            // Nama user besar
-            AnimatedCounter(
-                target = state.totalMovies,
-                style = TextStyle(
-                    color = primary,
-                    fontSize = 52.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = (-2).sp,
-                    lineHeight = 52.sp
-                )
+            // Nama user
+            Text(
+                "${state.userName}'s",
+                color = TextWarm.copy(alpha = 0.7f),  // ← hardcode TextWarm
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium,
+                letterSpacing = (-0.3).sp
             )
+
+            // "Rewind" judul besar
             Text(
                 "Rewind",
-                color = onBackground,
+                color = TextWarm,  // ← hardcode TextWarm biar selalu terang
                 fontSize = 44.sp,
                 fontWeight = FontWeight.ExtraBold,
                 letterSpacing = (-2).sp,
@@ -307,54 +303,56 @@ private fun RewindHeroSection(state: ProfileUiState.Success) {
 
             Spacer(Modifier.height(16.dp))
 
-            // Total movies — angka besar
+            // Total movies — fix layout supaya "Movies Watched" gak kepotong
             Row(
-                verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                verticalAlignment = Alignment.CenterVertically,  // ← ganti Bottom → CenterVertically
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(
-                    "${state.totalMovies}",
-                    color = primary,
-                    fontSize = 52.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = (-2).sp,
-                    lineHeight = 52.sp
+                AnimatedCounter(
+                    target = state.totalMovies,
+                    style = TextStyle(
+                        color = GoldAmber,
+                        fontSize = 52.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = (-2).sp,
+                        lineHeight = 52.sp,
+                    )
                 )
-                Column(
-                    modifier = Modifier.padding(bottom = 6.dp)
-                ) {
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(
                         "Movies",
-                        color = onBackground,
+                        color = TextWarm,  // ← hardcode
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
                         "Watched",
-                        color = onBackground.copy(alpha = 0.5f),
+                        color = TextWarm.copy(alpha = 0.5f),  // ← hardcode
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Normal
                     )
                 }
             }
 
-            // Thin divider
             Spacer(Modifier.height(4.dp))
+
+            // Divider line
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.4f)
                     .height(1.dp)
                     .background(
                         Brush.horizontalGradient(
-                            listOf(primary.copy(alpha = 0.6f), Color.Transparent)
+                            listOf(GoldAmber.copy(alpha = 0.6f), Color.Transparent)
                         )
                     )
             )
+
             Spacer(Modifier.height(4.dp))
 
             Text(
                 "Tracked since Jan 2024",
-                color = onBackground.copy(alpha = 0.35f),
+                color = TextWarm.copy(alpha = 0.35f),  // ← hardcode
                 fontSize = 11.sp,
                 letterSpacing = 0.3.sp
             )
