@@ -64,22 +64,33 @@ fun ProfileScreen(
     ) {
         Box(
             modifier = Modifier
-                .size(300.dp)
-                .offset(x = (-80).dp, y = (-60).dp)
-                .blur(120.dp)
+                .size(350.dp)
+                .offset(x = (-100).dp, y = (-80).dp)
+                .blur(130.dp)
                 .background(
-                    Brush.radialGradient(listOf(TheaterRed.copy(alpha = 0.18f), Color.Transparent)),
+                    Brush.radialGradient(listOf(TheaterRed.copy(alpha = 0.22f), Color.Transparent)),
                     CircleShape
                 )
         )
         Box(
             modifier = Modifier
-                .size(200.dp)
+                .size(220.dp)
                 .align(Alignment.TopEnd)
-                .offset(x = 60.dp, y = 100.dp)
-                .blur(100.dp)
+                .offset(x = 70.dp, y = 120.dp)
+                .blur(110.dp)
                 .background(
-                    Brush.radialGradient(listOf(GoldAmber.copy(alpha = 0.1f), Color.Transparent)),
+                    Brush.radialGradient(listOf(GoldAmber.copy(alpha = 0.13f), Color.Transparent)),
+                    CircleShape
+                )
+        )
+        Box(
+            modifier = Modifier
+                .size(280.dp)
+                .align(Alignment.BottomCenter)
+                .offset(y = 60.dp)
+                .blur(120.dp)
+                .background(
+                    Brush.radialGradient(listOf(VelvetRed.copy(alpha = 0.12f), Color.Transparent)),
                     CircleShape
                 )
         )
@@ -111,7 +122,6 @@ fun ProfileScreen(
         }
     }
 }
-
 @Composable
 private fun ProfileHeader(onNavigateBack: () -> Unit) {
     val surface = MaterialTheme.colorScheme.surface
@@ -1341,11 +1351,25 @@ private fun RecentActivity(movies: List<com.example.rewind.domain.model.Movie>) 
 
 @Composable
 private fun SectionTitle(text: String) {
-    Text(
-        text,
-        color = MaterialTheme.colorScheme.primary,
-        fontSize = 9.sp,
-        fontWeight = FontWeight.ExtraBold,
-        letterSpacing = 2.5.sp
-    )
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(3.dp)
+                    .height(12.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+            Text(
+                text,
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 9.sp,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 2.5.sp
+            )
+        }
+    }
 }
