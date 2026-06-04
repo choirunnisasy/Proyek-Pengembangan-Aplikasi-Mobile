@@ -36,6 +36,10 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -131,29 +135,22 @@ fun ProfileScreen(
 }
 @Composable
 private fun ProfileHeader(onNavigateBack: () -> Unit) {
+    val rewindColors = LocalRewindColors.current
     val surface = MaterialTheme.colorScheme.surface
-    val background = MaterialTheme.colorScheme.background
-    val primary = MaterialTheme.colorScheme.primary
-    val outline = MaterialTheme.colorScheme.outline
-    val onBackground = MaterialTheme.colorScheme.onBackground
+    val onBg = MaterialTheme.colorScheme.onBackground
 
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.9f else 1f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+        targetValue = if (isPressed) 0.88f else 1f,
+        animationSpec = spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessLow),
         label = "BackBtnScale"
     )
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                Brush.verticalGradient(
-                    listOf(surface, surface.copy(alpha = 0.8f), background)
-                )
-            )
-            .padding(horizontal = 20.dp, vertical = 18.dp)
+            .background(surface)
     ) {
         Box(
             modifier = Modifier
@@ -164,22 +161,28 @@ private fun ProfileHeader(onNavigateBack: () -> Unit) {
                     Brush.horizontalGradient(
                         listOf(
                             Color.Transparent,
-                            outline.copy(alpha = 0.4f),
-                            primary.copy(alpha = 0.3f),
-                            outline.copy(alpha = 0.4f),
+                            BorderGold.copy(alpha = 0.3f),
+                            GoldAmber.copy(alpha = 0.2f),
+                            BorderGold.copy(alpha = 0.3f),
                             Color.Transparent
                         )
                     )
                 )
         )
-        Row(verticalAlignment = Alignment.CenterVertically) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 18.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Box(
                 modifier = Modifier
-                    .size(38.dp)
+                    .size(42.dp)
                     .graphicsLayer(scaleX = scale, scaleY = scale)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .border(BorderStroke(1.dp, outline.copy(alpha = 0.4f)), CircleShape)
+                    .background(rewindColors.surfaceElevated)
+                    .border(BorderStroke(1.dp, rewindColors.borderGold.copy(alpha = 0.55f)), CircleShape)
                     .clickable(
                         interactionSource = interactionSource,
                         indication = LocalIndication.current,
@@ -187,24 +190,50 @@ private fun ProfileHeader(onNavigateBack: () -> Unit) {
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Text("←", color = primary, fontSize = 17.sp)
+                Icon(
+                    imageVector = Icons.Filled.ArrowBack,
+                    contentDescription = "Kembali",
+                    tint = GoldAmber,
+                    modifier = Modifier.size(19.dp)
+                )
             }
 
-            Spacer(Modifier.width(16.dp))
-            Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(3.dp),
+                modifier = Modifier.weight(1f)
+            ) {
                 Text(
-                    "MY PROFILE",
-                    color = primary,
-                    fontSize = 9.sp,
+                    text = "MY PROFILE",
+                    color = GoldAmber,
+                    fontSize = 10.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 4.sp
+                    letterSpacing = 3.sp
                 )
                 Text(
-                    "Stats & Collection",
-                    color = onBackground,
+                    text = "Stats & Collection",
+                    color = onBg,
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = (-0.3).sp
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = (-0.3).sp,
+                    lineHeight = 24.sp
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .size(42.dp)
+                    .clip(CircleShape)
+                    .background(rewindColors.surfaceElevated)
+                    .border(BorderStroke(1.dp, rewindColors.borderGold.copy(alpha = 0.55f)), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Person,
+                    contentDescription = null,
+                    tint = GoldAmber,
+                    modifier = Modifier.size(19.dp)
                 )
             }
         }
@@ -351,7 +380,7 @@ private fun RewindHeroSection(state: ProfileUiState.Success) {
             Spacer(Modifier.height(4.dp))
 
             Text(
-                "Tracked since Jan 2024",
+                "Tracked since Jan 2026",
                 color = TextWarm.copy(alpha = 0.35f),  // ← hardcode
                 fontSize = 11.sp,
                 letterSpacing = 0.3.sp
