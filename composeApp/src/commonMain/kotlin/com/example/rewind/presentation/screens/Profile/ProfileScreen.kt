@@ -190,6 +190,154 @@ private fun ProfileHeader(onNavigateBack: () -> Unit) {
 }
 
 @Composable
+private fun RewindHeroSection(state: ProfileUiState.Success) {
+    val primary = MaterialTheme.colorScheme.primary
+    val onBackground = MaterialTheme.colorScheme.onBackground
+    val outline = MaterialTheme.colorScheme.outline
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(28.dp))
+            .background(
+                Brush.linearGradient(
+                    colorStops = arrayOf(
+                        0f to VelvetRed.copy(alpha = 0.35f),
+                        0.5f to SurfaceElevated,
+                        1f to GoldAmberDim.copy(alpha = 0.2f)
+                    )
+                )
+            )
+            .border(
+                BorderStroke(
+                    1.dp,
+                    Brush.linearGradient(
+                        listOf(
+                            primary.copy(alpha = 0.5f),
+                            outline.copy(alpha = 0.15f),
+                            Color.Transparent
+                        )
+                    )
+                ),
+                RoundedCornerShape(28.dp)
+            )
+    ) {
+        // Decorative orb di dalam card
+        Box(
+            modifier = Modifier
+                .size(180.dp)
+                .align(Alignment.TopEnd)
+                .offset(x = 40.dp, y = (-40).dp)
+                .blur(60.dp)
+                .background(
+                    Brush.radialGradient(
+                        listOf(GoldAmber.copy(alpha = 0.2f), Color.Transparent)
+                    ),
+                    CircleShape
+                )
+        )
+
+        Column(
+            modifier = Modifier.padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            // Label "2024 REWIND"
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(6.dp)
+                        .clip(CircleShape)
+                        .background(primary)
+                )
+                Text(
+                    "2024  REWIND",
+                    color = primary,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 4.sp
+                )
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            // Nama user besar
+            Text(
+                "${state.userName}'s",
+                color = onBackground.copy(alpha = 0.7f),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium,
+                letterSpacing = (-0.3).sp
+            )
+            Text(
+                "Rewind",
+                color = onBackground,
+                fontSize = 44.sp,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = (-2).sp,
+                lineHeight = 44.sp
+            )
+
+            Spacer(Modifier.height(16.dp))
+
+            // Total movies — angka besar
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    "${state.totalMovies}",
+                    color = primary,
+                    fontSize = 52.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = (-2).sp,
+                    lineHeight = 52.sp
+                )
+                Column(
+                    modifier = Modifier.padding(bottom = 6.dp)
+                ) {
+                    Text(
+                        "Movies",
+                        color = onBackground,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        "Watched",
+                        color = onBackground.copy(alpha = 0.5f),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Normal
+                    )
+                }
+            }
+
+            // Thin divider
+            Spacer(Modifier.height(4.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.4f)
+                    .height(1.dp)
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(primary.copy(alpha = 0.6f), Color.Transparent)
+                        )
+                    )
+            )
+            Spacer(Modifier.height(4.dp))
+
+            Text(
+                "Tracked since Jan 2024",
+                color = onBackground.copy(alpha = 0.35f),
+                fontSize = 11.sp,
+                letterSpacing = 0.3.sp
+            )
+        }
+    }
+}
+
+@Composable
 private fun ProfileContent(
     state: ProfileUiState.Success,
     viewModel: ProfileViewModel
@@ -206,6 +354,8 @@ private fun ProfileContent(
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         Spacer(Modifier.height(8.dp))
+
+        RewindHeroSection(state = state)
 
         IdentityCard(
             state = state,
