@@ -205,14 +205,14 @@ private fun ProfileHeader(onNavigateBack: () -> Unit) {
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = "MY PROFILE",
+                    text = "PROFILE SAYA",
                     color = GoldAmber,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 3.sp
                 )
                 Text(
-                    text = "Stats & Collection",
+                    text = "Statistik & Koleksi",
                     color = onBg,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -349,13 +349,13 @@ private fun RewindHeroSection(state: ProfileUiState.Success) {
                 )
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(
-                        "Movies",
+                        "Film",
                         color = TextWarm,  // ← hardcode
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
-                        "Watched",
+                        "Ditonton",
                         color = TextWarm.copy(alpha = 0.5f),  // ← hardcode
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Normal
@@ -380,7 +380,7 @@ private fun RewindHeroSection(state: ProfileUiState.Success) {
             Spacer(Modifier.height(4.dp))
 
             Text(
-                "Tracked since Jan 2026",
+                "Dicatat sejak Jan 2026",
                 color = TextWarm.copy(alpha = 0.35f),  // ← hardcode
                 fontSize = 11.sp,
                 letterSpacing = 0.3.sp
@@ -448,10 +448,10 @@ private fun ProfileContent(
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                 RewindStatsSection(state = state)
-                SectionTitle("WATCH STATUS")
+                SectionTitle("STATUS TONTONAN")
                 StatusBreakdown(state = state)
                 if (state.topGenres.isNotEmpty()) {
-                    SectionTitle("TOP GENRES")
+                    SectionTitle("GENRE FAVORIT")
                     GenreBreakdown(state = state)
                 }
             }
@@ -464,10 +464,10 @@ private fun ProfileContent(
             )
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                SectionTitle("ACHIEVEMENTS")
+                SectionTitle("PENCAPAIAN")
                 AchievementsGrid(achievements = state.achievements)
                 if (state.recentMovies.isNotEmpty()) {
-                    SectionTitle("RECENTLY WATCHED")
+                    SectionTitle("BARU DITONTON")
                     RecentPosterScroll(movies = state.recentMovies)
                 }
                 Spacer(Modifier.height(48.dp))
@@ -499,11 +499,11 @@ private fun RecentPosterScroll(movies: List<com.example.rewind.domain.model.Movi
         itemsIndexed(movies) { index, movie ->
             val colors = posterColors[index % posterColors.size]
             val (statusColor, _) = when (movie.status) {
-                WatchStatus.COMPLETED -> StatusFinished to "Done"
-                WatchStatus.WATCHING  -> StatusWatching to "Watching"
-                WatchStatus.PLAN_TO_WATCH -> StatusWantToWatch to "Planned"
-                WatchStatus.ON_HOLD   -> StatusOnHold to "On Hold"
-                WatchStatus.DROPPED   -> StatusDropped to "Dropped"
+                WatchStatus.COMPLETED -> StatusFinished to "Selesai"
+                WatchStatus.WATCHING  -> StatusWatching to "Sedang Ditonton"
+                WatchStatus.PLAN_TO_WATCH -> StatusWantToWatch to "Rencana"
+                WatchStatus.ON_HOLD   -> StatusOnHold to "Ditunda"
+                WatchStatus.DROPPED   -> StatusDropped to "Berhenti"
             }
 
             Box(
@@ -583,10 +583,10 @@ private fun RewindStatsSection(state: ProfileUiState.Success) {
         ?.title ?: "—"
 
     val statItems = listOf(
-        RewindStat("🔥", "${state.currentStreak}", "Day Streak", TheaterRed),
-        RewindStat("⭐", if (state.averageRating > 0f) "${state.averageRating}" else "—", "Avg Rating", GoldAmber),
-        RewindStat("🎭", topGenre, "Top Genre", StatusOnHold),
-        RewindStat("🎬", topMovie, "Top Movie", StatusFinished)
+        RewindStat("🔥", "${state.currentStreak}", "Hari Beruntun", TheaterRed),
+        RewindStat("⭐", if (state.averageRating > 0f) "${state.averageRating}" else "—", "Rata-rata Rating", GoldAmber),
+        RewindStat("🎭", topGenre, "Genre Terfavorit", StatusOnHold),
+        RewindStat("🎬", topMovie, "Film Terbaik", StatusFinished)
     )
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -682,7 +682,6 @@ private fun RewindStatCard(stat: RewindStat, modifier: Modifier) {
         }
     }
 }
-// Tambahkan helper composable ini di ProfileScreen.kt
 
 @Composable
 fun AnimatedCounter(
@@ -984,13 +983,13 @@ private fun IdentityCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                MiniStat("${state.totalMovies}", "Films")
+                MiniStat("${state.totalMovies}", "Film")
                 StatDivider()
-                MiniStat("${state.statusCounts[WatchStatus.COMPLETED] ?: 0}", "Done")
+                MiniStat("${state.statusCounts[WatchStatus.COMPLETED] ?: 0}", "Selesai")
                 StatDivider()
-                MiniStat(if (state.averageRating > 0f) "${state.averageRating}★" else "—", "Avg")
+                MiniStat(if (state.averageRating > 0f) "${state.averageRating}★" else "—", "Rating")
                 StatDivider()
-                MiniStat("${state.favoriteCount}", "Faves")
+                MiniStat("${state.favoriteCount}", "Favorit")
             }
         }
     }
