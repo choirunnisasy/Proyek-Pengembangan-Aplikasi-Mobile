@@ -369,7 +369,7 @@ private fun ProfileContent(
             onCancelClick = { viewModel.cancelEdit() }
         )
 
-        QuickStatsRow(state = state)
+        RewindStatsSection(state = state)
         SectionTitle("WATCH STATUS")
         StatusBreakdown(state = state)
         if (state.topGenres.isNotEmpty()) {
@@ -383,6 +383,115 @@ private fun ProfileContent(
             RecentActivity(movies = state.recentMovies)
         }
         Spacer(Modifier.height(48.dp))
+    }
+}
+
+@Composable
+private fun RewindStatsSection(state: ProfileUiState.Success) {
+    val topGenre = state.topGenres.firstOrNull()?.first ?: "—"
+    val topMovie = state.recentMovies
+        .filter { it.status == WatchStatus.COMPLETED }
+        .maxByOrNull { it.rating ?: 0f }
+        ?.title ?: "—"
+
+    val statItems = listOf(
+        RewindStat("🔥", "${state.currentStreak}", "Day Streak", TheaterRed),
+        RewindStat("⭐", if (state.averageRating > 0f) "${state.averageRating}" else "—", "Avg Rating", GoldAmber),
+        RewindStat("🎭", topGenre, "Top Genre", StatusOnHold),
+        RewindStat("🎬", topMovie, "Top Movie", StatusFinished)
+    )
+
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        statItems.chunked(2).forEach { row ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                row.forEach { stat ->
+                    RewindStatCard(stat = stat, modifier = Modifier.weight(1f))
+                }
+            }
+        }
+    }
+}
+
+data class RewindStat(
+    val emoji: String,
+    val value: String,
+    val label: String,
+    val accentColor: Color
+)
+
+@Composable
+private fun RewindStatCard(stat: RewindStat, modifier: Modifier) {
+    val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
+    val outline = MaterialTheme.colorScheme.outline
+    val onBackground = MaterialTheme.colorScheme.onBackground
+
+    Box(
+        modifier = modifier
+            .height(110.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(surfaceVariant)
+            .border(
+                BorderStroke(1.dp, stat.accentColor.copy(alpha = 0.25f)),
+                RoundedCornerShape(20.dp)
+            )
+    ) {
+        // Accent line atas
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(2.dp)
+                .align(Alignment.TopCenter)
+                .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(stat.accentColor, stat.accentColor.copy(alpha = 0.3f))
+                    )
+                )
+        )
+        // Ambient glow sudut kiri atas
+        Box(
+            modifier = Modifier
+                .size(60.dp)
+                .align(Alignment.TopStart)
+                .offset(x = (-10).dp, y = (-10).dp)
+                .blur(25.dp)
+                .background(
+                    Brush.radialGradient(
+                        listOf(stat.accentColor.copy(alpha = 0.25f), Color.Transparent)
+                    ),
+                    CircleShape
+                )
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(14.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(stat.emoji, fontSize = 22.sp)
+
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    stat.value,
+                    color = onBackground,
+                    fontSize = if (stat.value.length > 8) 14.sp else 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = (-0.5).sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    stat.label,
+                    color = MaterialTheme.colorScheme.outline,
+                    fontSize = 10.sp,
+                    letterSpacing = 0.3.sp
+                )
+            }
+        }
     }
 }
 
