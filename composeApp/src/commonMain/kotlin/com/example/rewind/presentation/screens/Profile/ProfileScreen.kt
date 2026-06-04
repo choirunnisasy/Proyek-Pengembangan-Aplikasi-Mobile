@@ -21,6 +21,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -383,10 +387,108 @@ private fun ProfileContent(
         SectionTitle("ACHIEVEMENTS")
         AchievementsGrid(achievements = state.achievements)
         if (state.recentMovies.isNotEmpty()) {
-            SectionTitle("RECENT ACTIVITY")
-            RecentActivity(movies = state.recentMovies)
+            SectionTitle("RECENTLY WATCHED")
+            RecentPosterScroll(movies = state.recentMovies)
         }
         Spacer(Modifier.height(48.dp))
+    }
+}
+
+@Composable
+private fun RecentPosterScroll(movies: List<com.example.rewind.domain.model.Movie>) {
+    val primary = MaterialTheme.colorScheme.primary
+    val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
+    val onBackground = MaterialTheme.colorScheme.onBackground
+    val outline = MaterialTheme.colorScheme.outline
+
+    // Warna poster placeholder berdasarkan index
+    val posterColors = listOf(
+        listOf(VelvetRed, TheaterRed),
+        listOf(Color(0xFF1a3a5c), Color(0xFF2d6091)),
+        listOf(Color(0xFF3d1a4a), GoldAmberDim),
+        listOf(Color(0xFF1a3a20), Color(0xFF2d7040)),
+        listOf(SurfaceElevated, TheaterRed.copy(alpha = 0.6f))
+    )
+
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        contentPadding = PaddingValues(horizontal = 0.dp)
+    ) {
+        itemsIndexed(movies) { index, movie ->
+            val colors = posterColors[index % posterColors.size]
+            val (statusColor, _) = when (movie.status) {
+                WatchStatus.COMPLETED -> StatusFinished to "Done"
+                WatchStatus.WATCHING  -> StatusWatching to "Watching"
+                WatchStatus.PLAN_TO_WATCH -> StatusWantToWatch to "Planned"
+                WatchStatus.ON_HOLD   -> StatusOnHold to "On Hold"
+                WatchStatus.DROPPED   -> StatusDropped to "Dropped"
+            }
+
+            Box(
+                modifier = Modifier
+                    .width(105.dp)
+                    .height(152.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(
+                        Brush.linearGradient(
+                            colorStops = arrayOf(0f to colors[0], 1f to colors[1])
+                        )
+                    )
+                    .border(
+                        BorderStroke(1.dp, outline.copy(alpha = 0.2f)),
+                        RoundedCornerShape(14.dp)
+                    )
+            ) {
+                // Overlay gradient bawah
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.55f)
+                        .align(Alignment.BottomCenter)
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(Color.Transparent, Color.Black.copy(alpha = 0.85f))
+                            )
+                        )
+                )
+
+                // Status dot kanan atas
+                Box(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .size(7.dp)
+                        .align(Alignment.TopEnd)
+                        .clip(CircleShape)
+                        .background(statusColor)
+                )
+
+                // Info bawah
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(3.dp)
+                ) {
+                    Text(
+                        movie.title,
+                        color = Color.White,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        lineHeight = 14.sp
+                    )
+                    if ((movie.rating ?: 0f) > 0f) {
+                        Text(
+                            "★ ${movie.rating}",
+                            color = GoldAmber,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
