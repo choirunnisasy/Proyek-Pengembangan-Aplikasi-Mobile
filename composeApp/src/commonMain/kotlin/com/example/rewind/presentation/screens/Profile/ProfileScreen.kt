@@ -752,11 +752,30 @@ private fun IdentityCard(
                             color = onBackground,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
-                            letterSpacing = (-0.3).sp
+                            letterSpacing = (-0.5).sp
                         )
                     }
 
-                    Text("@cinephile", color = primary, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(primary.copy(alpha = 0.12f))
+                                .border(BorderStroke(0.5.dp, primary.copy(alpha = 0.35f)), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 7.dp, vertical = 3.dp)
+                        ) {
+                            Text(
+                                "✦ cinephile",
+                                color = primary,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 0.5.sp
+                            )
+                        }
+                    }
 
                     if (isEditMode) {
                         BasicTextField(
@@ -883,7 +902,7 @@ private fun IdentityCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                MiniStat("${state.totalMovies}", "Total")
+                MiniStat("${state.totalMovies}", "Films")
                 StatDivider()
                 MiniStat("${state.statusCounts[WatchStatus.COMPLETED] ?: 0}", "Done")
                 StatDivider()
@@ -899,10 +918,22 @@ private fun IdentityCard(
 private fun MiniStat(value: String, label: String) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(2.dp)
+        verticalArrangement = Arrangement.spacedBy(3.dp)
     ) {
-        Text(value, color = MaterialTheme.colorScheme.primary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        Text(label, color = MaterialTheme.colorScheme.outline, fontSize = 10.sp, letterSpacing = 0.5.sp)
+        Text(
+            value,
+            color = MaterialTheme.colorScheme.primary,
+            fontSize = 17.sp,
+            fontWeight = FontWeight.ExtraBold,
+            letterSpacing = (-0.3).sp
+        )
+        Text(
+            label,
+            color = MaterialTheme.colorScheme.outline,
+            fontSize = 9.sp,
+            letterSpacing = 1.sp,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 
