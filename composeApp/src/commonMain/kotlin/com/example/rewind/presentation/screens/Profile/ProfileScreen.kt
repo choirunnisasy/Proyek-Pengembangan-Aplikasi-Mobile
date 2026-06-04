@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import com.example.rewind.domain.model.WatchStatus
 import com.example.rewind.presentation.theme.*
 import org.koin.compose.viewmodel.koinViewModel
+import kotlinx.coroutines.delay
 
 @Composable
 fun ProfileScreen(
@@ -253,7 +254,7 @@ private fun RewindHeroSection(state: ProfileUiState.Success) {
                         .background(primary)
                 )
                 Text(
-                    "2024  REWIND",
+                    "2026 REWIND",
                     color = primary,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.ExtraBold,
@@ -264,12 +265,15 @@ private fun RewindHeroSection(state: ProfileUiState.Success) {
             Spacer(Modifier.height(8.dp))
 
             // Nama user besar
-            Text(
-                "${state.userName}'s",
-                color = onBackground.copy(alpha = 0.7f),
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Medium,
-                letterSpacing = (-0.3).sp
+            AnimatedCounter(
+                target = state.totalMovies,
+                style = TextStyle(
+                    color = primary,
+                    fontSize = 52.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = (-2).sp,
+                    lineHeight = 52.sp
+                )
             )
             Text(
                 "Rewind",
@@ -493,6 +497,29 @@ private fun RewindStatCard(stat: RewindStat, modifier: Modifier) {
             }
         }
     }
+}
+// Tambahkan helper composable ini di ProfileScreen.kt
+
+@Composable
+fun AnimatedCounter(
+    target: Int,
+    durationMs: Int = 1200,
+    style: TextStyle,
+    modifier: Modifier = Modifier
+) {
+    var display by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(target) {
+        val steps = 40
+        val stepDelay = durationMs / steps
+        for (i in 1..steps) {
+            delay(stepDelay.toLong())
+            display = (target * i / steps)
+        }
+        display = target
+    }
+
+    Text(text = "$display", style = style, modifier = modifier)
 }
 
 @Composable
