@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.sqldelight)
+    alias(libs.plugins.kover)
 }
 
 val localProperties = Properties().apply {
@@ -147,6 +148,31 @@ sqldelight {
     databases {
         create("RewindDatabase") {
             packageName.set("com.example.rewind.data.local")
+        }
+    }
+}
+
+kover {
+    reports {
+        filters {
+            excludes {
+                classes(
+                    // Exclude generated classes
+                    "*.BuildConfig",
+                    "*.ComposableSingletons*",
+                    "com.example.rewind.data.local.*",  // SQLDelight generated
+                )
+                packages(
+                    "com.example.rewind.presentation.theme",
+                )
+            }
+        }
+        verify {
+            rule {
+                bound {
+                    minValue = 70
+                }
+            }
         }
     }
 }
