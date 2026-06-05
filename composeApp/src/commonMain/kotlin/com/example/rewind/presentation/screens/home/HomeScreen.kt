@@ -36,6 +36,16 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.ui.text.TextStyle
 
 @Composable
 fun HomeScreen(
@@ -130,8 +140,8 @@ fun HomeScreen(
             TmdbDetailDialog(
                 item = item,
                 onDismiss = { selectedTmdbItem = null },
-                onConfirmAdd = { status ->
-                    viewModel.addTmdbToCollection(item, status)
+                onConfirmAdd = { status, rating, review ->
+                    viewModel.addTmdbToCollection(item, status, rating, review)
                     selectedTmdbItem = null
                 }
             )
@@ -1382,9 +1392,15 @@ private fun TmdbResultCard(
 private fun TmdbDetailDialog(
     item: TmdbMovieDto,
     onDismiss: () -> Unit,
-    onConfirmAdd: (WatchStatus) -> Unit
+    onConfirmAdd: (WatchStatus, Float?, String) -> Unit  // ← tambah parameter rating & review
 ) {
     var selectedStatus by remember { mutableStateOf(WatchStatus.PLAN_TO_WATCH) }
+    var rating by remember { mutableStateOf(0f) }
+    var userReview by remember { mutableStateOf("") }
+
+    // Tampilkan field rating & review hanya untuk status Selesai atau Berhenti
+    val showRatingReview = selectedStatus == WatchStatus.COMPLETED ||
+            selectedStatus == WatchStatus.DROPPED
 
     BasicAlertDialog(
         onDismissRequest = onDismiss,
@@ -1398,7 +1414,12 @@ private fun TmdbDetailDialog(
                 color = MaterialTheme.colorScheme.surface,
                 tonalElevation = 4.dp
             ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())  // ← scroll supaya tidak overflow
+                ) {
+                    // ── Poster Header ──────────────────────────────────────
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -1431,6 +1452,15 @@ private fun TmdbDetailDialog(
                     }
 
                     Column(modifier = Modifier.padding(20.dp)) {
+                        // ── Sinopsis (dari TMDB, bukan review pribadi) ──
+                        Text(
+                            "Sinopsis",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = GoldAmber,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             item.overview ?: "Tidak ada deskripsi.",
                             style = MaterialTheme.typography.bodyMedium,
@@ -1438,11 +1468,12 @@ private fun TmdbDetailDialog(
                             overflow = TextOverflow.Ellipsis,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+
                         Spacer(modifier = Modifier.height(20.dp))
-                        HorizontalDivider(
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-                        )
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                         Spacer(modifier = Modifier.height(16.dp))
+
+                        // ── Status Selector ─────────────────────────────
                         Text(
                             "Tambah ke Koleksi Sebagai:",
                             style = MaterialTheme.typography.titleSmall,
@@ -1452,11 +1483,11 @@ private fun TmdbDetailDialog(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         val statuses = listOf(
-                            WatchStatus.WATCHING       to "Sedang Ditonton",
-                            WatchStatus.PLAN_TO_WATCH  to "Direncanakan",
-                            WatchStatus.COMPLETED      to "Sudah Selesai",
-                            WatchStatus.ON_HOLD        to "Ditunda",
-                            WatchStatus.DROPPED        to "Berhenti"
+                            WatchStatus.WATCHING      to "Sedang Ditonton",
+                            WatchStatus.PLAN_TO_WATCH to "Direncanakan",
+                            WatchStatus.COMPLETED     to "Sudah Selesai",
+                            WatchStatus.ON_HOLD       to "Ditunda",
+                            WatchStatus.DROPPED       to "Berhenti"
                         )
                         statuses.forEach { (status, label) ->
                             Row(
@@ -1470,9 +1501,7 @@ private fun TmdbDetailDialog(
                                 RadioButton(
                                     selected = selectedStatus == status,
                                     onClick = { selectedStatus = status },
-                                    colors = RadioButtonDefaults.colors(
-                                        selectedColor = GoldAmber
-                                    )
+                                    colors = RadioButtonDefaults.colors(selectedColor = GoldAmber)
                                 )
                                 Text(
                                     label,
@@ -1482,20 +1511,124 @@ private fun TmdbDetailDialog(
                             }
                         }
 
+                        // ── Rating & Review (kondisional) ───────────────
+                        AnimatedVisibility(
+                            visible = showRatingReview,
+                            enter = fadeIn(tween(300)) + expandVertically(tween(300)),
+                            exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
+                        ) {
+                            Column {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                HorizontalDivider(
+                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                // Rating
+                                Text(
+                                    "Rating",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = MaterialTheme.colorScheme.onBackground
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = "★".repeat(rating.toInt()) + "☆".repeat(5 - rating.toInt()),
+                                        color = GoldAmber,
+                                        fontSize = 20.sp,
+                                        letterSpacing = 2.sp
+                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .background(GoldAmber.copy(alpha = 0.12f), RoundedCornerShape(8.dp))
+                                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                                    ) {
+                                        Text(
+                                            "${rating.toInt()} / 5",
+                                            color = GoldAmber,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+                                Slider(
+                                    value = rating,
+                                    onValueChange = { rating = it },
+                                    valueRange = 0f..5f,
+                                    steps = 4,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = SliderDefaults.colors(
+                                        thumbColor = GoldAmber,
+                                        activeTrackColor = GoldAmber,
+                                        inactiveTrackColor = MaterialTheme.colorScheme.outline,
+                                        activeTickColor = Color.Transparent,
+                                        inactiveTickColor = Color.Transparent
+                                    )
+                                )
+
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                // Review / Notes
+                                Text(
+                                    "Catatan Pribadi",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = MaterialTheme.colorScheme.onBackground
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                OutlinedTextField(
+                                    value = userReview,
+                                    onValueChange = { userReview = it },
+                                    placeholder = {
+                                        Text(
+                                            "Tulis pendapatmu tentang film/series ini...",
+                                            fontSize = 13.sp,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(100.dp),
+                                    maxLines = 4,
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedBorderColor = GoldAmber.copy(alpha = 0.7f),
+                                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                                        focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                                        unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                                        cursorColor = GoldAmber,
+                                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    ),
+                                    textStyle = TextStyle(fontSize = 13.sp)
+                                )
+                            }
+                        }
+
                         Spacer(modifier = Modifier.height(20.dp))
+
+                        // ── Buttons ─────────────────────────────────────
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.End
                         ) {
                             TextButton(onClick = onDismiss) {
-                                Text(
-                                    "Batal",
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                Text("Batal", color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                             Spacer(modifier = Modifier.width(8.dp))
                             Button(
-                                onClick = { onConfirmAdd(selectedStatus) },
+                                onClick = {
+                                    onConfirmAdd(
+                                        selectedStatus,
+                                        if (showRatingReview && rating > 0f) rating else null,
+                                        if (showRatingReview) userReview else ""
+                                    )
+                                },
                                 shape = RoundedCornerShape(35.dp),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = GoldAmber,
@@ -1508,7 +1641,8 @@ private fun TmdbDetailDialog(
                     }
                 }
             }
-        })
+        }
+    )
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
