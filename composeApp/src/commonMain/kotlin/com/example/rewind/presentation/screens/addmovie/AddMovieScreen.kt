@@ -85,6 +85,8 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
 
 @Composable
 fun AddMovieScreen(
@@ -103,7 +105,7 @@ fun AddMovieScreen(
     var totalEpisodesText by remember { mutableStateOf("") }
     var watchedEpisodesText by remember { mutableStateOf("") }
     val isEditMode = movieId != null
-    val titleError by remember { mutableStateOf(false) }
+    var titleError by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
 
     LaunchedEffect(movieId) {
