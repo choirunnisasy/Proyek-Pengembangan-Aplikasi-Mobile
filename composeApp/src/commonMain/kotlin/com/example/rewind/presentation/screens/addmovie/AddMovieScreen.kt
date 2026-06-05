@@ -81,6 +81,9 @@ import com.example.rewind.presentation.theme.StatusWatching
 import com.example.rewind.presentation.theme.TheaterRed
 import com.example.rewind.presentation.theme.VelvetRed
 import org.koin.compose.viewmodel.koinViewModel
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.ImeAction
 
 @Composable
 fun AddMovieScreen(
@@ -99,6 +102,7 @@ fun AddMovieScreen(
     var totalEpisodesText by remember { mutableStateOf("") }
     var watchedEpisodesText by remember { mutableStateOf("") }
     val isEditMode = movieId != null
+    val titleError by remember { mutableStateOf(false) }
 
     LaunchedEffect(movieId) {
         viewModel.loadMovieForEdit(movieId)
@@ -195,7 +199,10 @@ fun AddMovieScreen(
                 SectionLabel("TITLE")
                 OutlinedTextField(
                     value = title,
-                    onValueChange = { title = it },
+                    onValueChange = {
+                        title = it
+                        if (titleError && it.isNotBlank()) titleError = false
+                    },
                     placeholder = {
                         Text(
                             "Movie or series title...",
@@ -203,8 +210,22 @@ fun AddMovieScreen(
                             fontSize = 14.sp
                         )
                     },
+                    isError = titleError,
+                    supportingText = {
+                        if (titleError) {
+                            Text(
+                                text = "Judul tidak boleh kosong",
+                                color = TheaterRed,
+                                fontSize = 11.sp
+                            )
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Words,
+                        imeAction = ImeAction.Next
+                    ),
                     colors = fieldColors(),
                     shape = RoundedCornerShape(12.dp),
                     textStyle = LocalTextStyle.current.copy(
@@ -474,16 +495,20 @@ fun AddMovieScreen(
                                 indication = LocalIndication.current,
                                 enabled = uiState !is AddMovieUiState.Loading
                             ) {
-                                viewModel.saveMovie(
-                                    title = title,
-                                    genre = selectedGenre,
-                                    type = selectedType,
-                                    status = selectedStatus,
-                                    rating = if (rating > 0f) rating else null,
-                                    review = review,
-                                    totalEpisodes = totalEpisodesText.toIntOrNull(),
-                                    watchedEpisodes = watchedEpisodesText.toIntOrNull() ?: 0
-                                )
+                                if (title.isBlank()){
+                                    titleError = true
+                                } else {
+                                    viewModel.saveMovie(
+                                        title = title,
+                                        genre = selectedGenre,
+                                        type = selectedType,
+                                        status = selectedStatus,
+                                        rating = if (rating > 0f) rating else null,
+                                        review = review,
+                                        totalEpisodes = totalEpisodesText.toIntOrNull(),
+                                        watchedEpisodes = watchedEpisodesText.toIntOrNull() ?: 0
+                                    )
+                                }
                             },
                         contentAlignment = Alignment.Center
                     ) {
