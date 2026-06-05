@@ -84,6 +84,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.platform.LocalFocusManager
 
 @Composable
 fun AddMovieScreen(
@@ -103,6 +104,7 @@ fun AddMovieScreen(
     var watchedEpisodesText by remember { mutableStateOf("") }
     val isEditMode = movieId != null
     val titleError by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
 
     LaunchedEffect(movieId) {
         viewModel.loadMovieForEdit(movieId)
@@ -322,6 +324,10 @@ fun AddMovieScreen(
                             placeholder = {
                                 Text("Number of episodes...", color = rewindColors.textMuted, fontSize = 14.sp)
                             },
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Number,
+                                imeAction = ImeAction.Next
+                            ),
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             colors = fieldColors(),
@@ -418,6 +424,13 @@ fun AddMovieScreen(
                         .fillMaxWidth()
                         .height(120.dp),
                     maxLines = 5,
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Sentences,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = { focusManager.clearFocus() }
+                    ),
                     colors = fieldColors(),
                     shape = RoundedCornerShape(12.dp),
                     textStyle = LocalTextStyle.current.copy(
