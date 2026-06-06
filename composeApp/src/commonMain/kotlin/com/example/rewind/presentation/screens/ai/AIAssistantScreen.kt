@@ -127,11 +127,11 @@ fun AIAssistantScreen(
             when (event) {
                 is AIAssistantEvent.CopyToClipboard -> {
                     clipboardManager.setText(AnnotatedString(event.text))
-                    snackbarHostState.showSnackbar("Copied to clipboard")
+                    snackbarHostState.showSnackbar("Disalin ke clipboard")
                 }
                 is AIAssistantEvent.ApplyToNote -> {
                     onApplyResult?.invoke(event.text)
-                    snackbarHostState.showSnackbar("Applied successfully")
+                    snackbarHostState.showSnackbar("Berhasil diterapkan")
                     onNavigateBack()
                 }
             }
@@ -187,7 +187,7 @@ fun AIAssistantScreen(
 
                 AIWelcomeBanner()
 
-                SectionLabel("SELECT ACTION")
+                SectionLabel("PILIH AKSI")
                 ActionChips(
                     selectedAction = uiState.selectedAction,
                     onActionSelected = viewModel::onActionSelected
@@ -195,7 +195,7 @@ fun AIAssistantScreen(
 
                 ActionDescriptionBox(description = uiState.selectedAction.description)
 
-                SectionLabel("YOUR INPUT")
+                SectionLabel("INPUT KAMU")
                 OutlinedTextField(
                     value = uiState.inputText,
                     onValueChange = viewModel::onInputTextChange,
@@ -334,14 +334,14 @@ private fun AIHeader(onNavigateBack: () -> Unit) {
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = "AI ASSISTANT",
+                    text = "ASISTEN AI",
                     color = GoldAmber,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 3.sp
                 )
                 Text(
-                    text = "Talk with Echo",
+                    text = "Ngobrol dengan Echo",
                     color = onBg,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -433,7 +433,7 @@ private fun AIWelcomeBanner() {
 
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text = "Powered by Gemini AI",
+                    text = "Didukung oleh Gemini AI",
                     color = GoldAmber,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -718,7 +718,7 @@ private fun ResultCard(
                     .padding(horizontal = 10.dp, vertical = 4.dp)
             ) {
                 Text(
-                    text = "AI Generated",
+                    text = "Dibuat oleh AI",
                     color = GoldAmber,
                     fontSize = 9.sp,
                     fontWeight = FontWeight.SemiBold,
