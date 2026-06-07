@@ -162,10 +162,6 @@ kover {
                     "*.ComposableSingletons*",
                     "com.example.rewind.data.local.*",  // SQLDelight generated
 
-                    // Exclude repository implementations (require real DB/network)
-                    "com.example.rewind.data.repository.MovieRepositoryImpl",
-                    "com.example.rewind.data.repository.AIRepositoryImpl",
-                    "com.example.rewind.data.repository.TmdbRepositoryImpl",
 
                     // Exclude App composable
                     "com.example.rewind.AppKt*",
@@ -180,6 +176,7 @@ kover {
                     "com.example.rewind.presentation.navigation",
                     "com.example.rewind.core.di",
                     "com.example.rewind.data.remote.api",
+                    "com.example.rewind.data.repository",
                 )
                 annotatedBy(
                     "androidx.compose.runtime.Composable",
