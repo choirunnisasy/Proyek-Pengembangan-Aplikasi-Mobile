@@ -28,6 +28,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import com.example.rewind.domain.model.MovieType
 
 private class FakeDataStore : DataStore<Preferences> {
     private val store = MutableStateFlow<Preferences>(emptyPreferences())
@@ -77,8 +78,12 @@ class ProfileViewModelTest {
 
     @Test
     fun `totalMovies should reflect inserted movies count`() = runTest {
-        fakeRepository.insertMovie(createTestMovie(title = "Film A"))
-        fakeRepository.insertMovie(createTestMovie(title = "Film B"))
+        fakeRepository.insertMovie(
+            Movie(title = "Film A", createdAt = Clock.System.now(), updatedAt = Clock.System.now())
+        )
+        fakeRepository.insertMovie(
+            Movie(title = "Film B", createdAt = Clock.System.now(), updatedAt = Clock.System.now())
+        )
         advanceUntilIdle()
 
         val state = viewModel.uiState.value as ProfileUiState.Success
@@ -87,8 +92,12 @@ class ProfileViewModelTest {
 
     @Test
     fun `averageRating should be correct from rated movies`() = runTest {
-        fakeRepository.insertMovie(createTestMovie(title = "Film A", rating = 8.0f))
-        fakeRepository.insertMovie(createTestMovie(title = "Film B", rating = 6.0f))
+        fakeRepository.insertMovie(
+            Movie(title = "Film A", rating = 8.0f, createdAt = Clock.System.now(), updatedAt = Clock.System.now())
+        )
+        fakeRepository.insertMovie(
+            Movie(title = "Film B", rating = 6.0f, createdAt = Clock.System.now(), updatedAt = Clock.System.now())
+        )
         advanceUntilIdle()
 
         val state = viewModel.uiState.value as ProfileUiState.Success
@@ -97,7 +106,9 @@ class ProfileViewModelTest {
 
     @Test
     fun `averageRating should be 0 when no movies rated`() = runTest {
-        fakeRepository.insertMovie(createTestMovie(title = "Film A", rating = null))
+        fakeRepository.insertMovie(
+            Movie(title = "Film A", rating = null, createdAt = Clock.System.now(), updatedAt = Clock.System.now())
+        )
         advanceUntilIdle()
 
         val state = viewModel.uiState.value as ProfileUiState.Success
@@ -106,9 +117,15 @@ class ProfileViewModelTest {
 
     @Test
     fun `statusCounts should correctly count each status`() = runTest {
-        fakeRepository.insertMovie(createTestMovie(title = "A", status = WatchStatus.COMPLETED))
-        fakeRepository.insertMovie(createTestMovie(title = "B", status = WatchStatus.COMPLETED))
-        fakeRepository.insertMovie(createTestMovie(title = "C", status = WatchStatus.WATCHING))
+        fakeRepository.insertMovie(
+            Movie(title = "A", status = WatchStatus.COMPLETED, createdAt = Clock.System.now(), updatedAt = Clock.System.now())
+        )
+        fakeRepository.insertMovie(
+            Movie(title = "B", status = WatchStatus.COMPLETED, createdAt = Clock.System.now(), updatedAt = Clock.System.now())
+        )
+        fakeRepository.insertMovie(
+            Movie(title = "C", status = WatchStatus.WATCHING, createdAt = Clock.System.now(), updatedAt = Clock.System.now())
+        )
         advanceUntilIdle()
 
         val state = viewModel.uiState.value as ProfileUiState.Success
@@ -119,17 +136,27 @@ class ProfileViewModelTest {
 
     @Test
     fun `topGenres should be sorted by count descending`() = runTest {
-        repeat(3) { fakeRepository.insertMovie(createTestMovie(title = "Drama $it", genre = MovieGenre.DRAMA)) }
-        repeat(1) { fakeRepository.insertMovie(createTestMovie(title = "Action $it", genre = MovieGenre.ACTION)) }
+        repeat(3) {
+            fakeRepository.insertMovie(
+                Movie(title = "Drama $it", genre = MovieGenre.DRAMA, createdAt = Clock.System.now(), updatedAt = Clock.System.now())
+            )
+        }
+        repeat(1) {
+            fakeRepository.insertMovie(
+                Movie(title = "Action $it", genre = MovieGenre.ACTION, createdAt = Clock.System.now(), updatedAt = Clock.System.now())
+            )
+        }
         advanceUntilIdle()
 
         val state = viewModel.uiState.value as ProfileUiState.Success
-        assertEquals(MovieGenre.DRAMA.displayName, state.topGenres.first().first)
+        assertEquals("Drama", state.topGenres.first().first)
     }
 
     @Test
     fun `achievements should unlock First Frame when movie added`() = runTest {
-        fakeRepository.insertMovie(createTestMovie(title = "Film Pertama"))
+        fakeRepository.insertMovie(
+            Movie(title = "Film Pertama", createdAt = Clock.System.now(), updatedAt = Clock.System.now())
+        )
         advanceUntilIdle()
 
         val state = viewModel.uiState.value as ProfileUiState.Success
@@ -139,7 +166,11 @@ class ProfileViewModelTest {
 
     @Test
     fun `achievements Collector should unlock when 10 movies added`() = runTest {
-        repeat(10) { i -> fakeRepository.insertMovie(createTestMovie(title = "Film $i")) }
+        repeat(10) { i ->
+            fakeRepository.insertMovie(
+                Movie(title = "Film $i", createdAt = Clock.System.now(), updatedAt = Clock.System.now())
+            )
+        }
         advanceUntilIdle()
 
         val state = viewModel.uiState.value as ProfileUiState.Success
@@ -149,7 +180,11 @@ class ProfileViewModelTest {
 
     @Test
     fun `achievements Collector should be locked when less than 10 movies`() = runTest {
-        repeat(5) { i -> fakeRepository.insertMovie(createTestMovie(title = "Film $i")) }
+        repeat(5) { i ->
+            fakeRepository.insertMovie(
+                Movie(title = "Film $i", createdAt = Clock.System.now(), updatedAt = Clock.System.now())
+            )
+        }
         advanceUntilIdle()
 
         val state = viewModel.uiState.value as ProfileUiState.Success
@@ -159,7 +194,11 @@ class ProfileViewModelTest {
 
     @Test
     fun `recentMovies should only return 5 latest movies`() = runTest {
-        repeat(8) { i -> fakeRepository.insertMovie(createTestMovie(title = "Film $i")) }
+        repeat(8) { i ->
+            fakeRepository.insertMovie(
+                Movie(title = "Film $i", createdAt = Clock.System.now(), updatedAt = Clock.System.now())
+            )
+        }
         advanceUntilIdle()
 
         val state = viewModel.uiState.value as ProfileUiState.Success
