@@ -5,8 +5,12 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.emptyPreferences
 import com.example.rewind.data.local.datastore.UserPreferences
 import com.example.rewind.data.repository.FakeMovieRepository
+import com.example.rewind.domain.model.Movie
+import com.example.rewind.domain.model.MovieGenre
+import com.example.rewind.domain.model.WatchStatus
 import com.example.rewind.domain.usecase.GetAllMoviesUseCase
 import com.example.rewind.domain.usecase.GetFavoriteMoviesUseCase
+import com.example.rewind.presentation.screens.profile.ProfileUiState
 import com.example.rewind.presentation.screens.profile.ProfileViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -17,6 +21,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.datetime.Clock
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -24,15 +29,13 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-// 1. Trik Elegan: Membuat Fake DataStore, bukan Fake UserPreferences!
-class FakeDataStore : DataStore<Preferences> {
-    private val _data = MutableStateFlow(emptyPreferences())
-    override val data: Flow<Preferences> = _data
-
+private class FakeDataStore : DataStore<Preferences> {
+    private val store = MutableStateFlow<Preferences>(emptyPreferences())
+    override val data: Flow<Preferences> = store
     override suspend fun updateData(transform: suspend (t: Preferences) -> Preferences): Preferences {
-        val newData = transform(_data.value)
-        _data.value = newData
-        return newData
+        val updated = transform(store.value)
+        store.value = updated
+        return updated
     }
 }
 
@@ -40,30 +43,17 @@ class FakeDataStore : DataStore<Preferences> {
 class ProfileViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
-
     private lateinit var fakeRepository: FakeMovieRepository
-    private lateinit var realUserPreferences: UserPreferences
-    private lateinit var getAllMoviesUseCase: GetAllMoviesUseCase
-    private lateinit var getFavoriteMoviesUseCase: GetFavoriteMoviesUseCase
     private lateinit var viewModel: ProfileViewModel
 
     @BeforeTest
     fun setup() {
         Dispatchers.setMain(testDispatcher)
-
         fakeRepository = FakeMovieRepository()
-
-        // 2. Suntikkan Fake DataStore ke UserPreferences ASLI
-        val fakeDataStore = FakeDataStore()
-        realUserPreferences = UserPreferences(fakeDataStore)
-
-        getAllMoviesUseCase = GetAllMoviesUseCase(fakeRepository)
-        getFavoriteMoviesUseCase = GetFavoriteMoviesUseCase(fakeRepository)
-
         viewModel = ProfileViewModel(
-            getAllMoviesUseCase,
-            getFavoriteMoviesUseCase,
-            realUserPreferences
+            getAllMovies = GetAllMoviesUseCase(fakeRepository),
+            getFavoriteMovies = GetFavoriteMoviesUseCase(fakeRepository),
+            userPreferences = UserPreferences(FakeDataStore())
         )
     }
 
@@ -73,19 +63,115 @@ class ProfileViewModelTest {
     }
 
     @Test
-    fun `startEdit should turn on isEditMode`() = runTest {
-        viewModel.startEdit()
-        assertTrue(viewModel.isEditMode.value)
+    fun `initial uiState should be Loading`() {
+        assertTrue(viewModel.uiState.value is ProfileUiState.Loading)
     }
 
     @Test
-    fun `saveEdit should update user preferences and turn off isEditMode`() = runTest {
+    fun `uiState should be Success after movies loaded`() = runTest {
+        fakeRepository.insertMovie(createTestMovie(title = "Inception"))
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value is ProfileUiState.Success)
+    }
+
+    @Test
+    fun `totalMovies should reflect inserted movies count`() = runTest {
+        fakeRepository.insertMovie(createTestMovie(title = "Film A"))
+        fakeRepository.insertMovie(createTestMovie(title = "Film B"))
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value as ProfileUiState.Success
+        assertEquals(2, state.totalMovies)
+    }
+
+    @Test
+    fun `averageRating should be correct from rated movies`() = runTest {
+        fakeRepository.insertMovie(createTestMovie(title = "Film A", rating = 8.0f))
+        fakeRepository.insertMovie(createTestMovie(title = "Film B", rating = 6.0f))
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value as ProfileUiState.Success
+        assertEquals(7.0f, state.averageRating)
+    }
+
+    @Test
+    fun `averageRating should be 0 when no movies rated`() = runTest {
+        fakeRepository.insertMovie(createTestMovie(title = "Film A", rating = null))
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value as ProfileUiState.Success
+        assertEquals(0f, state.averageRating)
+    }
+
+    @Test
+    fun `statusCounts should correctly count each status`() = runTest {
+        fakeRepository.insertMovie(createTestMovie(title = "A", status = WatchStatus.COMPLETED))
+        fakeRepository.insertMovie(createTestMovie(title = "B", status = WatchStatus.COMPLETED))
+        fakeRepository.insertMovie(createTestMovie(title = "C", status = WatchStatus.WATCHING))
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value as ProfileUiState.Success
+        assertEquals(2, state.statusCounts[WatchStatus.COMPLETED])
+        assertEquals(1, state.statusCounts[WatchStatus.WATCHING])
+        assertEquals(0, state.statusCounts[WatchStatus.DROPPED] ?: 0)
+    }
+
+    @Test
+    fun `topGenres should be sorted by count descending`() = runTest {
+        repeat(3) { fakeRepository.insertMovie(createTestMovie(title = "Drama $it", genre = MovieGenre.DRAMA)) }
+        repeat(1) { fakeRepository.insertMovie(createTestMovie(title = "Action $it", genre = MovieGenre.ACTION)) }
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value as ProfileUiState.Success
+        assertEquals(MovieGenre.DRAMA.displayName, state.topGenres.first().first)
+    }
+
+    @Test
+    fun `achievements should unlock First Frame when movie added`() = runTest {
+        fakeRepository.insertMovie(createTestMovie(title = "Film Pertama"))
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value as ProfileUiState.Success
+        val firstFrame = state.achievements.find { it.title == "First Frame" }
+        assertTrue(firstFrame?.unlocked == true)
+    }
+
+    @Test
+    fun `achievements Collector should unlock when 10 movies added`() = runTest {
+        repeat(10) { i -> fakeRepository.insertMovie(createTestMovie(title = "Film $i")) }
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value as ProfileUiState.Success
+        val collector = state.achievements.find { it.title == "Collector" }
+        assertTrue(collector?.unlocked == true)
+    }
+
+    @Test
+    fun `achievements Collector should be locked when less than 10 movies`() = runTest {
+        repeat(5) { i -> fakeRepository.insertMovie(createTestMovie(title = "Film $i")) }
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value as ProfileUiState.Success
+        val collector = state.achievements.find { it.title == "Collector" }
+        assertTrue(collector?.unlocked == false)
+    }
+
+    @Test
+    fun `recentMovies should only return 5 latest movies`() = runTest {
+        repeat(8) { i -> fakeRepository.insertMovie(createTestMovie(title = "Film $i")) }
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value as ProfileUiState.Success
+        assertTrue(state.recentMovies.size <= 5)
+    }
+
+    @Test
+    fun `saveEdit with blank name should fallback to default`() = runTest {
         advanceUntilIdle()
 
         viewModel.startEdit()
-        viewModel.editName.value = "Nisa Rewind"
-        viewModel.editBio.value = "Film Enthusiast"
-
+        viewModel.editName.value = "   "
         viewModel.saveEdit()
         advanceUntilIdle()
 
@@ -93,22 +179,25 @@ class ProfileViewModelTest {
     }
 
     @Test
-    fun `cancelEdit should turn off isEditMode and revert input values to state values`() = runTest {
-        realUserPreferences.setUserName("Choirunnisa")
-        realUserPreferences.setUserBio("Developer KMP")
-
+    fun `userName should use default when preferences blank`() = runTest {
         advanceUntilIdle()
 
-        viewModel.startEdit()
-        viewModel.editName.value = "Nama Ngaco"
-        viewModel.editBio.value = "Bio Ngaco"
-
-        // Batalkan edit
-        viewModel.cancelEdit()
-
-        assertFalse(viewModel.isEditMode.value)
-        // Harus kembali ke nilai yang ada di dalam DataStore
-        assertEquals("Choirunnisa", viewModel.editName.value)
-        assertEquals("Developer KMP", viewModel.editBio.value)
+        val state = viewModel.uiState.value as ProfileUiState.Success
+        assertEquals("Rewind User", state.userName)
     }
+
+    private fun createTestMovie(
+        title: String = "Test Movie",
+        genre: MovieGenre = MovieGenre.OTHER,
+        status: WatchStatus = WatchStatus.PLAN_TO_WATCH,
+        rating: Float? = null
+    ) = Movie(
+        id = 0L,
+        title = title,
+        genre = genre,
+        status = status,
+        rating = rating,
+        createdAt = Clock.System.now(),
+        updatedAt = Clock.System.now()
+    )
 }
