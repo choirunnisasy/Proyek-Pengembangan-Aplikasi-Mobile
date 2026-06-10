@@ -185,6 +185,12 @@ class HomeViewModel(
                 }
             }
 
+            val calculatedWatchedEpisodes = if (status == WatchStatus.COMPLETED) {
+                totalEpisodes ?: if (type == MovieType.MOVIE) 1 else 0
+            } else {
+                0
+            }
+
             val movie = Movie(
                 title = item.displayTitle,
                 genre = genre,
@@ -194,7 +200,7 @@ class HomeViewModel(
                 review = userReview,
                 synopsis = item.overview ?: "",
                 totalEpisodes = totalEpisodes,
-                watchedEpisodes = 0,
+                watchedEpisodes = calculatedWatchedEpisodes,
                 createdAt = Clock.System.now(),
                 updatedAt = Clock.System.now(),
                 posterUrl = item.posterUrl("w500") // Simpan URL poster ke database lokal
