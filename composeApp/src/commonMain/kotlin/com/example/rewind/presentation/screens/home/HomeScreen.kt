@@ -152,7 +152,7 @@ fun HomeScreen(
             hostState = snackbarHostState,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 80.dp)
+                .padding(bottom = 20.dp)
         )
     }
 }
