@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- ============================================================
+         OUTER FILM REEL RING
+         A circular ring representing a vintage film reel.
+         Centered at (54,54), outer radius ~26, inner radius ~22.
+         All design elements stay within the safe zone (18-90dp).
+         ============================================================ -->
+    <path
+        android:pathData="
+            M54,28
+            A26,26,0,1,1,53.99,28
+            A26,26,0,1,1,54,28
+            Z
+            M54,32
+            A22,22,0,1,0,54.01,32
+            A22,22,0,1,0,54,32
+            Z"
+        android:fillType="evenOdd">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="36"
+                android:startY="28"
+                android:endX="72"
+                android:endY="80"
+                android:startColor="#FFBF00"
+                android:endColor="#D4AF37" />
+        </aapt:attr>
+    </path>
+
+    <!-- ============================================================
+         SPROCKET HOLES (8 evenly spaced around the reel)
+         Small circles on the reel ring at the midpoint radius (~24).
+         ============================================================ -->
+    <!-- Top -->
+    <path
+        android:pathData="M54,30 A2,2,0,1,1,54.01,30 Z"
+        android:fillColor="#3A0007" />
+    <!-- Top-right -->
+    <path
+        android:pathData="M70.97,37 A2,2,0,1,1,70.98,37 Z"
+        android:fillColor="#3A0007" />
+    <!-- Right -->
+    <path
+        android:pathData="M78,54 A2,2,0,1,1,78.01,54 Z"
+        android:fillColor="#3A0007" />
+    <!-- Bottom-right -->
+    <path
+        android:pathData="M70.97,71 A2,2,0,1,1,70.98,71 Z"
+        android:fillColor="#3A0007" />
+    <!-- Bottom -->
+    <path
+        android:pathData="M54,78 A2,2,0,1,1,54.01,78 Z"
+        android:fillColor="#3A0007" />
+    <!-- Bottom-left -->
+    <path
+        android:pathData="M37.03,71 A2,2,0,1,1,37.04,71 Z"
+        android:fillColor="#3A0007" />
+    <!-- Left -->
+    <path
+        android:pathData="M30,54 A2,2,0,1,1,30.01,54 Z"
+        android:fillColor="#3A0007" />
+    <!-- Top-left -->
+    <path
+        android:pathData="M37.03,37 A2,2,0,1,1,37.04,37 Z"
+        android:fillColor="#3A0007" />
+
+    <!-- ============================================================
+         INNER HUB CIRCLE
+         Central hub of the film reel.
+         ============================================================ -->
+    <path
+        android:pathData="
+            M54,42
+            A12,12,0,1,1,53.99,42
+            A12,12,0,1,1,54,42
+            Z
+            M54,45
+            A9,9,0,1,0,54.01,45
+            A9,9,0,1,0,54,45
+            Z"
+        android:fillType="evenOdd">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="42"
+                android:startY="42"
+                android:endX="66"
+                android:endY="66"
+                android:startColor="#D4AF37"
+                android:endColor="#FFBF00" />
+        </aapt:attr>
+    </path>
+
+    <!-- ============================================================
+         SPOKES connecting hub to outer ring (4 spokes)
+         ============================================================ -->
+    <!-- Top spoke -->
+    <path
+        android:pathData="M53,45 L53,32 L55,32 L55,45 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="54"
+                android:startY="32"
+                android:endX="54"
+                android:endY="45"
+                android:startColor="#FFBF00"
+                android:endColor="#D4AF37" />
+        </aapt:attr>
+    </path>
+    <!-- Bottom spoke -->
+    <path
+        android:pathData="M53,63 L53,76 L55,76 L55,63 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="54"
+                android:startY="63"
+                android:endX="54"
+                android:endY="76"
+                android:startColor="#D4AF37"
+                android:endColor="#FFBF00" />
+        </aapt:attr>
+    </path>
+    <!-- Left spoke -->
+    <path
+        android:pathData="M45,53 L32,53 L32,55 L45,55 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="32"
+                android:startY="54"
+                android:endX="45"
+                android:endY="54"
+                android:startColor="#FFBF00"
+                android:endColor="#D4AF37" />
+        </aapt:attr>
+    </path>
+    <!-- Right spoke -->
+    <path
+        android:pathData="M63,53 L76,53 L76,55 L63,55 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="63"
+                android:startY="54"
+                android:endX="76"
+                android:endY="54"
+                android:startColor="#D4AF37"
+                android:endColor="#FFBF00" />
+        </aapt:attr>
+    </path>
+
+    <!-- ============================================================
+         DOUBLE-ARROW REWIND SYMBOL (◁◁)
+         Centered inside the hub. Two left-pointing triangles.
+         ============================================================ -->
+    <!-- Left triangle of rewind symbol -->
+    <path
+        android:pathData="M49,54 L53,50.5 L53,57.5 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="49"
+                android:startY="50"
+                android:endX="53"
+                android:endY="58"
+                android:startColor="#FFBF00"
+                android:endColor="#D4AF37" />
+        </aapt:attr>
+    </path>
+    <!-- Right triangle of rewind symbol -->
+    <path
+        android:pathData="M53,54 L57,50.5 L57,57.5 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="53"
+                android:startY="50"
+                android:endX="57"
+                android:endY="58"
+                android:startColor="#FFBF00"
+                android:endColor="#D4AF37" />
+        </aapt:attr>
+    </path>
+
+</vector>
