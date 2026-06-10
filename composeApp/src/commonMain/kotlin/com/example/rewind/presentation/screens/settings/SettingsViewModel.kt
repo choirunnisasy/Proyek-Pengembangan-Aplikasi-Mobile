@@ -13,6 +13,7 @@ data class SettingsUiState(
     val sortBy: String = "UPDATED_DESC",
     val userName: String = "",
     val userBio: String = "",
+    val notificationsEnabled: Boolean = true,
     val isLoading: Boolean = false
 )
 
@@ -32,13 +33,15 @@ class SettingsViewModel(
                 userPreferences.isDarkMode,
                 userPreferences.sortBy,
                 userPreferences.userName,
-                userPreferences.userBio
-            ) { darkMode, sortBy, name, bio ->
+                userPreferences.userBio,
+                userPreferences.notificationsEnabled
+            ) { darkMode, sortBy, name, bio, notifEnabled ->
                 SettingsUiState(
                     isDarkMode = darkMode,
                     sortBy = sortBy,
                     userName = name,
                     userBio = bio,
+                    notificationsEnabled = notifEnabled,
                     isLoading = false
                 )
             }.collect { state ->
@@ -68,6 +71,12 @@ class SettingsViewModel(
     fun setUserBio(bio: String) {
         viewModelScope.launch {
             userPreferences.setUserBio(bio)
+        }
+    }
+
+    fun toggleNotifications() {
+        viewModelScope.launch {
+            userPreferences.setNotificationsEnabled(!_uiState.value.notificationsEnabled)
         }
     }
 }

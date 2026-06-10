@@ -4,6 +4,9 @@
     <!-- Internet permission for API calls -->
     <uses-permission android:name="android.permission.INTERNET" />
     
+    <!-- Notification permission for Android 13+ (API 33) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    
     <application
         android:name=".RewindApplication"
         android:allowBackup="true"

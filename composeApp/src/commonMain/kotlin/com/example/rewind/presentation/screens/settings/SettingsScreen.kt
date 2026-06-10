@@ -145,6 +145,17 @@ fun SettingsScreen(
                     onSortChange = { viewModel.setSortBy(it) }
                 )
             }
+            item { Spacer(Modifier.height(8.dp)) }
+            item { SettingsSectionHeader("Notifikasi") }
+            item {
+                SettingsToggleItem(
+                    icon = Icons.Default.Notifications,
+                    title = "Reminder Nonton",
+                    subtitle = if (uiState.notificationsEnabled) "Aktif — notifikasi harian untuk film yang sedang ditonton" else "Nonaktif",
+                    checked = uiState.notificationsEnabled,
+                    onCheckedChange = { viewModel.toggleNotifications() }
+                )
+            }
 
             item { Spacer(Modifier.height(8.dp)) }
             item { SettingsSectionHeader("Tentang") }
