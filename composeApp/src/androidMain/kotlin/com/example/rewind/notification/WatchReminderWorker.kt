@@ -9,7 +9,7 @@ import com.example.rewind.data.local.entity.toMovie
 import com.example.rewind.data.local.datastore.UserPreferences
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlinx.coroutines.flow.first // 🌟 Pastikan import ini ditambahkan di atas!
+import kotlinx.coroutines.flow.first 
 
 class WatchReminderWorker(
     private val context: Context,
@@ -24,14 +24,12 @@ class WatchReminderWorker(
 
     override suspend fun doWork(): Result {
         return try {
-            // 🌟 PERBAIKAN BUG: Ambil status secara instan menggunakan .first()
             val isEnabled = userPreferences.notificationsEnabled.first()
 
             if (!isEnabled) {
                 return Result.success()
             }
 
-            // 🌟 KOREKSI KEDUA: Pastikan mengarah ke nama database yang aktif di AppModule ("rewind.db")
             val driver = AndroidSqliteDriver(
                 schema = RewindDatabase.Schema,
                 context = context,
