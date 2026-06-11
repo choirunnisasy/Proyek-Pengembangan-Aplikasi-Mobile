@@ -3,10 +3,10 @@ package com.example.rewind.notification
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import com.example.rewind.data.local.RewindDatabase
 import com.example.rewind.data.local.entity.toMovie
 import com.example.rewind.data.local.datastore.UserPreferences
+import kotlinx.coroutines.flow.first
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -25,6 +25,7 @@ class WatchReminderWorker(
 ) : CoroutineWorker(context, params), KoinComponent {
 
     private val userPreferences: UserPreferences by inject()
+    private val database: RewindDatabase by inject()
 
     companion object {
         const val WORK_NAME = "watch_reminder_worker"
@@ -33,24 +34,15 @@ class WatchReminderWorker(
     override suspend fun doWork(): Result {
         return try {
             // Cek apakah notifikasi diaktifkan oleh user
-            var isEnabled = true
-            userPreferences.notificationsEnabled.collect { enabled ->
-                isEnabled = enabled
-                // Hanya ambil nilai pertama (current value)
-                return@collect
-            }
+            // Menggunakan first() agar hanya mengambil satu nilai dan langsung return,
+            // bukan collect() yang akan suspend selamanya pada DataStore Flow.
+            val isEnabled = userPreferences.notificationsEnabled.first()
 
             if (!isEnabled) {
                 return Result.success()
             }
 
-            // Query database langsung untuk film dengan status WATCHING
-            val driver = AndroidSqliteDriver(
-                schema = RewindDatabase.Schema,
-                context = context,
-                name = "studyplanner.db"
-            )
-            val database = RewindDatabase(driver)
+            // Query database untuk film dengan status WATCHING
             val watchingMovies = database.movieQueries
                 .getMoviesByStatus("WATCHING")
                 .executeAsList()
@@ -74,10 +66,10 @@ class WatchReminderWorker(
                 notificationHelper.showWatchReminderNotification(title, body)
             }
 
-            driver.close()
             Result.success()
         } catch (e: Exception) {
             Result.failure()
         }
     }
 }
+
