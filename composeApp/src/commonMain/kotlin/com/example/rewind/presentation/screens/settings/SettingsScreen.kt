@@ -44,33 +44,6 @@ fun SettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    var showNameDialog by remember { mutableStateOf(false) }
-    var showBioDialog by remember { mutableStateOf(false) }
-
-    if (showNameDialog) {
-        EditTextDialog(
-            title = "Nama Pengguna",
-            initialValue = uiState.userName,
-            onConfirm = {
-                viewModel.setUserName(it)
-                showNameDialog = false
-            },
-            onDismiss = { showNameDialog = false }
-        )
-    }
-
-    if (showBioDialog) {
-        EditTextDialog(
-            title = "Bio",
-            initialValue = uiState.userBio,
-            onConfirm = {
-                viewModel.setUserBio(it)
-                showBioDialog = false
-            },
-            onDismiss = { showBioDialog = false }
-        )
-    }
-
     Scaffold(
         topBar = {
             SettingsHeader(onNavigateBack = onNavigateBack)
@@ -98,25 +71,6 @@ fun SettingsScreen(
                 .padding(padding),
             contentPadding = PaddingValues(vertical = 8.dp)
         ) {
-            item {
-                SettingsSectionHeader("Profil")
-            }
-            item {
-                SettingsClickableItem(
-                    icon = Icons.Default.Person,
-                    title = "Nama Pengguna",
-                    subtitle = uiState.userName.ifEmpty { "Belum diisi" },
-                    onClick = { showNameDialog = true }
-                )
-            }
-            item {
-                SettingsClickableItem(
-                    icon = Icons.Default.Info,
-                    title = "Bio",
-                    subtitle = uiState.userBio.ifEmpty { "Belum diisi" },
-                    onClick = { showBioDialog = true }
-                )
-            }
 
             item { Spacer(Modifier.height(8.dp)) }
             item { SettingsSectionHeader("Tampilan") }
@@ -345,34 +299,7 @@ private fun SortBySelector(currentSort: String, onSortChange: (String) -> Unit) 
     }
 }
 
-@Composable
-private fun EditTextDialog(
-    title: String,
-    initialValue: String,
-    onConfirm: (String) -> Unit,
-    onDismiss: () -> Unit
-) {
-    var text by remember { mutableStateOf(initialValue) }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = {
-            OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-        },
-        confirmButton = {
-            TextButton(onClick = { onConfirm(text.trim()) }) { Text("Simpan") }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Batal") }
-        }
-    )
-}
 
 @Composable
 private fun SettingsHeader(onNavigateBack: () -> Unit) {

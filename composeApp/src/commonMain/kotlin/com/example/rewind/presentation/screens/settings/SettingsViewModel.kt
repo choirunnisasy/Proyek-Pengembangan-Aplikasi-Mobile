@@ -11,8 +11,6 @@ import kotlinx.coroutines.launch
 data class SettingsUiState(
     val isDarkMode: Boolean = false,
     val sortBy: String = "UPDATED_DESC",
-    val userName: String = "",
-    val userBio: String = "",
     val notificationsEnabled: Boolean = true,
     val isLoading: Boolean = false
 )
@@ -32,15 +30,11 @@ class SettingsViewModel(
             combine(
                 userPreferences.isDarkMode,
                 userPreferences.sortBy,
-                userPreferences.userName,
-                userPreferences.userBio,
                 userPreferences.notificationsEnabled
-            ) { darkMode, sortBy, name, bio, notifEnabled ->
+            ) { darkMode, sortBy, notifEnabled ->
                 SettingsUiState(
                     isDarkMode = darkMode,
                     sortBy = sortBy,
-                    userName = name,
-                    userBio = bio,
                     notificationsEnabled = notifEnabled,
                     isLoading = false
                 )
@@ -59,18 +53,6 @@ class SettingsViewModel(
     fun setSortBy(sortBy: String) {
         viewModelScope.launch {
             userPreferences.setSortBy(sortBy)
-        }
-    }
-
-    fun setUserName(name: String) {
-        viewModelScope.launch {
-            userPreferences.setUserName(name)
-        }
-    }
-
-    fun setUserBio(bio: String) {
-        viewModelScope.launch {
-            userPreferences.setUserBio(bio)
         }
     }
 
