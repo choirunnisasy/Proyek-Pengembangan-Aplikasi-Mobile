@@ -3,29 +3,20 @@ package com.example.rewind.notification
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import com.example.rewind.data.local.RewindDatabase
 import com.example.rewind.data.local.entity.toMovie
 import com.example.rewind.data.local.datastore.UserPreferences
-import kotlinx.coroutines.flow.first
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlinx.coroutines.flow.first // 🌟 Pastikan import ini ditambahkan di atas!
 
-/**
- * Worker untuk mengirim notifikasi reminder harian.
- *
- * Mengecek film dengan status WATCHING dari database,
- * kemudian mengirim notifikasi jika ada film yang sedang ditonton.
- * 
- * Worker ini hanya mengirim notifikasi jika setting notifikasi diaktifkan
- * oleh user di halaman Settings.
- */
 class WatchReminderWorker(
     private val context: Context,
     params: WorkerParameters
 ) : CoroutineWorker(context, params), KoinComponent {
 
     private val userPreferences: UserPreferences by inject()
-    private val database: RewindDatabase by inject()
 
     companion object {
         const val WORK_NAME = "watch_reminder_worker"
@@ -33,16 +24,20 @@ class WatchReminderWorker(
 
     override suspend fun doWork(): Result {
         return try {
-            // Cek apakah notifikasi diaktifkan oleh user
-            // Menggunakan first() agar hanya mengambil satu nilai dan langsung return,
-            // bukan collect() yang akan suspend selamanya pada DataStore Flow.
+            // 🌟 PERBAIKAN BUG: Ambil status secara instan menggunakan .first()
             val isEnabled = userPreferences.notificationsEnabled.first()
 
             if (!isEnabled) {
                 return Result.success()
             }
 
-            // Query database untuk film dengan status WATCHING
+            // 🌟 KOREKSI KEDUA: Pastikan mengarah ke nama database yang aktif di AppModule ("rewind.db")
+            val driver = AndroidSqliteDriver(
+                schema = RewindDatabase.Schema,
+                context = context,
+                name = "rewind.db"
+            )
+            val database = RewindDatabase(driver)
             val watchingMovies = database.movieQueries
                 .getMoviesByStatus("WATCHING")
                 .executeAsList()
@@ -66,10 +61,10 @@ class WatchReminderWorker(
                 notificationHelper.showWatchReminderNotification(title, body)
             }
 
+            driver.close()
             Result.success()
         } catch (e: Exception) {
             Result.failure()
         }
     }
 }
-
