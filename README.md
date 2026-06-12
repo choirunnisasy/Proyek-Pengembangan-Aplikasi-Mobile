@@ -210,6 +210,10 @@ composeApp/src/
 <img width="200" height="444" alt="WhatsApp Image 2026-06-12 at 09 30 02" src="https://github.com/user-attachments/assets/bcff2d5f-7999-4379-b147-7112bd316cae" />
   <img width="200" height="444" alt="WhatsApp Image 2026-06-12 at 09 30 02 (1)" src="https://github.com/user-attachments/assets/c7684f1c-e750-4db1-8fe7-331f6a455d78" />
 
+### 🏠 Home Screen
+| 🌑 Dark Mode | ☀️ Light Mode |
+|:------------:|:-------------:|
+| <img width="200" height="444" alt="WhatsApp Image 2026-06-12 at 09 30 03" src="https://github.com/user-attachments/assets/08c97fe0-827c-4c30-b278-005ff51ea502" /> | <img width="200" height="444" alt="WhatsApp Image 2026-06-12 at 09 43 51" src="https://github.com/user-attachments/assets/287bd82e-a00b-4050-a2b5-c32e96b4ad23" /> |
 
 ---
 
