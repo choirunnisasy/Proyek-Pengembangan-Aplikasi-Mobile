@@ -206,8 +206,10 @@ composeApp/src/
 
 ## 📸 Screenshots
 
-### Splash Screen
-<img width="200" height="444" alt="WhatsApp Image 2026-06-12 at 09 30 02" src="https://github.com/user-attachments/assets/c738fe6c-6383-41a7-9dda-c07a73f44aa5" />
+### 🔔 Splash Screen & Notifikasi Harian
+<img width="200" height="444" alt="WhatsApp Image 2026-06-12 at 09 30 02" src="https://github.com/user-attachments/assets/bcff2d5f-7999-4379-b147-7112bd316cae" />
+  <img width="200" height="444" alt="WhatsApp Image 2026-06-12 at 09 30 02 (1)" src="https://github.com/user-attachments/assets/c7684f1c-e750-4db1-8fe7-331f6a455d78" />
+
 
 ---
 
