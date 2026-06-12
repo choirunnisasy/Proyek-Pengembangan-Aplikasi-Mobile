@@ -49,8 +49,7 @@
 ## 🎬 Video Demo
 
 ### 📹 Final Video Demo
-<!-- TODO: Ganti dengan link YouTube final demo -->
-> 🔗 [**FINAL VIDEO DEMO**](https://youtube.com/your-final-demo-link)
+> 🔗 [**FINAL VIDEO DEMO**]( https://youtu.be/6ElHQAbLAns)
 
 ### Sprint Demos
 
