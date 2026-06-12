@@ -213,12 +213,17 @@ composeApp/src/
 ### 🏠 Home Screen
 | 🌑 Dark Mode | ☀️ Light Mode |
 |:------------:|:-------------:|
-| <img width="200" height="444" alt="WhatsApp Image 2026-06-12 at 09 30 03" src="https://github.com/user-attachments/assets/08c97fe0-827c-4c30-b278-005ff51ea502" /> | <img width="200" height="444" alt="WhatsApp Image 2026-06-12 at 09 43 51" src="https://github.com/user-attachments/assets/287bd82e-a00b-4050-a2b5-c32e96b4ad23" /> |
+| <img width="200" height="444" src="https://github.com/user-attachments/assets/08c97fe0-827c-4c30-b278-005ff51ea502" /> | <img width="200" height="444" src="https://github.com/user-attachments/assets/287bd82e-a00b-4050-a2b5-c32e96b4ad23" /> |
 
 ### 🤖 AI Assistant
 | 🌑 Dark Mode | ☀️ Light Mode |
 |:------------:|:-------------:|
-| <img width="200" height="444" alt="WhatsApp Image 2026-06-12 at 09 30 04" src="https://github.com/user-attachments/assets/0ab4c205-8ea5-4e77-8980-448e6f84bc19" /> | <img width="200" height="444" alt="WhatsApp Image 2026-06-12 at 09 43 51 (1)" src="https://github.com/user-attachments/assets/26713c7d-98ef-4508-9c5a-ddb53cceff9f" /> |
+| <img width="200" height="444" src="https://github.com/user-attachments/assets/0ab4c205-8ea5-4e77-8980-448e6f84bc19" /> | <img width="200" height="444" src="https://github.com/user-attachments/assets/26713c7d-98ef-4508-9c5a-ddb53cceff9f" /> |
+
+### ⚙️ Settings
+| 🌑 Dark Mode | ☀️ Light Mode |
+|:------------:|:-------------:|
+| <img width="200" height="444" src="https://github.com/user-attachments/assets/e705eb68-0821-4787-9bd4-34970617f4ac" /> | <img width="200" height="444" src="https://github.com/user-attachments/assets/8e27d6d0-0c32-4c46-a490-68c2d49d15d5" /> |
 
 ---
 
