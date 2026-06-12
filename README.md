@@ -2,9 +2,6 @@
 
 ![CI](https://github.com/choirunnisasy/Proyek-Pengembangan-Aplikasi-Mobile/actions/workflows/ci.yml/badge.svg)
 
-<!-- TODO: Ganti dengan screenshot atau GIF aplikasi -->
-<!-- ![App Screenshot](screenshots/app_preview.png) -->
-
 ---
 
 ## 👥 Team
