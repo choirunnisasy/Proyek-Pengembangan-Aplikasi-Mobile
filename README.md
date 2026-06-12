@@ -63,7 +63,7 @@
 
 ## 📊 Coverage Report
 
-<img width="1600" height="900" alt="Coverage Report" src="https://github.com/user-attachments/assets/52f5b318-3207-4e22-8509-1ca7ae53e2ca" />
+<img width="600" height="338" alt="Coverage Report" src="https://github.com/user-attachments/assets/52f5b318-3207-4e22-8509-1ca7ae53e2ca" />
 
 ---
 
