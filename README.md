@@ -227,6 +227,11 @@ composeApp/src/
 |:------------:|:-------------:|
 | <img width="200" height="444" src="https://github.com/user-attachments/assets/1f512471-4f96-4ed9-ba3b-3482e0d5d460" /> | <img width="200" height="444" src="https://github.com/user-attachments/assets/88b25c71-e892-48a2-8a8f-93e62e57257f" /> |
 
+### ✏️ Detail & Edit Screen
+| 🌑 Dark Mode | ☀️ Light Mode |
+|:------------:|:-------------:|
+| <img width="200" height="444" src="https://github.com/user-attachments/assets/a8619daa-2500-4816-ac5f-8abaad0abcad" /> | <img width="200" height="444" src="https://github.com/user-attachments/assets/ec12f661-e56c-4f6d-8858-7caf5e21188f" /> |
+
 ---
 
 <p align="center">
