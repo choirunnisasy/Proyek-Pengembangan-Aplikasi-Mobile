@@ -225,6 +225,11 @@ composeApp/src/
 |:------------:|:-------------:|
 | <img width="200" height="444" src="https://github.com/user-attachments/assets/e705eb68-0821-4787-9bd4-34970617f4ac" /> | <img width="200" height="444" src="https://github.com/user-attachments/assets/8e27d6d0-0c32-4c46-a490-68c2d49d15d5" /> |
 
+### 👤 Profile
+| 🌑 Dark Mode | ☀️ Light Mode |
+|:------------:|:-------------:|
+| <img width="200" height="444" src="https://github.com/user-attachments/assets/1f512471-4f96-4ed9-ba3b-3482e0d5d460" /> | <img width="200" height="444" src="https://github.com/user-attachments/assets/88b25c71-e892-48a2-8a8f-93e62e57257f" /> |
+
 ---
 
 <p align="center">
