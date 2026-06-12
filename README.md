@@ -215,6 +215,11 @@ composeApp/src/
 |:------------:|:-------------:|
 | <img width="200" height="444" alt="WhatsApp Image 2026-06-12 at 09 30 03" src="https://github.com/user-attachments/assets/08c97fe0-827c-4c30-b278-005ff51ea502" /> | <img width="200" height="444" alt="WhatsApp Image 2026-06-12 at 09 43 51" src="https://github.com/user-attachments/assets/287bd82e-a00b-4050-a2b5-c32e96b4ad23" /> |
 
+### 🤖 AI Assistant
+| 🌑 Dark Mode | ☀️ Light Mode |
+|:------------:|:-------------:|
+| <img width="200" height="444" alt="WhatsApp Image 2026-06-12 at 09 30 04" src="https://github.com/user-attachments/assets/0ab4c205-8ea5-4e77-8980-448e6f84bc19" /> | <img width="200" height="444" alt="WhatsApp Image 2026-06-12 at 09 43 51 (1)" src="https://github.com/user-attachments/assets/26713c7d-98ef-4508-9c5a-ddb53cceff9f" /> |
+
 ---
 
 <p align="center">
