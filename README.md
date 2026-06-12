@@ -206,16 +206,8 @@ composeApp/src/
 
 ## 📸 Screenshots
 
-<!-- TODO: Tambahkan screenshot aplikasi -->
-<!-- 
-| Home Screen | Detail Screen | AI Assistant |
-|:-----------:|:-------------:|:------------:|
-| ![Home](screenshots/home.png) | ![Detail](screenshots/detail.png) | ![AI](screenshots/ai.png) |
-
-| Search | Profile | Settings |
-|:------:|:-------:|:--------:|
-| ![Search](screenshots/search.png) | ![Profile](screenshots/profile.png) | ![Settings](screenshots/settings.png) |
--->
+### Splash Screen
+<img width="200" height="444" alt="WhatsApp Image 2026-06-12 at 09 30 02" src="https://github.com/user-attachments/assets/c738fe6c-6383-41a7-9dda-c07a73f44aa5" />
 
 ---
 
